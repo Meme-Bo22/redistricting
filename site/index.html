@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redistricting (name TBD)</title>
+<meta name="description" content="Fair-lines redistricting toys: equal-population, contiguous, compact districts from Census block groups.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Palette and type copied from fair-lines/index.html (dark slate default, light via prefers-color-scheme or toggle). */
+:root {
+  --bg: #12171c; --panel: #181f26; --panel-2: #1f2832; --map-bg: #0e1318;
+  --ink: #dde4ea; --ink-2: #8c9aa7; --rule: #2b3640;
+  --accent: #5fd0c0; --accent-ink: #0c1a18;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f1f3f2; --panel: #fbfcfb; --panel-2: #e8ecea; --map-bg: #f7f8f7;
+    --ink: #1b252d; --ink-2: #55636e; --rule: #cdd5d9;
+    --accent: #0d7c70; --accent-ink: #ffffff;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f1f3f2; --panel: #fbfcfb; --panel-2: #e8ecea; --map-bg: #f7f8f7;
+  --ink: #1b252d; --ink-2: #55636e; --rule: #cdd5d9;
+  --accent: #0d7c70; --accent-ink: #ffffff;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+header { padding: 40px 0 24px; }
+.label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+h1 { margin: 6px 0 10px; font-size: clamp(26px, 5vw, 38px); font-weight: 600; letter-spacing: -.01em; }
+.lede { margin: 0; max-width: 62ch; font-size: 17px; color: var(--ink-2); }
+.themebtn { float: right; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); border-radius: 4px; padding: 3px 9px; font-family: var(--font-mono); font-size: 11px; cursor: pointer; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; margin: 8px 0 32px; }
+a.card { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; color: inherit; text-decoration: none; }
+a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; }
+a.card img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; background: var(--map-bg); border-bottom: 1px solid var(--rule); }
+.body { padding: 14px 16px 16px; }
+.body h2 { margin: 4px 0 6px; font-size: 18px; font-weight: 600; }
+.body p { margin: 0; color: var(--ink-2); font-size: 14px; }
+.tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.tag.wip { color: var(--ink-2); }
+footer { border-top: 1px solid var(--rule); padding: 18px 0 40px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+footer a { color: var(--accent); margin-right: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="themebtn" id="themeBtn" type="button">theme</button>
+    <div class="label">Prototype</div>
+    <h1>Redistricting (name TBD)</h1>
+    <p class="lede">Equal-population, contiguous, compact districts built from Census block groups, with no party, race or incumbent data in the solver.</p>
+  </header>
+  <main class="grid">
+    <a class="card" href="fair-lines/">
+      <img src="img/fair-lines-state.png" alt="Pennsylvania split into 17 solver districts next to the official map" loading="lazy">
+      <div class="body"><div class="tag">Toy 1</div><h2>State solver</h2>
+      <p>Pick any state and get a fair plan. A least-change slider morphs it toward the official map and shows how many people must move.</p></div>
+    </a>
+    <a class="card" href="fair-lines/">
+      <img src="img/fair-lines-borderless.png" alt="National view of the Fair Lines page, with the borderless 435-district solve one click away" loading="lazy">
+      <div class="body"><div class="tag">Toy 2</div><h2>Borderless US</h2>
+      <p>The same solver across the whole country: 435 equal-population districts that ignore state lines. Open the page and choose "One country".</p></div>
+    </a>
+    <a class="card" href="draw/">
+      <img src="img/draw-overview.png" alt="Draw tool: click a block group and a district grows from it" loading="lazy">
+      <div class="body"><div class="tag">Toy 3</div><h2>Draw your own</h2>
+      <p>Click a block group and a district grows from it. Then Finish, Improve or Solve from your seeds, and compare against the official map.</p></div>
+    </a>
+    <a class="card" href="regions/">
+      <img src="img/regions.png" alt="The borderless districts regrouped into 50 new states" loading="lazy">
+      <div class="body"><div class="tag wip">Toy 4 &middot; in progress</div><h2>Re-draw the states</h2>
+      <p>Regroup the borderless districts into 50 new contiguous states.</p></div>
+    </a>
+  </main>
+  <footer>
+    <a href="https://github.com/domattioli/redistricting#readme">README</a>
+    <a href="https://github.com/domattioli/redistricting/blob/main/STATUS.md">STATUS</a>
+    <a href="https://github.com/domattioli/redistricting/blob/main/docs/METHOD.md">Method</a>
+  </footer>
+</div>
+<script>
+(function () {
+  var r = document.documentElement, b = document.getElementById("themeBtn");
+  try { var t = localStorage.getItem("theme"); if (t) r.setAttribute("data-theme", t); } catch (e) {}
+  b.addEventListener("click", function () {
+    var dark = r.getAttribute("data-theme") ? r.getAttribute("data-theme") === "dark" : !matchMedia("(prefers-color-scheme: light)").matches;
+    var n = dark ? "light" : "dark"; r.setAttribute("data-theme", n);
+    try { localStorage.setItem("theme", n); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

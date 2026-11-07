@@ -1,0 +1,2899 @@
+<meta charset="utf-8">
+<title>Fair Lines</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* "The mesh is the map." A research notebook: the population mesh is drawn under the districts, the solver
+   narrates itself in a log, and party colour appears only in Lean mode and the small seat readouts.
+   Dark slate is the default; a light theme follows prefers-color-scheme or the toggle. */
+:root {
+  --bg: #12171c; --panel: #181f26; --panel-2: #1f2832; --map-bg: #0e1318;
+  --ink: #dde4ea; --ink-2: #8c9aa7; --rule: #2b3640;
+  --accent: #5fd0c0; --accent-ink: #0c1a18;
+  --mesh: rgba(190,215,230,.13); --edge-hi: #f2e9c9; --bd: #0b0f13;
+  --d0: #4d7f8c; --d1: #8f7f55; --d2: #7b6f9e; --d3: #628a6a; --d4: #a0707a; --d5: #6f86a8; --d6: #a58a62; --d7: #7d9a8c;
+  --on-d: #0d1216;
+  --dem: #6a9bf0; --rep: #ee7a6e; --lean-mid: #3a4450;
+  --ok-bg: #1d4a36; --ok-ink: #9be3bd; --bad-bg: #5a2626; --bad-ink: #ffb4ab;
+  --state-lo: #202a33; --state-hi: #3f8f86;
+  --hm0: #f2735f; --hm1: #9e4b45; --hm2: #343c46; --hm3: #3f6cae; --hm4: #5f98f7; --hm-none: #232a30;   /* lean heat map, R+25 -> even -> D+25 (lightness rises evenly away from the neutral) */
+  --lc0: #1f5eff; --lc1: #5b95ff; --lc2: #aecbff; --lc3: #ffd24a; --lc4: #ffb9ad; --lc5: #ff7a66; --lc6: #e0301e; --lc-halo: #0b0f13;   /* lean category outlines: Safe D .. Safe R */
+  --cur-core: #fbfbf6; --cur-halo: #0b0f13;   /* official dashed border in Lean view: neutral core + contrasting halo, outside the red/blue/category palette */
+  --sf0: #c8e020; --sf1: #5ec962; --sf2: #21918c; --sf3: #3b528b; --sf4: #440154;   /* size function, fine -> coarse (viridis, bright = small h on dark) */
+  --sf-line: #ffffff; --sf-halo: #0b0f13;   /* our district borders over the size field: thin line + halo so it reads on every ramp colour */
+  --official: #ff5fa8;                       /* official (current) district borders, dashed */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f1f3f2; --panel: #fbfcfb; --panel-2: #e8ecea; --map-bg: #f7f8f7;
+    --ink: #1b252d; --ink-2: #55636e; --rule: #cdd5d9;
+    --accent: #0d7c70; --accent-ink: #ffffff;
+    --mesh: rgba(30,50,65,.17); --edge-hi: #14202a; --bd: #ffffff;
+    --d0: #9cc3cc; --d1: #d9c995; --d2: #c3b8de; --d3: #aed0b3; --d4: #e0b8bf; --d5: #b3c6e0; --d6: #dcc7a2; --d7: #bcd6cb;
+    --on-d: #17212a;
+    --dem: #2f62c4; --rep: #c4453a; --lean-mid: #e6e4ec;
+    --ok-bg: #d3ecdc; --ok-ink: #14532d; --bad-bg: #f6d4d0; --bad-ink: #7f1d1d;
+    --state-lo: #e3e8e8; --state-hi: #5aa89f;
+    --hm0: #b3261e; --hm1: #df8c82; --hm2: #ecebee; --hm3: #86a8e2; --hm4: #1f4fb0; --hm-none: #d8d9d6;
+    --lc0: #0b3fa8; --lc1: #2f6fe0; --lc2: #6c9cee; --lc3: #d99a00; --lc4: #ee8f80; --lc5: #d9473a; --lc6: #9d1409; --lc-halo: #ffffff;
+    --cur-core: #0a0a0a; --cur-halo: #ffffff;
+    --sf0: #440154; --sf1: #3b528b; --sf2: #21918c; --sf3: #5ec962; --sf4: #c8e020;
+    --sf-line: #0b0f13; --sf-halo: #ffffff; --official: #c2185b;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f1f3f2; --panel: #fbfcfb; --panel-2: #e8ecea; --map-bg: #f7f8f7;
+  --ink: #1b252d; --ink-2: #55636e; --rule: #cdd5d9;
+  --accent: #0d7c70; --accent-ink: #ffffff;
+  --mesh: rgba(30,50,65,.17); --edge-hi: #14202a; --bd: #ffffff;
+  --d0: #9cc3cc; --d1: #d9c995; --d2: #c3b8de; --d3: #aed0b3; --d4: #e0b8bf; --d5: #b3c6e0; --d6: #dcc7a2; --d7: #bcd6cb;
+  --on-d: #17212a;
+  --dem: #2f62c4; --rep: #c4453a; --lean-mid: #e6e4ec;
+  --ok-bg: #d3ecdc; --ok-ink: #14532d; --bad-bg: #f6d4d0; --bad-ink: #7f1d1d;
+  --state-lo: #e3e8e8; --state-hi: #5aa89f;
+  --hm0: #b3261e; --hm1: #df8c82; --hm2: #ecebee; --hm3: #86a8e2; --hm4: #1f4fb0; --hm-none: #d8d9d6;
+  --lc0: #0b3fa8; --lc1: #2f6fe0; --lc2: #6c9cee; --lc3: #d99a00; --lc4: #ee8f80; --lc5: #d9473a; --lc6: #9d1409; --lc-halo: #ffffff;
+  --cur-core: #0a0a0a; --cur-halo: #ffffff;
+  --sf0: #440154; --sf1: #3b528b; --sf2: #21918c; --sf3: #5ec962; --sf4: #c8e020;
+  --sf-line: #0b0f13; --sf-halo: #ffffff; --official: #c2185b;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(20px, env(safe-area-inset-top, 0px)) 56px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px; }
+.side > * { min-width: 0; }
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.015em; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: clamp(30px, 5vw, 46px); }
+h2 { font-size: clamp(20px, 3vw, 26px); }
+h3 { font-size: 14px; letter-spacing: 0; }
+p { margin: 0; max-width: 68ch; }
+.label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+button, select, input { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- masthead ---------- */
+.mast { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; border-bottom: 1px solid var(--rule); padding-bottom: 18px; }
+.mast-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.byline { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.lede { font-size: 16px; color: var(--ink-2); }
+.lede b { color: var(--ink); font-weight: 500; }
+.themebtn { border: 1px solid var(--rule); background: var(--panel); border-radius: 4px; padding: 3px 9px; font-family: var(--font-mono); font-size: 11px; cursor: pointer; }
+
+/* ---------- controls ---------- */
+.btn { border: 1px solid var(--rule); background: var(--panel-2); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 14px; }
+.btn:hover { border-color: var(--ink-2); }
+.btn.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+.chips { display: inline-flex; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.chips button { border: 0; background: var(--panel-2); padding: 5px 11px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; }
+.chips button + button { border-left: 1px solid var(--rule); }
+.chips button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; background: var(--panel-2); }
+.stepper button { border: 0; background: transparent; width: 30px; height: 32px; cursor: pointer; font-weight: 600; }
+.stepper span { min-width: 76px; text-align: center; font-family: var(--font-mono); font-size: 12px; }
+.check { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; background: var(--panel-2); }
+
+/* ---------- state lab ---------- */
+.lab { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 22px; align-items: start; }
+@media (max-width: 900px) { .lab { grid-template-columns: minmax(0, 1fr); } }
+.lab-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px; grid-column: 1 / -1; }
+.stage { position: relative; background: var(--map-bg); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; touch-action: none; }
+.stage canvas { display: block; width: 100%; }
+.stage .overlay { position: absolute; inset: 0; }
+.tip { position: absolute; pointer-events: none; background: var(--panel-2); color: var(--ink); border: 1px solid var(--rule); padding: 6px 9px; border-radius: 4px; font-size: 12px; line-height: 1.35; white-space: nowrap; z-index: 2; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; text-align: center; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); background: var(--map-bg); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin-top: 12px; }
+.paintbar { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.paintbar button { width: 30px; height: 26px; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; color: var(--on-d); }
+.paintbar button[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sflegend { margin-top: 12px; max-width: 420px; display: grid; gap: 4px; }
+.sflegend .bar { height: 10px; border: 1px solid var(--rule); border-radius: 2px; background: linear-gradient(to right, var(--sf0), var(--sf1), var(--sf2), var(--sf3), var(--sf4)); }
+.sflegend .ticks { position: relative; height: 16px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.sflegend .ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.sflegend .ticks span::before { content: ""; position: absolute; left: 50%; top: -5px; height: 4px; border-left: 1px solid var(--ink-2); }
+.sflegend .ticks span.first { transform: none; } .sflegend .ticks span.first::before { left: 0; }
+.sflegend .ticks span.last { transform: translateX(-100%); } .sflegend .ticks span.last::before { left: 100%; }
+.sflegend .cap { font-size: 12px; color: var(--ink-2); }
+.leanlegend { margin-top: 12px; max-width: 520px; display: grid; gap: 6px; }
+.leanlegend .bar { height: 10px; border: 1px solid var(--rule); border-radius: 2px; background: linear-gradient(to right, var(--hm0), var(--hm1), var(--hm2), var(--hm3), var(--hm4)); }
+.leanlegend .ticks { position: relative; height: 16px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.leanlegend .ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.leanlegend .ticks span:first-child { transform: none; } .leanlegend .ticks span:last-child { transform: translateX(-100%); }
+.leanlegend .nov { display: inline-block; width: 10px; height: 10px; border: 1px solid var(--rule); background: var(--hm-none); vertical-align: -1px; margin-right: 4px; }
+.leancats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; font-size: 12px; color: var(--ink-2); }
+.leancats li { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.leancats i { width: 18px; height: 0; border-top: 3px solid; box-shadow: 0 -1px 0 var(--lc-halo), 0 1px 0 var(--lc-halo); display: inline-block; }
+.leancats b { font-family: var(--font-mono); color: var(--ink); font-weight: 600; }
+.curlegend.lean .off { color: var(--ink); text-decoration: underline dashed var(--cur-core) 2px; text-underline-offset: 3px; }
+.hint { font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+.curlegend { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.curlegend .ours { color: var(--ink); font-weight: 600; } .curlegend .off { color: var(--official); font-weight: 600; }
+.curlegend .stale { color: var(--bad-ink); background: var(--bad-bg); padding: 0 6px; border-radius: 3px; }
+.cmp { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.cmp th, .cmp td { padding: 3px 0; border-bottom: 1px solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; }
+.cmp th:first-child, .cmp td:first-child { text-align: left; font-family: var(--font-body); color: var(--ink-2); font-weight: 400; }
+.cmp thead th { font-family: var(--font-mono); font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: .05em; }
+.cmp thead th.off { color: var(--official); } .cmp thead th.ours { color: var(--ink); }
+.cmp td { font-family: var(--font-mono); }
+.cmp-overlap { font-size: 13px; color: var(--ink-2); } .cmp-overlap b { color: var(--ink); font-family: var(--font-mono); font-weight: 600; }
+
+.side { display: grid; gap: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; padding: 12px; display: grid; gap: 10px; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.chip { font-family: var(--font-mono); font-size: 11px; border: 1px solid var(--rule); border-radius: 3px; padding: 0 6px; color: var(--ink-2); }
+
+/* solver log */
+.live { display: flex; flex-wrap: wrap; gap: 4px 16px; font-family: var(--font-mono); font-size: 12px; }
+.live b { font-weight: 600; color: var(--accent); }
+.log { margin: 0; padding: 8px 10px; list-style: none; background: var(--map-bg); border: 1px solid var(--rule); border-radius: 3px; height: 190px; overflow-y: auto; overflow-x: hidden; font-family: var(--font-mono); font-size: 11.5px; line-height: 1.55; }
+.log li { display: grid; grid-template-columns: 5.2ch 9.5ch minmax(0, 1fr); gap: 0 8px; white-space: nowrap; }
+.log li .t { color: var(--ink-2); }
+.log li .m { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; }
+.log li.done .s, .log li.done .m { color: var(--accent); }
+.log li.idle { color: var(--ink-2); display: block; }
+
+/* readouts */
+.seats { display: flex; align-items: baseline; gap: 10px; font-family: var(--font-mono); font-size: 13px; }
+.seats .d { color: var(--dem); font-weight: 600; } .seats .r { color: var(--rep); font-weight: 600; }
+.seats .delta { margin-left: auto; color: var(--ink-2); font-size: 11.5px; text-align: right; }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 13px; margin: 0; }
+.kv dt { color: var(--ink-2); } .kv dd { margin: 0; font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; }
+.pill { display: inline-block; padding: 0 6px; border-radius: 3px; font-size: 11px; font-family: var(--font-mono); }
+.pill.ok { background: var(--ok-bg); color: var(--ok-ink); } .pill.bad { background: var(--bad-bg); color: var(--bad-ink); }
+.votes { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.swing { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.swing input { width: 110px; accent-color: var(--accent); }
+.natline { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); max-width: none; }
+.natline .d { color: var(--dem); font-weight: 600; } .natline .r { color: var(--rep); font-weight: 600; }
+.ladder svg { width: 100%; height: auto; display: block; }
+.ladder text { font-family: var(--font-mono); font-size: 9px; fill: var(--ink-2); }
+
+/* ---------- all states ---------- */
+.nation { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.nation-head { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 8px; }
+.natstage { position: relative; aspect-ratio: 975 / 610; overflow: hidden; touch-action: pan-y; }
+.natstage.zoomed, .stage.zoomed { touch-action: none; }
+.natstage svg path { vector-effect: non-scaling-stroke; }
+.zoomctl { position: absolute; top: 8px; right: 8px; z-index: 3; display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; background: var(--panel-2); opacity: .92; }
+.zoomctl button { width: 28px; height: 26px; border: 0; background: transparent; color: var(--ink); cursor: pointer; font: 600 14px/1 var(--font-mono, monospace); padding: 0; }
+.zoomctl button + button { border-top: 1px solid var(--rule); }
+.zoomctl button:hover { background: var(--panel); }
+.zoomctl button:disabled { opacity: .4; cursor: default; }
+.zoomhint { position: absolute; left: 8px; bottom: 6px; z-index: 3; font: 11px/1.2 var(--font-mono, monospace); color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--rule); border-radius: 3px; padding: 2px 6px; opacity: .85; pointer-events: none; }
+.natstage svg, .natstage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.nation.sizeon path { fill: transparent !important; stroke: var(--sf-line); stroke-width: .7; }
+.nation path { stroke: var(--bg); stroke-width: 1; cursor: pointer; transition: opacity .15s; }
+.nation path:hover { opacity: .75; }
+.nation.sizeon path:hover { opacity: 1; stroke-width: 1.6; }
+.nation path:focus-visible { outline: none; stroke: var(--accent); stroke-width: 3; }
+.nation path.edited { stroke: var(--accent); stroke-width: 2; }
+.nation path.sel { stroke: var(--ink); stroke-width: 2.5; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.sw { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--rule); }
+
+/* ---------- one country, no state lines ---------- */
+.natbar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.nation.mos path { fill: transparent !important; stroke: var(--ink); stroke-opacity: .8; stroke-width: .55; }
+.nation.mos path:hover { opacity: 1; stroke-width: 1.5; }
+.natstage .natov { pointer-events: none; }
+.nation.mos .statekey { display: none; }
+.natmos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 760px) { .natmos { grid-template-columns: minmax(0, 1fr); } }
+.natprog { height: 6px; border: 1px solid var(--rule); border-radius: 3px; background: var(--map-bg); overflow: hidden; }
+.natprog i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+.natlog { margin: 0; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); max-width: none; min-height: 3.2em; overflow-wrap: anywhere; }
+.natlog b { color: var(--accent); font-weight: 600; }
+.natnote { font-size: 13px; color: var(--ink-2); max-width: none; }
+.natnote b { color: var(--ink); font-weight: 500; }
+
+/* ---------- how far from fair? ---------- */
+.lc { margin-top: 14px; }
+.lc .lc-row { display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; gap: 4px 10px; align-items: center; font-size: 13px; }
+.lc .lc-row .end { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+.lc input[type=range] { width: 100%; accent-color: var(--accent); min-width: 0; }
+@media (max-width: 520px) { .lc .lc-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .lc .lc-row input { grid-column: 1 / -1; grid-row: 2; } .lc .lc-row .end:last-child { text-align: right; } }
+.lc .lc-sentence { font-size: 14px; color: var(--ink); max-width: none; }
+.lc .lc-sentence b { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+.lc .lc-read { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); max-width: none; }
+.lcplot { width: 100%; max-width: 520px; height: auto; display: block; }
+.lcplot text { font-family: var(--font-mono); font-size: 11px; fill: var(--ink-2); }
+.lcplot .ttl { fill: var(--ink); }
+.lcplot .ax { stroke: var(--rule); stroke-width: 1; fill: none; }
+.lcplot .ln { stroke: var(--accent); stroke-width: 1.8; fill: none; }
+.lcplot .pt { fill: var(--panel); stroke: var(--accent); stroke-width: 1.5; }
+.lcplot .guide { stroke: var(--official); stroke-width: 1; stroke-dasharray: 4 3; }
+.lcplot .now { fill: var(--official); stroke: var(--panel); stroke-width: 1.5; }
+
+/* ---------- notes ---------- */
+.why { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; border-top: 1px solid var(--rule); padding-top: 20px; }
+.why p { color: var(--ink-2); }
+.why p b { color: var(--ink); font-weight: 500; }
+.bench { width: 100%; max-width: 640px; border-collapse: collapse; font-size: 12.5px; }
+.bench caption { text-align: left; color: var(--ink-2); font-size: 12px; padding-bottom: 6px; }
+.bench th, .bench td { padding: 4px 8px 4px 0; text-align: right; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+.bench th:first-child, .bench td:first-child { text-align: left; font-family: var(--font-body); }
+.bench td { font-family: var(--font-mono); }
+.bench thead th { font-family: var(--font-mono); font-size: 11px; font-weight: 400; color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; }
+.bench tbody th { text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--accent); padding-top: 12px; border-bottom-color: var(--accent); letter-spacing: .06em; }
+.bench tr.ours td, .bench tr.ours th { color: var(--accent); }
+.bench td:first-child { font-family: var(--font-body); font-size: 13px; }
+.notes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; border-top: 1px solid var(--rule); padding-top: 16px; font-size: 13px; color: var(--ink-2); }
+.notes p { max-width: 90ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="mast-top">
+      <h1>Fair Lines</h1>
+      <button class="themebtn" id="themeBtn" aria-label="Toggle light and dark theme">theme</button>
+    </div>
+    <div class="byline">by Dominik Mattioli · 50 states · 435 districts · no party data used</div>
+    <p class="lede">These congressional districts are drawn by a computer program that sees only <b>where people live</b>, never how they vote. Each dot is a Census block group (a small neighbourhood of a few thousand people) and each line joins two neighbours. The program colours that web into districts with equal populations. Pick a state on the map, watch the districts grow, then try to bend the lines yourself.</p>
+  </header>
+
+  <section class="nation" aria-labelledby="natTitle">
+    <div class="nation-head">
+      <h2 id="natTitle">All states</h2>
+      <div class="legend"><label class="check"><input type="checkbox" id="natSize"> Mesh size</label><span class="statekey"><span class="sw" style="background:var(--state-lo)"></span>fewer seats in the House</span><span class="statekey"><span class="sw" style="background:var(--state-hi)"></span>more seats in the House</span><span class="statekey"><span class="sw" style="background:transparent;border-color:var(--accent)"></span>a map you redrew</span></div>
+    </div>
+    <div class="natbar">
+      <div class="chips" role="group" aria-label="Map view">
+        <button id="natViewStates" aria-pressed="true">States</button><button id="natViewMos" aria-pressed="false">One country: 435 districts</button>
+      </div>
+      <button class="btn go" id="btnNatSolve">Solve the whole country, ignoring state lines</button>
+      <button class="btn" id="btnNatStop" hidden>&#9632; Stop</button>
+    </div>
+    <div class="natstage">
+      <canvas id="natCv" hidden aria-hidden="true"></canvas>
+      <canvas id="natMos" hidden role="img" aria-label="Every block group in the country coloured by its congressional district"></canvas>
+      <canvas id="natOv" class="natov" hidden aria-hidden="true"></canvas>
+      <svg id="usmap" viewBox="0 0 975 610" role="group" aria-label="Map of U.S. states"></svg>
+      <div class="loading" id="natLoading" hidden>Loading 239,209 block groups…</div>
+      <div class="zoomctl" role="group" aria-label="Zoom the national map"><button id="natZin" aria-label="Zoom in">+</button><button id="natZout" aria-label="Zoom out">−</button><button id="natZreset" aria-label="Reset zoom" title="Reset zoom (or double-click the map)">⟲</button></div>
+      <div class="zoomhint" id="natZhint" hidden></div>
+    </div>
+    <div class="natmos" id="natMosPanel" hidden>
+      <div class="panel">
+        <div class="panel-head"><h3>One country, no state lines</h3><span class="chip" id="natChip">fair map in each state</span></div>
+        <div class="chips" role="group" aria-label="Which map to show">
+          <button id="natShowFair" aria-pressed="true">Fair map in each state</button><button id="natShowFree" aria-pressed="false" disabled>Borderless map</button>
+        </div>
+        <div class="natprog" id="natProg" hidden><i id="natProgBar"></i></div>
+        <p class="natlog" id="natLog" role="status" aria-live="polite">Each patch of colour is one of the 435 districts, drawn from every block group in the country. Thin lines are state borders.</p>
+        <p class="natnote" id="natMethod">The solver is the same one the state lab uses, started from 435 random, population-weighted centres, but it treats the whole country as one region: districts may cross state lines.</p>
+      </div>
+      <div class="panel" aria-live="polite">
+        <div class="panel-head"><span class="label" id="natScoreTitle">Borderless map · 2020 votes</span></div>
+        <div class="seats"><span class="d num"><span id="nsD">–</span> D</span><span class="r num"><span id="nsR">–</span> R</span><span class="delta" id="nsDelta">run the solver to see seats</span></div>
+        <dl class="kv">
+          <dt>State-by-state fair maps</dt><dd id="nsBase">–</dd>
+          <dt>Worst population gap</dt><dd id="nsDev">–</dd>
+          <dt>Districts in one piece</dt><dd id="nsContig">–</dd>
+          <dt>Districts that cross a state line</dt><dd id="nsCross">–</dd>
+          <dt>Solver</dt><dd id="nsMode">–</dd>
+        </dl>
+        <p class="natnote"><b>This is a thought experiment.</b> Real congressional districts can&rsquo;t cross state lines, because each state is given its own number of seats. Running the solver on the whole country shows how much of the House balance comes from where the state lines fall, rather than from how the lines inside each state are drawn.</p>
+      </div>
+    </div>
+    <div class="sflegend" id="natSfLegend" hidden>
+      <div class="label">Mesh element size in kilometres, all 50 states</div>
+      <div class="bar" aria-hidden="true"></div>
+      <div class="ticks" id="natSfTicks" aria-hidden="true"></div>
+      <p class="cap" id="natSfCap"></p>
+    </div>
+  </section>
+
+  <section class="lab" id="lab" aria-labelledby="stateTitle">
+    <div class="lab-head">
+      <div><span class="label" id="stateKicker">State lab</span><h2 id="stateTitle">Pennsylvania</h2></div>
+      <label><span class="label">State </span><select id="statePick" aria-label="Choose state"></select></label>
+    </div>
+    <div>
+      <div class="stage" id="stage">
+        <canvas id="map" aria-label="District map drawn over the population mesh" role="img"></canvas>
+        <canvas id="overlay" class="overlay"></canvas>
+        <div class="tip" id="tip" hidden></div>
+        <div class="zoomctl" role="group" aria-label="Zoom the state map"><button id="stZin" aria-label="Zoom in">+</button><button id="stZout" aria-label="Zoom out">−</button><button id="stZreset" aria-label="Reset zoom" title="Reset zoom (or double-click the map)">⟲</button></div>
+        <div class="zoomhint" id="stZhint" hidden></div>
+        <div class="loading" id="loading">Loading block groups…</div>
+      </div>
+      <div class="toolbar">
+        <button class="btn go" id="btnGen">▶ Draw it fresh</button>
+        <div class="stepper" aria-label="Number of districts">
+          <button id="kMinus" aria-label="Fewer districts">−</button><span id="kOut" class="num">17 seats</span><button id="kPlus" aria-label="More districts">+</button>
+        </div>
+        <div class="chips" role="group" aria-label="Color by">
+          <button id="colDistrict" aria-pressed="true">Districts</button><button id="colLean" aria-pressed="false">Lean</button><button id="colSize" aria-pressed="false">Mesh size</button>
+        </div>
+        <label class="check"><input type="checkbox" id="showMesh" checked> Show mesh</label>
+        <label class="check" id="curToggleWrap" hidden><input type="checkbox" id="showCur"> Compare: current districts</label>
+      </div>
+      <div class="sflegend" id="sfLegend" hidden>
+        <div class="label">Mesh element size in kilometres</div>
+        <div class="bar" aria-hidden="true"></div>
+        <div class="ticks" id="sfTicks" aria-hidden="true"></div>
+        <p class="cap" id="sfCap"></p>
+      </div>
+      <div class="leanlegend" id="leanLegend" hidden>
+        <div class="label">Lean: how the two main parties split the vote, averaged with neighbours</div>
+        <div class="bar" aria-hidden="true"></div>
+        <div class="ticks" aria-hidden="true"><span style="left:0">R+25</span><span style="left:50%">even</span><span style="left:100%">D+25</span></div>
+        <p class="cap" style="font-size:12px;color:var(--ink-2)">&ldquo;D+3&rdquo; means Democrats lead by 3 percentage points; &ldquo;R+3&rdquo; means Republicans do. &ldquo;Even&rdquo; is a tie.</p>
+        <div class="label" style="margin-top:2px">District outline, by winning margin <span style="text-transform:none;letter-spacing:0">(<span class="nov"></span>no votes recorded)</span></div>
+        <ul class="leancats" id="leanCats"></ul>
+      </div>
+      <div class="curlegend" id="curLegend" hidden aria-label="Legend: our districts and the official districts"></div>
+      <div class="panel lc" id="lcPanel" hidden>
+        <div class="panel-head"><h3>How far from fair?</h3><span class="chip" id="lcChip">official 2026 map to fair map</span></div>
+        <div class="lc-row">
+          <label class="end" for="lcSlider">Official 2026 map</label>
+          <input type="range" id="lcSlider" min="0" max="100" step="1" value="100" aria-describedby="lcOut">
+          <span class="end">Fair map</span>
+        </div>
+        <p class="lc-read" id="lcOut" aria-live="polite">Slide toward the official map to see the districts morph.</p>
+        <p class="lc-sentence" id="lcSentence" aria-live="polite"></p>
+        <svg id="lcPlot" class="lcplot" viewBox="0 0 400 232" role="img" aria-label="Compactness and population gap against the share of people moved" hidden></svg>
+        <p class="hint" style="margin:0;font-size:12px">Method: blends district centres from the official map toward the fair map and rebalances at each step (Euclidean distances, equal populations). It matches each fair district to the official district it overlaps most. It does not claim to find the fewest possible moves. The official districts are not round, power-diagram cells, so even the first step (10%) redraws them that way and moves a lot of people at once. Official districts are assigned by block-group centre, so their populations here are only within about 2% of equal. Dashed lines are the official districts.</p>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="btnDrag" aria-pressed="false">Move centres</button>
+        <button class="btn" id="btnPaint" aria-pressed="false">Gerrymander brush</button>
+        <button class="btn" id="btnReset">Back to fair map</button>
+      </div>
+      <div id="paintTools" hidden>
+        <div class="paintbar" id="paintbar" aria-label="District to paint"></div>
+        <p class="hint">Pick a district, then drag across the map to hand neighbourhoods to it. The solver log and scorecard show whether the populations stay equal and every district stays in one piece.</p>
+      </div>
+      <p class="hint" id="dragHint" hidden>Drag a numbered centre. The map rebalances to equal populations around wherever you put it.</p>
+    </div>
+    <aside class="side">
+      <div class="panel">
+        <div class="panel-head"><h3>Solver log</h3><span class="chip" id="mapState">fair map</span></div>
+        <div class="live" aria-live="polite"><span>largest population gap <b id="liveDev" class="num">–</b></span><span>districts in one piece <b id="liveContig" class="num">–</b></span></div>
+        <ol class="log" id="logList" data-stage="idle" role="log" aria-live="off" aria-label="Solver log" tabindex="0"></ol>
+      </div>
+      <div class="panel" aria-live="polite">
+        <div class="panel-head"><span class="label" id="scoreTitle">Projected seats · 2020 votes</span></div>
+        <div class="seats"><span class="d num"><span id="stD">–</span> D</span><span class="r num"><span id="stR">–</span> R</span><span class="delta" id="stDelta">fair map</span></div>
+        <dl class="kv">
+          <dt>Statewide two-party vote</dt><dd id="kvVote">–</dd>
+          <dt>Worst population gap</dt><dd id="kvDev">–</dd>
+          <dt>Every district in one piece</dt><dd id="kvContig">–</dd>
+          <dt>Counties split</dt><dd id="kvCty">–</dd>
+          <dt>Boundary length (share of neighbour links cut)</dt><dd id="kvCut">–</dd>
+          <dt>Wasted-vote gap</dt><dd id="kvEG">–</dd>
+        </dl>
+        <p class="hint" style="margin:0;font-size:12px">Population gap: how far the most over- or under-filled district is from an equal share. Wasted-vote gap: how many more votes one party throws away than the other (on losing, or on surplus winning, ballots) as a share of all votes; near zero is even, and the letter names the party that gains.</p>
+        <div class="ladder">
+          <div class="label" style="margin-bottom:4px">Districts, safest D to safest R</div>
+          <svg id="ladder" viewBox="0 0 320 150" role="img" aria-label="District margins"></svg>
+        </div>
+      </div>
+      <div class="panel" id="cmpPanel" hidden aria-live="polite">
+        <div class="panel-head"><span class="label">Official maps vs ours</span><span class="chip" id="cmpK"></span></div>
+        <table class="cmp">
+          <thead><tr><th></th><th class="off">official</th><th class="ours">ours</th></tr></thead>
+          <tbody id="cmpBody"></tbody>
+        </table>
+        <p class="cmp-overlap" id="cmpOverlap"></p>
+      </div>
+      <div class="panel">
+        <div class="votes">
+          <span class="label">Votes from</span>
+          <div class="chips" role="group" aria-label="Election">
+            <button id="el-pres2016" data-el="pres2016" aria-pressed="false">2016</button>
+            <button id="el-pres2020" data-el="pres2020" aria-pressed="true">2020</button>
+            <button id="el-pres2024" data-el="pres2024" aria-pressed="false">2024</button>
+          </div>
+          <label class="swing"><span class="label">Swing</span>
+            <input id="swing" type="range" min="-10" max="10" step="0.5" value="0" aria-describedby="swingOut">
+            <span id="swingOut" class="num" style="min-width:5.5ch">even</span></label>
+        </div>
+        <p class="natline" aria-live="polite">House, <span id="natScope">fair maps</span>: <span class="d"><span id="natD" class="num">–</span> D</span> · <span class="r"><span id="natR" class="num">–</span> R</span> · 218 to win</p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="why" aria-labelledby="whyTitle">
+    <h2 id="whyTitle">Why a mesh</h2>
+    <p>Drawing districts is a <b>cutting problem</b>. Picture the state as a web of neighbourhoods, each joined to the ones next to it. You must cut that web into pieces that each hold the same number of people, stay in one connected piece, and have short, tidy borders. Engineers solve the same problem when they split a coastal ocean model across many computer processors, and this tool grows out of that work (the ADMESH and CHILmesh mesh-building software). Here every dot is a block group weighted by its population, so those methods apply directly, and we can compare them with other districting methods on exactly the same data.</p>
+    <p>The <b>Mesh size</b> view shows the other half of the link. A mesh builder steers its grid with a size map, the target width of a grid cell at each place. If cells followed population, so each held about the same number of people, they would be small in cities and large in empty land, and that is what the view paints. We tested the idea and it did not pay off: meshing to this size map did not beat cutting the block groups directly (see <span class="num" style="overflow-wrap:anywhere">research/redistricting_mesh_vs_bg/results.md</span>). So here it is a way to look at the data, and the solver does not use it.</p>
+    <table class="bench">
+      <caption>Four methods on the same block groups, the same mesh and the same scoring code. &ldquo;Population gap&rdquo; is how far the worst district is from an equal share (smaller is better). &ldquo;Compactness&rdquo; is the average Polsby-Popper score: 1 means a perfect circle, and values near 0 mean long, stringy shapes (higher is better). &ldquo;Seconds&rdquo; is run time. The GerryChain row is the most compact map found in 5,000 random steps.</caption>
+      <thead><tr><th>Method</th><th>Population gap %</th><th>Compactness</th><th>Seconds</th></tr></thead>
+      <tbody>
+        <tr><th colspan="4">PA · 17 districts</th></tr>
+        <tr class="ours"><td>This generator</td><td>0.107</td><td>0.451</td><td>1.8</td></tr>
+        <tr><td>GerryChain&rsquo;s random-map sampler</td><td>0.955</td><td>0.256</td><td>278</td></tr>
+        <tr><td>Shortest splitline</td><td>0.121</td><td>0.475</td><td>3.6</td></tr>
+        <tr><td>Standard graph-partitioning program (METIS)</td><td>0.099</td><td>0.344</td><td>0.1</td></tr>
+        <tr><th colspan="4">NC · 14 districts</th></tr>
+        <tr class="ours"><td>This generator</td><td>0.094</td><td>0.413</td><td>1.1</td></tr>
+        <tr><td>GerryChain&rsquo;s random-map sampler</td><td>0.986</td><td>0.250</td><td>315</td></tr>
+        <tr><td>Shortest splitline</td><td>0.213</td><td>0.454</td><td>3.0</td></tr>
+        <tr><td>Standard graph-partitioning program (METIS)</td><td>0.104</td><td>0.330</td><td>0.1</td></tr>
+        <tr><th colspan="4">CA · 52 districts</th></tr>
+        <tr class="ours"><td>This generator</td><td>0.204</td><td>0.293</td><td>26</td></tr>
+        <tr><td>GerryChain&rsquo;s random-map sampler</td><td>0.990</td><td>0.248</td><td>296</td></tr>
+        <tr><td>Shortest splitline †</td><td>0.310</td><td>0.418</td><td>23</td></tr>
+        <tr><td>Standard graph-partitioning program (METIS)</td><td>2.538</td><td>0.155</td><td>1.1</td></tr>
+      </tbody>
+    </table>
+    <p><b>Honest framing.</b> This is not a new method. It combines published techniques (Hess 1965; Cohen-Addad, Klein &amp; Young 2018; and the border-swapping step used by METIS, a standard graph-partitioning program) and was tuned until it behaved well on real block-group data. GerryChain&rsquo;s random-map sampler (called ReCom) is built to produce many different maps, not one tightly balanced map, so its population-gap column says little about what it is for. Shortest splitline, which repeatedly cuts the state in two with the shortest line that splits the people evenly, wins on compactness in two of the three states. † In California, shortest splitline produced a map with a district in more than one piece. Source: <span class="num" style="overflow-wrap:anywhere">research/redistricting_baselines/results.md</span>.</p>
+  </section>
+
+  <footer class="notes">
+    <p><strong>How the lines are drawn.</strong> We join the Census block groups into a web of neighbours (a Delaunay triangulation, trimmed to the state outline, with islands linked across water). The program picks starting centres, then grows districts outward from them over that web in a way that keeps each one the same size in people; this is a population-balanced version of a centroidal power diagram (each district is the area closest to its centre, with sizes adjusted for population). It then reattaches any stray pieces and swaps border neighbourhoods one at a time to even out the populations. The only inputs are head counts and locations. For large states the picture shows a thinned-out web to stay fast, but the solver always uses every link. &ldquo;Draw it fresh&rdquo; and the seat buttons start from random centres, chosen so that crowded areas are more likely to get one, so each run can end up slightly different.</p>
+    <p><strong>Read the numbers loosely.</strong> Population comes from the 2020 Census, by block group, with the 2020 count of seats per state. Districts are equal to within about 0.2%, which is looser than the near-exact equality courts require. Votes are presidential results <span id="elecMethod">estimated down to block groups</span>. They come from the Voting and Election Science Team (VEST) precinct data, as spread to blocks by the ALARM Project (Algorithm-Assisted Redistricting Methodology; CC BY 4.0 / CC BY-SA 4.0), and from 2024 county totals published by Dave&rsquo;s Redistricting (DRA) and the Redistricting Data Hub (RDH) (CC BY-SA 4.0). So the seat counts show how those presidential votes would fall under each map, not how House races would turn out. No Voting Rights Act analysis is included. These are hypothetical maps.</p>
+  </footer>
+</div>
+
+<script id="engineSrc">
+/*
+ * DistrictEngine -- dependency-free browser/Node port of redistricting/solver.py.
+ *
+ * Stages (same as solver.partition, n_init=1):
+ *   seed (RCB) -> lloyd (capacity-constrained Lloyd: balanced power assignment
+ *   over geodesic distances, then population centroids) -> balance (tight final
+ *   assignment) -> contiguity -> refine (batched FM boundary moves with a
+ *   county-split penalty) -> contiguity -> done.
+ *
+ * Plain script: defines a global `DistrictEngine`; under Node it is also
+ * `module.exports`. Everything is deterministic (no Math.random).
+ *
+ * Long-running work is cooperative: `run()` is a generator whose internal
+ * kernels check a wall-clock budget (opts.budgetMs, default 40 ms) and yield
+ * a `partial: true` snapshot (same labels/centers/stats objects as the last
+ * full snapshot) whenever it is exceeded, so no single next() blocks long.
+ * `rebalance()` drives the same generators synchronously with no budget.
+ *
+ * Label j always belongs to centre j (centers[2j], centers[2j+1]); call
+ * numberDistricts() for the Python plan's north-to-south numbering.
+ */
+(function (root) {
+  'use strict';
+
+  var now = (typeof performance !== 'undefined' && performance && typeof performance.now === 'function')
+    ? function () { return performance.now(); }
+    : function () { return Date.now(); };
+
+  // ------------------------------------------------------------------ clock
+  function Clock(budgetMs) {
+    this.budget = budgetMs > 0 ? budgetMs : Infinity;
+    this.t0 = now();
+  }
+  Clock.prototype.due = function () { return this.budget !== Infinity && now() - this.t0 > this.budget; };
+  Clock.prototype.reset = function () { this.t0 = now(); };
+  var NO_BUDGET = new Clock(Infinity);
+
+  function drain(gen) {
+    var r;
+    while (!(r = gen.next()).done) { /* no budget: should not happen, but harmless */ }
+    return r.value;
+  }
+
+  // ------------------------------------------------------------------ prepare
+  function toF64(a) { return a instanceof Float64Array ? a : Float64Array.from(a); }
+
+  function prepare(data) {
+    var n = data.n | 0;
+    if (!(n > 0)) n = data.x.length;
+    var x = toF64(data.x), y = toF64(data.y), w = toF64(data.pop);
+    // county ids -> dense 0..C-1 in sorted order (np.unique return_inverse)
+    var cty = new Int32Array(n), ncty = 0;
+    if (data.cty) {
+      var raw = Array.from(data.cty), uniq = Array.from(new Set(raw)).sort(function (a, b) { return a < b ? -1 : a > b ? 1 : 0; });
+      var map = new Map();
+      for (var i = 0; i < uniq.length; i++) map.set(uniq[i], i);
+      for (i = 0; i < n; i++) cty[i] = map.get(raw[i]);
+      ncty = uniq.length;
+    } else ncty = 1;
+    // unique undirected edges a<b, sorted (== scipy triu(adj, 1).tocoo() order)
+    var E = data.edges, m0 = E.length >> 1;
+    var keys = new Float64Array(m0), nk = 0;
+    for (i = 0; i < m0; i++) {
+      var a = E[2 * i] | 0, b = E[2 * i + 1] | 0;
+      if (a === b) continue;
+      if (a > b) { var t = a; a = b; b = t; }
+      keys[nk++] = a * n + b;
+    }
+    keys = keys.subarray(0, nk).sort();
+    var er = new Int32Array(nk), ec = new Int32Array(nk), ne = 0;
+    for (i = 0; i < nk; i++) {
+      if (i > 0 && keys[i] === keys[i - 1]) continue;
+      er[ne] = Math.floor(keys[i] / n); ec[ne] = keys[i] - er[ne] * n; ne++;
+    }
+    er = er.slice(0, ne); ec = ec.slice(0, ne);
+    var deg = new Int32Array(n + 1);
+    for (i = 0; i < ne; i++) { deg[er[i] + 1]++; deg[ec[i] + 1]++; }
+    for (i = 0; i < n; i++) deg[i + 1] += deg[i];
+    var indptr = deg, indices = new Int32Array(2 * ne), elen = new Float64Array(2 * ne);
+    var fill = indptr.slice(0, n);
+    for (i = 0; i < ne; i++) {
+      var p = er[i], q = ec[i];
+      var L = Math.hypot(x[p] - x[q], y[p] - y[q]) + 1e-6;
+      indices[fill[p]] = q; elen[fill[p]++] = L;
+      indices[fill[q]] = p; elen[fill[q]++] = L;
+    }
+    var W = 0;
+    for (i = 0; i < n; i++) W += w[i];
+    return {
+      n: n, x: x, y: y, w: w, cty: cty, ncty: ncty,
+      indptr: indptr, indices: indices, elen: elen, er: er, ec: ec, nedges: ne,
+      totalPop: W, seats: data.seats | 0,
+      cache: { rcb: {}, ws: null, statsWs: null }
+    };
+  }
+
+  // ------------------------------------------------------------------ workspace
+  // Grow-only typed-array pool. One per run() and one cached on prep for rebalance().
+  function Workspace() { this.b = {}; }
+  Workspace.prototype.get = function (name, Type, size) {
+    var a = this.b[name];
+    if (!a || a.length < size || !(a instanceof Type)) { a = new Type(Math.max(size, 1)); this.b[name] = a; }
+    return a;
+  };
+
+  // ------------------------------------------------------------------ helpers
+  function centroids(prep, labels, k, fallback) {
+    var n = prep.n, x = prep.x, y = prep.y, w = prep.w;
+    var tot = new Float64Array(k), cx = new Float64Array(k), cy = new Float64Array(k);
+    for (var i = 0; i < n; i++) { var l = labels[i], wi = w[i]; tot[l] += wi; cx[l] += wi * x[i]; cy[l] += wi * y[i]; }
+    var c = new Float64Array(2 * k);
+    for (var j = 0; j < k; j++) {
+      if (tot[j] > 0) { c[2 * j] = cx[j] / tot[j]; c[2 * j + 1] = cy[j] / tot[j]; }
+      else { c[2 * j] = fallback[2 * j]; c[2 * j + 1] = fallback[2 * j + 1]; }
+    }
+    return c;
+  }
+
+  function inertia(prep, labels, centers) {
+    var s = 0, x = prep.x, y = prep.y, w = prep.w;
+    for (var i = 0; i < prep.n; i++) {
+      var l = labels[i], dx = x[i] - centers[2 * l], dy = y[i] - centers[2 * l + 1];
+      s += w[i] * (dx * dx + dy * dy);
+    }
+    return s;
+  }
+
+  // stable index sort of perm[0..N) by key (ties by perm value, i.e. original order)
+  function sortByKey(perm, key, N) {
+    // iterative quicksort + insertion sort; comparison (key, index) => deterministic == stable argsort
+    var stack = [0, N - 1];
+    while (stack.length) {
+      var hi = stack.pop(), lo = stack.pop();
+      while (hi - lo > 16) {
+        var mid = (lo + hi) >> 1;
+        // median of three -> perm[mid]
+        if (lt(key, perm[mid], perm[lo])) sw(perm, mid, lo);
+        if (lt(key, perm[hi], perm[lo])) sw(perm, hi, lo);
+        if (lt(key, perm[hi], perm[mid])) sw(perm, hi, mid);
+        var pv = perm[mid], pk = key[pv];
+        var i = lo, j = hi;
+        while (i <= j) {
+          while (key[perm[i]] < pk || (key[perm[i]] === pk && perm[i] < pv)) i++;
+          while (key[perm[j]] > pk || (key[perm[j]] === pk && perm[j] > pv)) j--;
+          if (i <= j) { var t = perm[i]; perm[i] = perm[j]; perm[j] = t; i++; j--; }
+        }
+        if (j - lo < hi - i) { stack.push(i, hi); hi = j; } else { stack.push(lo, j); lo = i; }
+      }
+      for (var a = lo + 1; a <= hi; a++) {
+        var v = perm[a], kv = key[v], b = a - 1;
+        while (b >= lo && (key[perm[b]] > kv || (key[perm[b]] === kv && perm[b] > v))) { perm[b + 1] = perm[b]; b--; }
+        perm[b + 1] = v;
+      }
+    }
+  }
+  function lt(key, a, b) { return key[a] < key[b] || (key[a] === key[b] && a < b); }
+  function sw(p, i, j) { var t = p[i]; p[i] = p[j]; p[j] = t; }
+
+  // k-th smallest (0-based) of a[0..N), partially reorders a; a[k+1..N) >= a[k] afterwards
+  function nthElement(a, N, kth) {
+    var lo = 0, hi = N - 1;
+    while (hi > lo) {
+      var mid = (lo + hi) >> 1;
+      var x0 = a[lo], x1 = a[mid], x2 = a[hi], pv;
+      pv = (x0 < x1) ? (x1 < x2 ? x1 : (x0 < x2 ? x2 : x0)) : (x0 < x2 ? x0 : (x1 < x2 ? x2 : x1));
+      var i = lo, j = hi;
+      while (i <= j) {
+        while (a[i] < pv) i++;
+        while (a[j] > pv) j--;
+        if (i <= j) { var t = a[i]; a[i] = a[j]; a[j] = t; i++; j--; }
+      }
+      if (kth <= j) hi = j; else if (kth >= i) lo = i; else return a[kth];
+    }
+    return a[kth];
+  }
+
+  // numpy.quantile (linear) of a[0..N) -- destroys order of a
+  function quantile(a, N, q) {
+    if (N === 0) return 0;
+    var pos = q * (N - 1), lo = Math.floor(pos), frac = pos - lo;
+    var v0 = nthElement(a, N, lo);
+    if (frac === 0 || lo + 1 >= N) return v0;
+    var v1 = Infinity;
+    for (var i = lo + 1; i < N; i++) if (a[i] < v1) v1 = a[i];
+    return v0 + frac * (v1 - v0);
+  }
+
+  // Cholesky solve of SPD k x k system (A row-major, overwritten); returns x in b
+  function cholSolve(A, b, k) {
+    for (var j = 0; j < k; j++) {
+      var s = A[j * k + j];
+      for (var p = 0; p < j; p++) s -= A[j * k + p] * A[j * k + p];
+      if (!(s > 0)) s = 1e-300;
+      var d = Math.sqrt(s);
+      A[j * k + j] = d;
+      for (var i = j + 1; i < k; i++) {
+        var t = A[i * k + j];
+        for (p = 0; p < j; p++) t -= A[i * k + p] * A[j * k + p];
+        A[i * k + j] = t / d;
+      }
+    }
+    for (i = 0; i < k; i++) { t = b[i]; for (p = 0; p < i; p++) t -= A[i * k + p] * b[p]; b[i] = t / A[i * k + i]; }
+    for (i = k - 1; i >= 0; i--) { t = b[i]; for (p = i + 1; p < k; p++) t -= A[p * k + i] * b[p]; b[i] = t / A[i * k + i]; }
+    return b;
+  }
+
+  // ------------------------------------------------------------------ RCB seed
+  function rcb(prep, k) {
+    var n = prep.n, x = prep.x, y = prep.y, w = prep.w;
+    var labels = new Int32Array(n), ids = new Int32Array(n), tkey = new Float64Array(n);
+    var perm = new Int32Array(n), tmp = new Int32Array(n);
+    for (var i = 0; i < n; i++) ids[i] = i;
+    function rec(lo, hi, kk, base) {
+      var size = hi - lo, i;
+      if (kk === 1 || size === 0) { for (i = lo; i < hi; i++) labels[ids[i]] = base; return; }
+      var sw_ = 0, mx = 0, my = 0;
+      for (i = lo; i < hi; i++) { var u = ids[i], ww = w[u] + 1e-9; sw_ += ww; mx += ww * x[u]; my += ww * y[u]; }
+      mx /= sw_; my /= sw_;
+      var ax = 0, ay = 1;
+      if (size > 2) {
+        var a = 0, b = 0, c = 0;
+        for (i = lo; i < hi; i++) { u = ids[i]; ww = w[u] + 1e-9; var dx = x[u] - mx, dy = y[u] - my; a += ww * dx * dx; b += ww * dx * dy; c += ww * dy * dy; }
+        if (b === 0) { if (a > c) { ax = 1; ay = 0; } }
+        else {
+          var lam = 0.5 * (a + c) + Math.sqrt(0.25 * (a - c) * (a - c) + b * b);
+          var vx = b, vy = lam - a;
+          if (Math.abs(lam - a) < Math.abs(lam - c)) { vx = lam - c; vy = b; }
+          var nr = Math.hypot(vx, vy); ax = vx / nr; ay = vy / nr;
+          // LAPACK (numpy.linalg.eigh) sign convention for 2x2, verified empirically:
+          // x-dominant eigenvector has negative x, otherwise positive y.
+          if (a > c ? ax > 0 : ay < 0) { ax = -ax; ay = -ay; }
+        }
+      }
+      for (i = 0; i < size; i++) { u = ids[lo + i]; perm[i] = i; tkey[i] = (x[u] - mx) * ax + (y[u] - my) * ay; }
+      sortByKey(perm, tkey, size);
+      for (i = 0; i < size; i++) tmp[i] = ids[lo + perm[i]];
+      for (i = 0; i < size; i++) ids[lo + i] = tmp[i];
+      var k1 = kk >> 1, tot = 0;
+      for (i = lo; i < hi; i++) tot += w[ids[i]];
+      var thr = tot * k1 / kk, cum = 0, cut = size;
+      for (i = 0; i < size; i++) { cum += w[ids[lo + i]]; if (cum >= thr) { cut = i; break; } }
+      cut = cut + 1;
+      cut = Math.min(Math.max(cut, 1), size - 1);
+      rec(lo, lo + cut, k1, base);
+      rec(lo + cut, hi, kk - k1, base + k1);
+    }
+    rec(0, n, k, 0);
+    return labels;
+  }
+
+  function rcbCached(prep, k) {
+    var c = prep.cache.rcb[k];
+    if (!c) {
+      var lab = rcb(prep, k), fb = new Float64Array(2 * k);
+      for (var j = 0; j < k; j++) { var u = Math.min(j, prep.n - 1); fb[2 * j] = prep.x[u]; fb[2 * j + 1] = prep.y[u]; }
+      c = prep.cache.rcb[k] = { labels: lab, centers: centroids(prep, lab, k, fb) };
+    }
+    return c;
+  }
+
+  // ------------------------------------------------------------------ distances
+  // Dijkstra from src over the length-weighted mesh (indexed binary heap).
+  function dijkstra(prep, src, dist, heap, pos) {
+    var n = prep.n, indptr = prep.indptr, indices = prep.indices, elen = prep.elen;
+    for (var i = 0; i < n; i++) { dist[i] = Infinity; pos[i] = -1; }
+    var hn = 0;
+    dist[src] = 0; heap[0] = src; pos[src] = 0; hn = 1;
+    while (hn > 0) {
+      var u = heap[0], du = dist[u];
+      pos[u] = -2; // settled
+      hn--;
+      if (hn > 0) { // sift last down from root
+        var last = heap[hn], dl = dist[last], h = 0;
+        for (;;) {
+          var l = 2 * h + 1;
+          if (l >= hn) break;
+          var r = l + 1, cidx = (r < hn && dist[heap[r]] < dist[heap[l]]) ? r : l;
+          if (dist[heap[cidx]] >= dl) break;
+          heap[h] = heap[cidx]; pos[heap[h]] = h; h = cidx;
+        }
+        heap[h] = last; pos[last] = h;
+      }
+      for (var e = indptr[u], ee = indptr[u + 1]; e < ee; e++) {
+        var v = indices[e], pv = pos[v];
+        if (pv === -2) continue;
+        var nd = du + elen[e];
+        if (nd < dist[v]) {
+          dist[v] = nd;
+          var hh;
+          if (pv === -1) { hh = hn++; } else hh = pv;
+          while (hh > 0) { // sift up
+            var par = (hh - 1) >> 1, hp = heap[par];
+            if (dist[hp] <= nd) break;
+            heap[hh] = hp; pos[hp] = hh; hh = par;
+          }
+          heap[hh] = v; pos[v] = hh;
+        }
+      }
+    }
+  }
+
+  function nearestUnit(prep, cx, cy) {
+    var best = 0, bd = Infinity, x = prep.x, y = prep.y;
+    for (var i = 0; i < prep.n; i++) { var dx = x[i] - cx, dy = y[i] - cy, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } }
+    return best;
+  }
+
+  // dist2[i*k + j]: squared distance unit i -> centre j (Euclidean or geodesic)
+  function* dist2Gen(prep, ws, centers, k, geodesic, ck) {
+    var n = prep.n, D = ws.get('dist2', Float64Array, n * k), x = prep.x, y = prep.y, i, j;
+    if (!geodesic) {
+      for (i = 0; i < n; i++) {
+        var xi = x[i], yi = y[i], o = i * k;
+        for (j = 0; j < k; j++) { var dx = xi - centers[2 * j], dy = yi - centers[2 * j + 1]; D[o + j] = dx * dx + dy * dy; }
+      }
+      return D;
+    }
+    var dist = ws.get('dij', Float64Array, n), heap = ws.get('heap', Int32Array, n), pos = ws.get('pos', Int32Array, n);
+    var maxFinite = -Infinity, anyInf = false;
+    for (j = 0; j < k; j++) {
+      dijkstra(prep, nearestUnit(prep, centers[2 * j], centers[2 * j + 1]), dist, heap, pos);
+      for (i = 0; i < n; i++) {
+        var d = dist[i];
+        if (d === Infinity) anyInf = true; else if (d > maxFinite) maxFinite = d;
+        D[i * k + j] = d;
+      }
+      if (ck.due()) yield;
+    }
+    var big = maxFinite > -Infinity ? maxFinite * 10 : 1.0;
+    for (i = 0; i < n * k; i++) { var dd = D[i]; if (anyInf && dd === Infinity) dd = big; D[i] = dd * dd; }
+    return D;
+  }
+
+  // ------------------------------------------------------------------ balanced assignment
+  // Newton state: best / second-best slot per row, gap, district pops.
+  function nstate(n, m, k, d2, idx, w, vv, lab, sec, gap, pops) {
+    for (var j = 0; j < k; j++) pops[j] = 0;
+    for (var i = 0; i < n; i++) {
+      var o = i * m, b0 = -1, s0 = Infinity, b1 = -1, s1 = Infinity;
+      for (var t = 0; t < m; t++) {
+        var s = d2[o + t] - vv[idx[o + t]];
+        if (s < s0) { s1 = s0; b1 = b0; s0 = s; b0 = t; }
+        else if (s < s1) { s1 = s; b1 = t; }
+      }
+      var L = idx[o + b0];
+      lab[i] = L; sec[i] = idx[o + b1]; gap[i] = s1 - s0;
+      pops[L] += w[i];
+    }
+  }
+  function maxRelErr(pops, k, target) {
+    var e = 0;
+    for (var j = 0; j < k; j++) { var d = Math.abs(pops[j] / target - 1); if (d > e) e = d; }
+    return e;
+  }
+  function ssRelErr(pops, k, target) {
+    var e = 0;
+    for (var j = 0; j < k; j++) { var d = pops[j] / target - 1; e += d * d; }
+    return e;
+  }
+
+  var STEPS = [1.0, 0.5, 0.25, 0.125, 0.0625];
+
+  function* newtonGen(prep, ws, n, m, k, d2, idx, v, target, tol, ck) {
+    var iters = 150, bandQ = 0.2, lm = 0.05, w = prep.w;
+    var labA = ws.get('nlabA', Int32Array, n), secA = ws.get('nsecA', Int32Array, n), gapA = ws.get('ngapA', Float64Array, n);
+    var labB = ws.get('nlabB', Int32Array, n), secB = ws.get('nsecB', Int32Array, n), gapB = ws.get('ngapB', Float64Array, n);
+    var popsA = new Float64Array(k), popsB = new Float64Array(k);
+    var qbuf = ws.get('nq', Float64Array, n), K = new Float64Array(k * k), dg = new Float64Array(k), dv = new Float64Array(k);
+    var vt = new Float64Array(k);
+    v = Float64Array.from(v);
+    var nlive = 0;
+    for (var i = 0; i < n; i++) if (w[i] > 0) nlive++;
+    var prof = ws.prof, tn0 = now();
+    nstate(n, m, k, d2, idx, w, v, labA, secA, gapA, popsA);
+    var err = maxRelErr(popsA, k, target);
+    for (var it = 0; it < iters; it++) {
+      if (err <= tol || nlive === 0) break;
+      var nq = 0;
+      for (i = 0; i < n; i++) if (w[i] > 0) qbuf[nq++] = gapA[i];
+      var eps = Math.max(quantile(qbuf, nq, bandQ), 1e-12);
+      K.fill(0);
+      for (i = 0; i < n; i++) {
+        if (gapA[i] < eps && w[i] > 0) {
+          var cw = w[i] / eps, a = labA[i], b = secA[i];
+          K[a * k + b] -= cw; K[b * k + a] -= cw;
+        }
+      }
+      var mean = 0;
+      for (var r = 0; r < k; r++) { var s = 0; for (var c = 0; c < k; c++) s += K[r * k + c]; dg[r] = -s; mean += dg[r]; }
+      mean /= k;
+      for (r = 0; r < k; r++) K[r * k + r] = dg[r] + lm * (dg[r] + mean + 1e-12);
+      for (r = 0; r < k; r++) dv[r] = target - popsA[r];
+      cholSolve(K, dv, k);
+      var dm = 0;
+      for (r = 0; r < k; r++) dm += dv[r];
+      dm /= k;
+      var cap = 4 * eps;
+      for (r = 0; r < k; r++) { var q = dv[r] - dm; dv[r] = q < -cap ? -cap : q > cap ? cap : q; }
+      var ss0 = ssRelErr(popsA, k, target), ok = false;
+      for (var si = 0; si < STEPS.length; si++) {
+        var st = STEPS[si];
+        for (r = 0; r < k; r++) vt[r] = v[r] + st * dv[r];
+        nstate(n, m, k, d2, idx, w, vt, labB, secB, gapB, popsB);
+        var e = maxRelErr(popsB, k, target);
+        if (ssRelErr(popsB, k, target) < ss0 || e < err) {
+          v.set(vt);
+          var t1 = labA; labA = labB; labB = t1; t1 = secA; secA = secB; secB = t1;
+          var t2 = gapA; gapA = gapB; gapB = t2; t2 = popsA; popsA = popsB; popsB = t2;
+          err = e; ok = true;
+          break;
+        }
+      }
+      if (!ok) break;
+      if (prof) prof.newtonIters++;
+      if (ck.due()) yield;
+    }
+    if (prof) prof.newtonMs += now() - tn0;
+    // keep the swapped buffers registered (they are interchangeable)
+    ws.b.nlabA = labA; ws.b.nlabB = labB; ws.b.nsecA = secA; ws.b.nsecB = secB; ws.b.ngapA = gapA; ws.b.ngapB = gapB;
+    return v;
+  }
+
+  // m nearest candidate centres per row (idx, d2: n*m); m === k means all, in order
+  function selectCandidates(n, k, m, D, idx, d2) {
+    var i, j, t;
+    if (m >= k) {
+      for (i = 0; i < n; i++) for (j = 0; j < k; j++) { idx[i * k + j] = j; d2[i * k + j] = D[i * k + j]; }
+      return;
+    }
+    for (i = 0; i < n; i++) {
+      var o = i * m, base = i * k, cnt = 0;
+      for (j = 0; j < k; j++) {
+        var d = D[base + j];
+        if (cnt < m) {
+          t = cnt++;
+          while (t > 0 && d2[o + t - 1] > d) { d2[o + t] = d2[o + t - 1]; idx[o + t] = idx[o + t - 1]; t--; }
+          d2[o + t] = d; idx[o + t] = j;
+        } else if (d < d2[o + m - 1]) {
+          t = m - 1;
+          while (t > 0 && d2[o + t - 1] > d) { d2[o + t] = d2[o + t - 1]; idx[o + t] = idx[o + t - 1]; t--; }
+          d2[o + t] = d; idx[o + t] = j;
+        }
+      }
+    }
+  }
+
+  // Smallest margin value M* with weight(margin <= M*) >= need (requires total >= need).
+  // perm is scratch. Expected O(N) (3-way weighted quickselect).
+  function weightedCrossing(perm, key, wt, N, need) {
+    for (var t = 0; t < N; t++) perm[t] = t;
+    var lo = 0, hi = N, acc = 0;
+    for (;;) {
+      if (hi - lo <= 24) {
+        sortByKey(perm.subarray(lo, hi), key, hi - lo);
+        for (t = lo; t < hi; t++) { acc += wt[perm[t]]; if (acc >= need) return key[perm[t]]; }
+        return key[perm[hi - 1]]; // rounding fallback
+      }
+      var a = key[perm[lo]], b = key[perm[(lo + hi) >> 1]], c = key[perm[hi - 1]];
+      var pv = (a < b) ? (b < c ? b : (a < c ? c : a)) : (a < c ? a : (b < c ? c : b));
+      var lt = lo, i = lo, gt = hi - 1, WL = 0, WE = 0, x;
+      while (i <= gt) {
+        var pi = perm[i], kv = key[pi];
+        if (kv < pv) { WL += wt[pi]; perm[i] = perm[lt]; perm[lt] = pi; lt++; i++; }
+        else if (kv > pv) { perm[i] = perm[gt]; perm[gt] = pi; gt--; }
+        else { WE += wt[pi]; i++; }
+      }
+      if (acc + WL >= need) hi = lt;
+      else if (acc + WL + WE >= need) return pv;
+      else { acc += WL + WE; lo = gt + 1; }
+      if (lo >= hi) return pv; // rounding fallback
+    }
+  }
+
+  function* ascentGen(prep, ws, D, k, v, tol, m, maxSteps, ck) {
+    var n = prep.n, w = prep.w, target = prep.totalPop / k, i, j, t;
+    var idx = ws.get('idx', Int32Array, n * m), d2 = ws.get('d2', Float64Array, n * m), s = ws.get('s', Float64Array, n * m);
+    selectCandidates(n, k, m, D, idx, d2);
+    v = yield* newtonGen(prep, ws, n, m, k, d2, idx, v, target, tol, ck);
+    // candidate rows/slots per district, rows ascending
+    var cptr = new Int32Array(k + 1);
+    for (i = 0; i < n * m; i++) cptr[idx[i] + 1]++;
+    for (j = 0; j < k; j++) cptr[j + 1] += cptr[j];
+    var crow = ws.get('crow', Int32Array, n * m), cslot = ws.get('cslot', Int32Array, n * m), cf = cptr.slice(0, k);
+    for (i = 0; i < n; i++) for (t = 0; t < m; t++) { var jj = idx[i * m + t], p = cf[jj]++; crow[p] = i; cslot[p] = t; }
+    var labels = new Int32Array(n), pops = new Float64Array(k), bslot = ws.get('bslot', Int32Array, n);
+    for (i = 0; i < n; i++) {
+      var o = i * m, b = 0, sb = Infinity;
+      for (t = 0; t < m; t++) { var sv = d2[o + t] - v[idx[o + t]]; s[o + t] = sv; if (sv < sb) { sb = sv; b = t; } }
+      bslot[i] = b; labels[i] = idx[o + b]; pops[labels[i]] += w[i];
+    }
+    var bestErr = Infinity, bestLab = Int32Array.from(labels), bestV = Float64Array.from(v);
+    var cap = Math.max(1, n);
+    var margin = ws.get('margin', Float64Array, cap), mrow = ws.get('mrow', Int32Array, cap), perm = ws.get('perm', Int32Array, cap);
+    var wbuf = ws.get('wbuf', Float64Array, cap), perm2 = ws.get('perm2', Int32Array, cap);
+    var starved = false, prof = ws.prof, ta0 = now();
+    if (maxSteps == null) maxSteps = 10 * k;
+    for (var step = 0; step < maxSteps; step++) {
+      var jmax = 0, dmax = -1;
+      for (j = 0; j < k; j++) { var dj = Math.abs(pops[j] / target - 1); if (dj > dmax) { dmax = dj; jmax = j; } }
+      j = jmax;
+      var devj = pops[j] / target - 1;
+      if (dmax < bestErr) { bestErr = dmax; bestLab.set(labels); bestV.set(v); }
+      if (dmax <= tol) break;
+      var need = Math.abs(pops[j] - target);
+      var r0 = cptr[j], r1 = cptr[j + 1];
+      if (r1 === r0) { starved = true; break; }
+      var N = 0, tot = 0;
+      if (devj > 0) { // shed: lowering v_j by delta releases members with margin < delta
+        for (p = r0; p < r1; p++) {
+          i = crow[p];
+          if (labels[i] !== j) continue;
+          var sl = cslot[p], oo = i * m, mn = Infinity;
+          for (t = 0; t < m; t++) if (t !== sl && s[oo + t] < mn) mn = s[oo + t];
+          margin[N] = mn - s[oo + sl]; mrow[N] = i; wbuf[N] = w[i]; tot += w[i]; N++;
+        }
+      } else { // gain: raising v_j by delta captures non-members with margin < delta
+        for (p = r0; p < r1; p++) {
+          i = crow[p];
+          if (labels[i] === j) continue;
+          oo = i * m;
+          margin[N] = s[oo + cslot[p]] - s[oo + bslot[i]]; mrow[N] = i; wbuf[N] = w[i]; tot += w[i]; N++;
+        }
+      }
+      if (N === 0) { starved = true; break; }
+      if (tot < need) { starved = true; break; } // candidate pool cannot cover it: widen
+      // Exact equivalent of: o = argsort(margin, stable); cum = cumsum(w[o]); t = argmin|cum - need|.
+      // Weighted quickselect finds the crossing margin M*; only margins <= M* are sorted.
+      var Mstar = weightedCrossing(perm, margin, wbuf, N, need);
+      var cnt = 0, nextVal = Infinity;
+      for (t = 0; t < N; t++) {
+        var mt = margin[t];
+        if (mt <= Mstar) perm2[cnt++] = t; else if (mt < nextVal) nextVal = mt;
+      }
+      sortByKey(perm2, margin, cnt);
+      var cum = 0, bt = 0, bd = Infinity;
+      for (t = 0; t < cnt; t++) {
+        cum += wbuf[perm2[t]];
+        var ad = Math.abs(cum - need);
+        if (ad < bd) { bd = ad; bt = t; }
+      }
+      var lo = margin[perm2[bt]];
+      var hi = bt + 1 < cnt ? margin[perm2[bt + 1]] : (nextVal < Infinity ? nextVal : lo + 1.0);
+      var delta = hi > lo ? 0.5 * (lo + hi) : lo + 1e-9 * (1 + Math.abs(lo));
+      v[j] += devj > 0 ? -delta : delta;
+      // incremental update of the touched rows (only slot sl changed in each)
+      var vj = v[j];
+      for (p = r0; p < r1; p++) {
+        i = crow[p]; oo = i * m; sl = cslot[p];
+        var old = s[oo + sl], nv = d2[oo + sl] - vj, bs = bslot[i], nb = bs;
+        s[oo + sl] = nv;
+        if (nv > old) {
+          if (bs === sl) { // best got worse: full argmin
+            var sb2 = Infinity;
+            for (t = 0; t < m; t++) if (s[oo + t] < sb2) { sb2 = s[oo + t]; nb = t; }
+          }
+        } else if (nv < old) {
+          var cb = s[oo + bs];
+          if (nv < cb || (nv === cb && sl < bs)) nb = sl;
+        }
+        if (nb !== bs) {
+          bslot[i] = nb;
+          var nl = idx[oo + nb], ol = labels[i];
+          if (nl !== ol) { pops[ol] -= w[i]; pops[nl] += w[i]; labels[i] = nl; }
+        }
+      }
+      if (prof) prof.ascentSteps++;
+      if (ck.due()) yield;
+    }
+    if (prof) { prof.ascentMs += now() - ta0; prof.ascents++; }
+    // _best
+    if (maxRelErr(pops, k, target) <= bestErr) return { labels: labels, v: v, starved: starved, pops: pops };
+    return { labels: bestLab, v: bestV, starved: starved };
+  }
+
+  function* balancedAssignGen(prep, ws, D, k, v, tol, ck, m, maxSteps) {
+    v = v ? Float64Array.from(v) : new Float64Array(k);
+    m = Math.min(Math.max(m || 12, 2), k);
+    for (;;) {
+      var res = yield* ascentGen(prep, ws, D, k, v, tol, m, maxSteps == null ? null : maxSteps, ck);
+      if (!res.starved || m >= k) return res;
+      v = res.v;
+      m = Math.min(2 * m, k);
+    }
+  }
+
+  // ------------------------------------------------------------------ contiguity
+  // connected components of the same-label subgraph; components numbered by lowest node
+  function components(prep, labels, comp, stack) {
+    var n = prep.n, indptr = prep.indptr, indices = prep.indices, nc = 0;
+    comp.fill(-1, 0, n);
+    for (var s0 = 0; s0 < n; s0++) {
+      if (comp[s0] !== -1) continue;
+      var L = labels[s0], sp = 0;
+      comp[s0] = nc; stack[sp++] = s0;
+      while (sp > 0) {
+        var u = stack[--sp];
+        for (var e = indptr[u], ee = indptr[u + 1]; e < ee; e++) {
+          var v = indices[e];
+          if (comp[v] === -1 && labels[v] === L) { comp[v] = nc; stack[sp++] = v; }
+        }
+      }
+      nc++;
+    }
+    return nc;
+  }
+
+  // Faithful port of enforce_contiguity (one orphan piece per round), or with
+  // batch=true every non-conflicting orphan per round (smallest first).
+  function* contiguityGen(prep, ws, labels, k, maxRounds, batch, ck) {
+    var n = prep.n, w = prep.w, indptr = prep.indptr, indices = prep.indices;
+    labels = Int32Array.from(labels);
+    var comp = ws.get('comp', Int32Array, n), stack = ws.get('stack', Int32Array, n);
+    var cpop = ws.get('cpop', Float64Array, n), cdist = ws.get('cdist', Int32Array, n);
+    var main = new Int32Array(k), best = new Float64Array(k), cnt = new Float64Array(k);
+    var dirty = ws.get('dirty', Uint8Array, n);
+    var memStart = ws.get('memStart', Int32Array, n + 1), members = ws.get('members', Int32Array, n);
+    var orph = ws.get('orph', Int32Array, n), okey = ws.get('okey', Float64Array, n);
+    for (var round = 0; round < maxRounds; round++) {
+      var nc = components(prep, labels, comp, stack), ci, i;
+      for (ci = 0; ci < nc; ci++) cpop[ci] = 0;
+      for (i = 0; i < n; i++) { cpop[comp[i]] += w[i] + 1e-9; cdist[comp[i]] = labels[i]; }
+      main.fill(-1); best.fill(-1);
+      for (ci = 0; ci < nc; ci++) { var d = cdist[ci]; if (cpop[ci] > best[d]) { best[d] = cpop[ci]; main[d] = ci; } }
+      var no = 0;
+      for (ci = 0; ci < nc; ci++) if (main[cdist[ci]] !== ci) { orph[no] = ci; okey[ci] = cpop[ci]; no++; }
+      if (no === 0) return labels;
+      // members grouped by component (counting sort)
+      memStart.fill(0, 0, nc + 1);
+      for (i = 0; i < n; i++) memStart[comp[i] + 1]++;
+      for (ci = 0; ci < nc; ci++) memStart[ci + 1] += memStart[ci];
+      var fillp = stack; // reuse as cursor
+      for (ci = 0; ci < nc; ci++) fillp[ci] = memStart[ci];
+      for (i = 0; i < n; i++) members[fillp[comp[i]]++] = i;
+      // orphan order: smallest population first (argmin -> first by component index)
+      var oper = orph.subarray(0, no);
+      sortByKey(oper, okey, no);
+      var todo = batch ? no : 1;
+      if (batch) dirty.fill(0, 0, n);
+      for (var oi = 0; oi < todo; oi++) {
+        ci = oper[oi];
+        var a = memStart[ci], b = memStart[ci + 1], own = labels[members[a]], skip = false;
+        cnt.fill(0);
+        var any = false;
+        for (var q = a; q < b && !skip; q++) {
+          var u = members[q];
+          for (var e = indptr[u], ee = indptr[u + 1]; e < ee; e++) {
+            var v = indices[e];
+            if (comp[v] === ci) continue;
+            if (batch && dirty[v]) { skip = true; break; }
+            var lv = labels[v];
+            if (lv !== own) { cnt[lv]++; any = true; }
+          }
+        }
+        if (skip || !any) continue;
+        var bl = 0;
+        for (var j = 1; j < k; j++) if (cnt[j] > cnt[bl]) bl = j;
+        for (q = a; q < b; q++) { labels[members[q]] = bl; if (batch) dirty[members[q]] = 1; }
+      }
+      if (ck.due()) yield;
+    }
+    return labels;
+  }
+
+  // ------------------------------------------------------------------ refine
+  function connectedWithout(u, d, labels, indptr, indices, seen, goal, queue, stampRef) {
+    var e, ee, v, first = -1, cnt = 0;
+    var st = ++stampRef[0];
+    for (e = indptr[u], ee = indptr[u + 1]; e < ee; e++) {
+      v = indices[e];
+      if (labels[v] !== d) continue;
+      if (first < 0) first = v; else { goal[v] = st; }
+      cnt++;
+    }
+    if (cnt <= 1) return true;
+    var left = cnt - 1, qh = 0, qt = 0;
+    seen[u] = st; seen[first] = st; queue[qt++] = first;
+    while (qh < qt && left > 0) {
+      var a = queue[qh++];
+      for (e = indptr[a], ee = indptr[a + 1]; e < ee; e++) {
+        v = indices[e];
+        if (seen[v] !== st && labels[v] === d) {
+          seen[v] = st;
+          if (goal[v] === st) left--;
+          queue[qt++] = v;
+        }
+      }
+    }
+    return left === 0;
+  }
+
+  function* refineGen(prep, ws, labels, k, opts, ck, onPass) {
+    var n = prep.n, x = prep.x, y = prep.y, w = prep.w, er = prep.er, ec = prep.ec, ne = prep.nedges;
+    var indptr = prep.indptr, indices = prep.indices, cid = prep.cty, nct = prep.ncty;
+    var tol = opts.tol, cw = opts.countyWeight, useCounty = cw !== 0 && opts.county !== false;
+    var maxPasses = opts.maxPasses, i, j;
+    labels = Int32Array.from(labels);
+    var target = prep.totalPop / k;
+    var pops = new Float64Array(k), sx = new Float64Array(k), sy = new Float64Array(k);
+    for (i = 0; i < n; i++) { var l = labels[i]; pops[l] += w[i]; sx[l] += w[i] * x[i]; sy[l] += w[i] * y[i]; }
+    var cd = new Float64Array(nct * k);
+    for (i = 0; i < n; i++) cd[cid[i] * k + labels[i]] += w[i];
+    var r2 = 0, wsum = 0;
+    for (i = 0; i < n; i++) {
+      l = labels[i];
+      var pm = Math.max(pops[l], 1e-12), dx = x[i] - sx[l] / pm, dy = y[i] - sy[l] / pm, ww = Math.max(w[i], 1e-12);
+      r2 += ww * (dx * dx + dy * dy); wsum += ww;
+    }
+    r2 = r2 / wsum || 1.0;
+    var cap = Math.max(1, 2 * ne);
+    var cu = ws.get('rcu', Int32Array, cap), cdst = ws.get('rcd', Int32Array, cap);
+    var cscore = ws.get('rsc', Float64Array, cap), curg = ws.get('rug', Float64Array, cap), cperm = ws.get('rpm', Int32Array, cap);
+    // boundary flags, maintained incrementally: unit has a neighbour in another district
+    var bflag = ws.get('rbf', Uint8Array, n), maxdeg = 0;
+    for (i = 0; i < n; i++) {
+      var dgi = indptr[i + 1] - indptr[i]; if (dgi > maxdeg) maxdeg = dgi;
+      bflag[i] = 0;
+      for (var e = indptr[i]; e < indptr[i + 1]; e++) if (labels[indices[e]] !== labels[i]) { bflag[i] = 1; break; }
+    }
+    var dl = new Int32Array(maxdeg + 1);
+    var seen = ws.get('rseen', Int32Array, n), goal = ws.get('rgoal', Int32Array, n), queue = ws.get('rq', Int32Array, n);
+    seen.fill(0, 0, n); goal.fill(0, 0, n);
+    var stamp = [0];
+    var touched = new Uint8Array(k), cenx = new Float64Array(k), ceny = new Float64Array(k);
+    var moves = 0, passes = 0;
+    var dev = new Float64Array(k);
+    for (var pass = 0; pass < maxPasses; pass++) {
+      var md = 0;
+      for (j = 0; j < k; j++) { dev[j] = pops[j] / target - 1; if (Math.abs(dev[j]) > md) md = Math.abs(dev[j]); }
+      if (md <= tol) break;
+      // unique (u, dst) boundary pairs in lexicographic order (== np.unique over cut edges)
+      for (j = 0; j < k; j++) { var pp = Math.max(pops[j], 1e-12); cenx[j] = sx[j] / pp; ceny[j] = sy[j] / pp; }
+      var ng = 0, thr = -1e-9 * target * target, anyCut = false;
+      for (var u = 0; u < n; u++) {
+        if (!bflag[u]) continue;
+        anyCut = true;
+        var src = labels[u], nd = 0;
+        for (e = indptr[u]; e < indptr[u + 1]; e++) {
+          var lv = labels[indices[e]];
+          if (lv === src) continue;
+          var t = nd;
+          while (t > 0 && dl[t - 1] > lv) t--;
+          if (t > 0 && dl[t - 1] === lv) continue;
+          for (var z = nd; z > t; z--) dl[z] = dl[z - 1];
+          dl[t] = lv; nd++;
+        }
+        var wu = w[u];
+        if (!(wu > 0) || !(pops[src] - wu > 0)) continue;
+        for (var di = 0; di < nd; di++) {
+          var dst = dl[di];
+          var ps = pops[src] - target, pd = pops[dst] - target;
+          var dsq = (ps - wu) * (ps - wu) + (pd + wu) * (pd + wu) - ps * ps - pd * pd;
+          if (!(dsq < thr)) continue;
+          var ax = x[u] - cenx[dst], ay = y[u] - ceny[dst], bx = x[u] - cenx[src], by = y[u] - ceny[src];
+          var sc = (ax * ax + ay * ay - bx * bx - by * by) / r2;
+          if (useCounty) {
+            var cc = cid[u] * k;
+            sc += cw * ((cd[cc + dst] <= 0 ? 1 : 0) - (cd[cc + src] <= wu ? 1 : 0));
+          }
+          var urg = Math.max(Math.abs(dev[src]), Math.abs(dev[dst]));
+          cu[ng] = u; cdst[ng] = dst; cscore[ng] = sc; curg[ng] = -Math.round(urg * 1e4) / 1e4; cperm[ng] = ng; ng++;
+        }
+      }
+      if (!anyCut) break;
+      if (ng === 0) break;
+      // lexsort((score, -round(urgency, 4))): primary -urg, secondary score, then index
+      var ord = Array.prototype.slice.call(cperm.subarray(0, ng));
+      ord.sort(function (p1, p2) { return (curg[p1] - curg[p2]) || (cscore[p1] - cscore[p2]) || (p1 - p2); });
+      touched.fill(0);
+      var applied = 0, nt = 0;
+      for (var oi = 0; oi < ng; oi++) {
+        var c = ord[oi], a_ = labels[cu[c]], b_ = cdst[c];
+        u = cu[c];
+        // src recorded implicitly: labels[u] unchanged unless u moved (then its src is touched)
+        if (touched[a_] || touched[b_]) continue;
+        if (!connectedWithout(u, a_, labels, indptr, indices, seen, goal, queue, stamp)) continue;
+        wu = w[u];
+        labels[u] = b_;
+        pops[a_] -= wu; pops[b_] += wu;
+        sx[a_] -= wu * x[u]; sy[a_] -= wu * y[u]; sx[b_] += wu * x[u]; sy[b_] += wu * y[u];
+        cd[cid[u] * k + a_] -= wu; cd[cid[u] * k + b_] += wu;
+        touched[a_] = touched[b_] = 1; nt += 2;
+        applied++;
+        // refresh boundary flags of u and its neighbours
+        for (var e2 = indptr[u]; e2 <= indptr[u + 1]; e2++) {
+          var q2 = e2 < indptr[u + 1] ? indices[e2] : u, f = 0, lq = labels[q2];
+          for (var e3 = indptr[q2]; e3 < indptr[q2 + 1]; e3++) if (labels[indices[e3]] !== lq) { f = 1; break; }
+          bflag[q2] = f;
+        }
+        if (nt >= k) { var all = true; for (j = 0; j < k; j++) if (!touched[j]) { all = false; break; } if (all) break; }
+      }
+      moves += applied;
+      passes++;
+      if (applied === 0) break;
+      if (onPass) { var snap = onPass(passes, labels, moves); if (snap) yield snap; }
+      if (ck.due()) yield;
+    }
+    return { labels: labels, moves: moves, passes: passes };
+  }
+
+  // ------------------------------------------------------------------ stats
+  function stats(prep, labels, k) {
+    var n = prep.n, w = prep.w, i, j;
+    var sw_ = prep.cache.statsWs || (prep.cache.statsWs = { comp: new Int32Array(n), stack: new Int32Array(n), cd: null });
+    var pops = new Float64Array(k);
+    for (i = 0; i < n; i++) pops[labels[i]] += w[i];
+    var ideal = prep.totalPop / k, md = 0;
+    for (j = 0; j < k; j++) { var d = Math.abs(pops[j] / ideal - 1); if (d > md) md = d; }
+    var nc = components(prep, labels, sw_.comp, sw_.stack);
+    var pieces = new Int32Array(k), seenc = new Uint8Array(nc);
+    for (i = 0; i < n; i++) { var c = sw_.comp[i]; if (!seenc[c]) { seenc[c] = 1; pieces[labels[i]]++; } }
+    var allC = true;
+    for (j = 0; j < k; j++) if (pieces[j] !== 1) { allC = false; break; }
+    var cut = 0, er = prep.er, ec = prep.ec;
+    for (i = 0; i < prep.nedges; i++) if (labels[er[i]] !== labels[ec[i]]) cut++;
+    var nct = prep.ncty, pres = new Uint8Array(nct * k), per = new Int32Array(nct);
+    for (i = 0; i < n; i++) {
+      if (!(w[i] > 0)) continue;
+      var key = prep.cty[i] * k + labels[i];
+      if (!pres[key]) { pres[key] = 1; per[prep.cty[i]]++; }
+    }
+    var split = 0;
+    for (i = 0; i < nct; i++) if (per[i] > 1) split++;
+    return {
+      pops: pops,
+      maxAbsDevPct: 100 * md,
+      piecesPerDistrict: pieces,
+      allContiguous: allC,
+      cutEdgeFraction: prep.nedges ? cut / prep.nedges : 0,
+      countiesSplit: split
+    };
+  }
+
+  // ------------------------------------------------------------------ numbering
+  // plan._number_districts: north-to-south bands, west-to-east within a band.
+  function numberDistricts(labels, centers) {
+    var k = centers.length >> 1, j;
+    var ymax = -Infinity, ymin = Infinity;
+    for (j = 0; j < k; j++) { var cy = centers[2 * j + 1]; if (cy > ymax) ymax = cy; if (cy < ymin) ymin = cy; }
+    var span = (ymax - ymin) || 1.0;
+    var nb = Math.max(1, Math.round(Math.sqrt(k)));
+    var band = new Float64Array(k), order = [];
+    for (j = 0; j < k; j++) { band[j] = Math.floor((ymax - centers[2 * j + 1]) / (span / nb + 1e-9)); order.push(j); }
+    order.sort(function (a, b) { return (band[a] - band[b]) || (centers[2 * a] - centers[2 * b]) || (a - b); });
+    var remap = new Int32Array(k), oc = new Float64Array(2 * k);
+    for (j = 0; j < k; j++) { remap[order[j]] = j; oc[2 * j] = centers[2 * order[j]]; oc[2 * j + 1] = centers[2 * order[j] + 1]; }
+    var out = new Int32Array(labels.length);
+    for (var i = 0; i < labels.length; i++) out[i] = remap[labels[i]];
+    return { labels: out, centers: oc, remap: remap };
+  }
+
+  // ------------------------------------------------------------------ run (generator)
+  function opt(o, key, dflt) { return o && o[key] !== undefined && o[key] !== null ? o[key] : dflt; }
+
+  function voronoiLabels(prep, centers, k) {
+    var lab = new Int32Array(prep.n), x = prep.x, y = prep.y;
+    for (var i = 0; i < prep.n; i++) {
+      var b = 0, bd = Infinity;
+      for (var j = 0; j < k; j++) { var dx = x[i] - centers[2 * j], dy = y[i] - centers[2 * j + 1], d = dx * dx + dy * dy; if (d < bd) { bd = d; b = j; } }
+      lab[i] = b;
+    }
+    return lab;
+  }
+
+  // Coincident centres make a degenerate power diagram (one of them gets nothing).
+  // Push any centre closer than minKm to an earlier one out to minKm, deterministically.
+  function separateCenters(c, k, minKm) {
+    if (!(minKm > 0)) return c;
+    for (var j = 1; j < k; j++) {
+      var tries = 0;
+      for (var i = 0; i < j; i++) {
+        var dx = c[2 * j] - c[2 * i], dy = c[2 * j + 1] - c[2 * i + 1], d = Math.hypot(dx, dy);
+        if (d < minKm) {
+          var ux, uy;
+          if (d > 1e-9 && tries < 4) { ux = dx / d; uy = dy / d; } else { var a = 2.399963229728653 * (j + tries); ux = Math.cos(a); uy = Math.sin(a); }
+          var rr = minKm * (1 + 0.25 * Math.floor(tries / 8)); // widen if boxed in
+          c[2 * j] = c[2 * i] + ux * rr; c[2 * j + 1] = c[2 * i + 1] + uy * rr;
+          if (++tries < 200) i = -1; // re-check against all earlier centres
+        }
+      }
+    }
+    return c;
+  }
+
+  function* run(prep, k, opts) {
+    opts = opts || {};
+    var geodesic = opt(opts, 'geodesic', true), tol = opt(opts, 'tol', 0.001), cw = opt(opts, 'countyWeight', 0.5);
+    var maxIter = opt(opts, 'maxIter', 40), every = Math.max(1, opt(opts, 'refineSnapshotEvery', 4));
+    var lloydTol = opt(opts, 'lloydTol', 0.002), tolKm = opt(opts, 'tolKm', 0.05);
+    var maxPasses = opt(opts, 'maxPasses', 2000), budget = opt(opts, 'budgetMs', 40);
+    var n = prep.n;
+    k = k | 0;
+    if (k < 1 || k > n) throw new RangeError('k=' + k + ' must be in [1, n=' + n + ']');
+    var ck = new Clock(budget), ws = new Workspace();
+    var last = null, t0 = now();
+    function snap(stage, step, labels, centers, extra) {
+      last = { stage: stage, step: step, labels: Int32Array.from(labels), centers: Float64Array.from(centers), stats: stats(prep, labels, k), extra: extra || null, partial: false };
+      return last;
+    }
+    function partial() { return { stage: last.stage, step: last.step, labels: last.labels, centers: last.centers, stats: last.stats, extra: last.extra, partial: true }; }
+    // pump an inner generator: its bare yields become partial snapshots, real snapshots pass through
+    function* pump(gen) {
+      var r;
+      while (!(r = gen.next()).done) { yield (r.value ? r.value : partial()); ck.reset(); }
+      return r.value;
+    }
+
+    if (k === 1) {
+      var z = new Int32Array(n), c1 = centroids(prep, z, 1, new Float64Array([prep.x[0], prep.y[0]]));
+      yield snap('seed', 0, z, c1);
+      var fin1 = snap('done', 0, z, c1, { lloydIterations: 0, moves: 0, seconds: (now() - t0) / 1000 });
+      fin1.numbered = numberDistricts(z, c1);
+      yield fin1;
+      return fin1;
+    }
+
+    var centers, labels;
+    if (opts.initialCenters) {
+      centers = Float64Array.from(opts.initialCenters);
+      if (centers.length !== 2 * k) throw new RangeError('initialCenters must have length 2k');
+      separateCenters(centers, k, opt(opts, 'minSeparationKm', 0.5));
+      yield snap('seed', 0, voronoiLabels(prep, centers, k), centers, { initial: true });
+    } else {
+      var rc = rcbCached(prep, k);
+      centers = Float64Array.from(rc.centers);
+      yield snap('seed', 0, rc.labels, centers);
+    }
+    ck.reset();
+
+    // ---- lloyd_power
+    var prev = null, v = null, hist = [], it = 0;
+    for (it = 1; it <= maxIter; it++) {
+      var D = yield* pump(dist2Gen(prep, ws, centers, k, geodesic, ck));
+      var res = yield* pump(balancedAssignGen(prep, ws, D, k, v, Math.max(lloydTol, 0.01), ck));
+      v = res.v;
+      var nw = res.labels, c = centroids(prep, nw, k, centers), shift = 0;
+      for (var j = 0; j < k; j++) shift = Math.max(shift, Math.hypot(c[2 * j] - centers[2 * j], c[2 * j + 1] - centers[2 * j + 1]));
+      var stable = prev !== null && arrEq(prev, nw);
+      prev = nw; centers = c;
+      hist.push(inertia(prep, prev, centers));
+      yield snap('lloyd', it, prev, centers, { inertia: hist[hist.length - 1], shift: shift });
+      ck.reset();
+      if (shift < tolKm || stable || (it >= 8 && Math.abs(hist[hist.length - 2] - hist[hist.length - 1]) < 1e-4 * hist[hist.length - 1])) break;
+    }
+    var iters = Math.min(it, maxIter);
+    D = yield* pump(dist2Gen(prep, ws, centers, k, geodesic, ck));
+    res = yield* pump(balancedAssignGen(prep, ws, D, k, v, lloydTol, ck));
+    labels = res.labels;
+    hist.push(inertia(prep, labels, centers));
+    yield snap('balance', 0, labels, centers, { inertia: hist[hist.length - 1] });
+    ck.reset();
+
+    // ---- contiguity
+    labels = yield* pump(contiguityGen(prep, ws, labels, k, 200, false, ck));
+    yield snap('contiguity', 0, labels, centroids(prep, labels, k, centers));
+    ck.reset();
+
+    // ---- refine
+    var rr = yield* pump(refineGen(prep, ws, labels, k, { tol: tol, countyWeight: cw, maxPasses: maxPasses }, ck,
+      function (pass, lab, moves) {
+        if (pass % every !== 0) return null;
+        return snap('refine', pass, lab, centroids(prep, lab, k, centers), { moves: moves });
+      }));
+    labels = yield* pump(contiguityGen(prep, ws, rr.labels, k, 200, false, ck));
+    centers = centroids(prep, labels, k, centers);
+    var fin = snap('done', rr.passes, labels, centers, {
+      lloydIterations: iters, moves: rr.moves, refinePasses: rr.passes, inertiaHistory: hist,
+      seconds: (now() - t0) / 1000
+    });
+    fin.numbered = numberDistricts(labels, centers);
+    yield fin;
+    return fin;
+  }
+
+  function arrEq(a, b) {
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  // ------------------------------------------------------------------ rebalance (sync)
+  function rebalance(prep, k, centers, opts) {
+    opts = opts || {};
+    var t0 = now();
+    var geodesic = opt(opts, 'geodesic', false), tol = opt(opts, 'tol', 0.001), cw = opt(opts, 'countyWeight', 0.5);
+    var assignTol = opt(opts, 'assignTol', 0.002), maxPasses = opt(opts, 'refinePasses', 200);
+    k = k | 0;
+    centers = Float64Array.from(centers);
+    if (centers.length !== 2 * k) throw new RangeError('centers must have length 2k');
+    separateCenters(centers, k, opt(opts, 'minSeparationKm', 0.5));
+    if (k === 1) {
+      var z = new Int32Array(prep.n);
+      return { labels: z, centers: centers, centroids: centroids(prep, z, 1, centers), v: new Float64Array(1), stats: stats(prep, z, 1), ms: now() - t0 };
+    }
+    var ws = prep.cache.ws || (prep.cache.ws = new Workspace());
+    var prof = ws.prof = { newtonIters: 0, newtonMs: 0, ascentSteps: 0, ascentMs: 0, ascents: 0 };
+    var D = drain(dist2Gen(prep, ws, centers, k, geodesic, NO_BUDGET));
+    var res = drain(balancedAssignGen(prep, ws, D, k, opts.v || null, assignTol, NO_BUDGET, 12, opt(opts, 'ascentSteps', 2 * k)));
+    var t1 = now();
+    var labels = drain(contiguityGen(prep, ws, res.labels, k, opt(opts, 'contiguityRounds', 200), true, NO_BUDGET));
+    var t2 = now();
+    var rr = drain(refineGen(prep, ws, labels, k, { tol: tol, countyWeight: cw, maxPasses: maxPasses }, NO_BUDGET, null));
+    labels = drain(contiguityGen(prep, ws, rr.labels, k, opt(opts, 'contiguityRounds', 200), true, NO_BUDGET));
+    var t3 = now();
+    return {
+      labels: labels, centers: centers, centroids: centroids(prep, labels, k, centers), v: res.v,
+      stats: stats(prep, labels, k), moves: rr.moves,
+      ms: now() - t0, timing: { assign: t1 - t0, contiguity: t2 - t1, refine: t3 - t2 }, prof: prof
+    };
+  }
+
+  var DistrictEngine = {
+    version: '0.1.0',
+    prepare: prepare,
+    run: run,
+    rebalance: rebalance,
+    stats: stats,
+    numberDistricts: numberDistricts,
+    // exposed for tests / advanced use
+    _internal: { rcb: rcb, centroids: centroids, inertia: inertia, quantile: quantile, cholSolve: cholSolve }
+  };
+
+  root.DistrictEngine = DistrictEngine;
+  if (typeof module !== 'undefined' && module.exports) module.exports = DistrictEngine;
+})(typeof globalThis !== 'undefined' ? globalThis : (typeof self !== 'undefined' ? self : this));
+
+</script>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const palette = () => [0, 1, 2, 3, 4, 5, 6, 7].map(i => css("--d" + i));
+const ELECTION_LABEL = { pres2016: "2016", pres2020: "2020", pres2024: "2024" };
+const S = {
+  us: null, election: "pres2020", swing: 0,
+  data: null, prep: null, k: 0, labels: null, centers: null, fair: null,
+  edited: {},          // abbr -> {k, labels, data} for states whose map differs from the fair one
+  colorBy: "district", showMesh: true, mode: "view", paintD: 0, runner: null, view: null,
+};
+
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function hexRGB(h) { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(c => c + c).join(""); const v = parseInt(h, 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; }
+function mix(a, b, t) { return [0, 1, 2].map(i => Math.round(a[i] + (b[i] - a[i]) * t)); }
+function fmtPct(x, d = 1) { return (x >= 0 ? "" : "−") + Math.abs(x).toFixed(d) + "%"; }
+function margin(dShare) { const m = (dShare - 0.5) * 200; return m >= 0 ? "D+" + m.toFixed(1) : "R+" + (-m).toFixed(1); }
+
+/* ---------------- votes & seats ---------------- */
+function districtVotes(data, labels, k, el) {
+  const e = data.elections[el], D = new Float64Array(k), R = new Float64Array(k);
+  for (let i = 0; i < data.n; i++) { const l = labels[i]; if (l >= 0) { D[l] += e.d[i]; R[l] += e.r[i]; } }
+  return { D, R };
+}
+function sharesFromVotes(D, R) { const s = new Float64Array(D.length); for (let j = 0; j < D.length; j++) s[j] = D[j] + R[j] > 0 ? D[j] / (D[j] + R[j]) : 0.5; return s; }
+function seatsOf(shares, swing) { let d = 0; for (const s of shares) if (s + swing / 100 > 0.5) d++; return [d, shares.length - d]; }
+function efficiencyGap(D, R, swing) {
+  // uniform swing applied to two-party shares, then wasted votes
+  let wd = 0, wr = 0, tot = 0;
+  for (let j = 0; j < D.length; j++) {
+    const t = D[j] + R[j]; if (!t) continue;
+    const sd = Math.min(1, Math.max(0, D[j] / t + swing / 100)), d = sd * t, r = t - d;
+    if (d > r) { wd += d - t / 2; wr += r; } else { wr += r - t / 2; wd += d; }
+    tot += t;
+  }
+  return tot ? (wd - wr) / tot : 0;   // positive = more Dem votes wasted (map favors Rep)
+}
+function stateShares(abbr, el) {
+  const ed = S.edited[abbr];
+  if (ed) { const v = districtVotes(ed.data, ed.labels, ed.k, el); return sharesFromVotes(v.D, v.R); }
+  const st = S.us.states[abbr]; return st.plans[el].shares;
+}
+
+/* ---------------- national ---------------- */
+function renderNation() {
+  let D = 0, R = 0; const perState = {};
+  for (const abbr of Object.keys(S.us.states)) {
+    const [d, r] = seatsOf(stateShares(abbr, S.election), S.swing); D += d; R += r; perState[abbr] = [d, r];
+  }
+  $("natD").textContent = D; $("natR").textContent = R;
+  const nEdited = Object.keys(S.edited).length;
+  $("natScope").textContent = `${ELECTION_LABEL[S.election]} votes, ` + (nEdited ? `${nEdited} state${nEdited > 1 ? "s" : ""} redrawn by you` : "fair maps");
+  const lo = hexRGB(css("--state-lo")), hi = hexRGB(css("--state-hi"));
+  for (const p of $("usmap").querySelectorAll("path")) {
+    const ab = p.dataset.abbr, [d, r] = perState[ab], c = mix(lo, hi, Math.min(1, Math.sqrt((d + r) / 40)));
+    p.style.fill = `rgb(${c})`; p.classList.toggle("edited", !!S.edited[ab]);
+    p.querySelector("title").textContent = `${S.us.states[ab].name}: ${d} D · ${r} R${S.edited[ab] ? " (your map)" : ""}`;
+  }
+}
+function buildUSMap() {
+  const svg = $("usmap"); const sel = $("statePick");
+  const abbrs = Object.keys(S.us.states).sort((a, b) => S.us.states[a].name.localeCompare(S.us.states[b].name));
+  for (const abbr of abbrs) {
+    const st = S.us.states[abbr];
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", st.path); p.dataset.abbr = abbr; p.setAttribute("tabindex", "0"); p.setAttribute("role", "button");
+    p.setAttribute("aria-label", st.name);
+    p.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+    p.addEventListener("click", (e) => {                     // wait a beat: a double-click on the map resets the zoom instead
+      clearTimeout(S.pickT); if (e.detail > 1) return; S.pickT = setTimeout(() => openState(abbr, true), 260);
+    });
+    p.addEventListener("dblclick", () => clearTimeout(S.pickT));
+    p.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openState(abbr, true); } });
+    svg.appendChild(p);
+    const o = document.createElement("option"); o.value = abbr; o.textContent = st.name; sel.appendChild(o);
+  }
+  sel.addEventListener("change", () => openState(sel.value, false));
+}
+
+/* National size function: data/us_sizefn.json is precomputed by build_national_sizefn.py (same h as sizeField above, for every unit of
+   every state, in the 975x610 Albers USA frame at 2x). Its PNG holds an 8-bit level per pixel; the ramp comes from the --sf tokens here. */
+async function setNatSize(on) {
+  S.natSize = on; const cb = $("natSize");
+  $("natCv").hidden = !on; $("natSfLegend").hidden = !on; document.querySelector(".nation").classList.toggle("sizeon", on);
+  if (!on) return;
+  if (!S.nat) {
+    $("natSfCap").textContent = "Loading the national mesh-size map…";
+    try {
+      const r = await fetch("data/us_sizefn.json"); if (!r.ok) throw new Error("HTTP " + r.status);
+      const doc = await r.json(), img = new Image(); img.src = doc.png; await img.decode();
+      const c = document.createElement("canvas"); c.width = doc.w; c.height = doc.h; const cx = c.getContext("2d"); cx.drawImage(img, 0, 0);
+      S.nat = { doc, src: cx.getImageData(0, 0, doc.w, doc.h).data };
+    } catch (err) { $("natSfCap").textContent = "Could not load the national mesh-size map (" + err.message + ")."; cb.checked = false; S.natSize = false; $("natCv").hidden = true; document.querySelector(".nation").classList.remove("sizeon"); return; }
+  }
+  const dc = S.nat.doc;
+  $("natSfCap").textContent = `${dc.n.toLocaleString()} block groups; elements range from ${dc.hmin} to ${dc.hmax} kilometres across. Each size comes from local population density (the 16 nearest block groups), so every element would hold about the same number of people, and neighbouring sizes may change only gradually. Same rule as the state view. The colour scale is logarithmic.`;
+  if (S.natSize) paintNat();
+}
+function paintNat() {
+  if (!S.nat) return;
+  const { doc, src } = S.nat, cv = $("natCv"), stops = [0, 1, 2, 3, 4].map(i => hexRGB(css("--sf" + i))), lut = [];
+  for (let g = 0; g < 256; g++) { const t = g / 255 * 4, k = Math.min(3, Math.floor(t)); lut.push(mix(stops[k], stops[k + 1], t - k)); }
+  const off = S.nat.off || (S.nat.off = document.createElement("canvas")); off.width = doc.w; off.height = doc.h;
+  const cx = off.getContext("2d"), im = cx.createImageData(doc.w, doc.h), o = im.data;
+  for (let i = 0; i < src.length; i += 4) { const c = lut[src[i]]; o[i] = c[0]; o[i + 1] = c[1]; o[i + 2] = c[2]; o[i + 3] = src[i + 3]; }
+  cx.putImageData(im, 0, 0);
+  natCvRender(S.natZoom ? S.natZoom.z : { k: 1, x: 0, y: 0 });
+}
+// the precomputed size raster, drawn at the current zoom into a canvas at screen resolution (state outlines come from the SVG on top)
+function natCvRender(z) {
+  if (!S.nat || !S.nat.off || $("natCv").hidden) return;
+  const cv = $("natCv"), st = document.querySelector(".natstage"), w = st.clientWidth, h = st.clientHeight, R = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(w * R); cv.height = Math.round(h * R);
+  const ctx = cv.getContext("2d"), s = R * z.k * w / S.nat.doc.w;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+  ctx.setTransform(s, 0, 0, s, R * z.x, R * z.y); ctx.drawImage(S.nat.off, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+function natApplySvg(z) {
+  const w = document.querySelector(".natstage").clientWidth || 975, f = 975 / w / z.k;
+  $("usmap").setAttribute("viewBox", `${(-z.x * f).toFixed(3)} ${(-z.y * f).toFixed(3)} ${(975 / z.k).toFixed(3)} ${(610 / z.k).toFixed(3)}`);
+}
+function natPreview(z) {
+  natApplySvg(z); natCvRender(z);
+  const N = S.nn;
+  if (N && N.view && !$("natMos").hidden) {
+    if (!S.natSnap) S.natSnap = snapshot($("natMos"));
+    zoomPreview($("natMos"), S.natSnap, N.view.z, z, N.view.R);
+    $("natOv").getContext("2d").clearRect(0, 0, N.view.pw, N.view.ph);
+  }
+  zoomHint("natZhint", z);
+}
+async function natCommit(z) {
+  natApplySvg(z); natCvRender(z); zoomHint("natZhint", z);
+  const N = S.nn; if (!N || !N.view || $("natMos").hidden) { S.natSnap = null; return; }
+  const V = await natPix(N, z); if (!V) return;                 // superseded by a newer zoom
+  N.view = V; S.natSnap = null; natDraw();
+}
+
+/* ---------------- zoom and pan (every map) ----------------
+   One small controller per map stage. The transform z = {k, x, y} maps the fitted map to the screen in CSS px: screen = k * fitted + (x, y),
+   k in [1, maxK], and the pan is clamped so the fitted frame always covers the stage. While the wheel / drag / pinch is moving, preview(z)
+   shows a cheap stand-in (the last bitmap, scaled); 160 ms after it stops, commit(z) re-renders rasters and strokes at the new view, so
+   lines stay one device pixel wide at any zoom. Wheel zooms about the cursor, drag pans, two fingers pinch, double-click or ⟲ resets. */
+function makeZoom(el, o) {
+  const z = { k: 1, x: 0, y: 0 }, pts = new Map(), maxK = o.maxK || 40;
+  let pan = null, pinch = null, tmr = 0, moved = 0;
+  const box = () => el.getBoundingClientRect();
+  function clamp() {
+    const r = box(); z.k = Math.min(maxK, Math.max(1, z.k));
+    z.x = Math.min(0, Math.max(r.width - z.k * r.width, z.x)); z.y = Math.min(0, Math.max(r.height - z.k * r.height, z.y));
+    if (z.k < 1.0005) { z.k = 1; z.x = 0; z.y = 0; }
+  }
+  function changed(now) {
+    clamp(); el.classList.toggle("zoomed", z.k > 1); o.preview(z); clearTimeout(tmr);
+    if (now) o.commit(z); else tmr = setTimeout(() => o.commit(z), 160);
+  }
+  function zoomAt(cx, cy, f) {
+    const k0 = z.k; z.k = Math.min(maxK, Math.max(1, z.k * f)); const r = z.k / k0;
+    z.x = cx - (cx - z.x) * r; z.y = cy - (cy - z.y) * r; changed();
+  }
+  el.addEventListener("wheel", (e) => {
+    if (!o.enabled()) return;
+    const f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : e.deltaMode === 2 ? 1 : 0.0015));
+    if ((f > 1 && z.k >= maxK) || (f < 1 && z.k <= 1)) return;          // at a limit: let the page scroll
+    e.preventDefault(); const r = box(); zoomAt(e.clientX - r.left, e.clientY - r.top, f);
+  }, { passive: false });
+  el.addEventListener("pointerdown", (e) => {
+    if (!o.enabled() || (e.target.closest && e.target.closest(".zoomctl"))) return;
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2) {
+      const [a, b] = [...pts.values()];
+      pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] }; pan = null;
+      if (o.cancel) o.cancel(); e.stopPropagation(); return;
+    }
+    moved = 0;
+    if (e.button === 1 || o.canPan(e)) { pan = [e.clientX, e.clientY]; e.stopPropagation(); if (e.button === 1) e.preventDefault(); }
+  }, true);
+  window.addEventListener("pointermove", (e) => {
+    if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pinch && pts.size === 2) {
+      const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], r = box();
+      z.x += m[0] - pinch.m[0]; z.y += m[1] - pinch.m[1]; zoomAt(m[0] - r.left, m[1] - r.top, d / pinch.d); pinch = { d, m };
+      e.stopPropagation(); return;
+    }
+    if (pan) {
+      const dx = e.clientX - pan[0], dy = e.clientY - pan[1]; moved += Math.abs(dx) + Math.abs(dy); pan = [e.clientX, e.clientY];
+      if (moved > 3) { z.x += dx; z.y += dy; changed(); el.style.cursor = "grabbing"; }
+      e.stopPropagation();
+    }
+  }, true);
+  const up = (e) => {
+    if (!pts.has(e.pointerId)) return; pts.delete(e.pointerId);
+    if (pts.size < 2) pinch = null;
+    if (pan) { pan = null; el.style.cursor = ""; if (o.afterPan) o.afterPan(); if (moved > 3) e.stopPropagation(); }
+  };
+  window.addEventListener("pointerup", up, true); window.addEventListener("pointercancel", up, true);
+  el.addEventListener("click", (e) => { if (moved > 3) { e.stopPropagation(); e.preventDefault(); moved = 0; } }, true);
+  el.addEventListener("dblclick", (e) => { if (!o.enabled() || (e.target.closest && e.target.closest(".zoomctl"))) return; e.preventDefault(); reset(); });
+  function reset() { z.k = 1; z.x = 0; z.y = 0; changed(true); }
+  return {
+    z, reset, zoomBy(f) { const r = box(); zoomAt(r.width / 2, r.height / 2, f); },
+    silentReset() { z.k = 1; z.x = 0; z.y = 0; el.classList.remove("zoomed"); clearTimeout(tmr); },
+  };
+}
+function zoomHint(id, z, extra) {
+  const h = $(id); h.hidden = z.k <= 1;
+  if (z.k > 1) h.textContent = `${z.k < 10 ? z.k.toFixed(1) : Math.round(z.k)}× · ${extra || "drag to pan"} · double-click to reset`;
+}
+// stand-in while zooming: the canvas as last rendered (at transform z0), redrawn at the relative transform
+function zoomPreview(cv, snap, z0, z, dpr) {
+  const ctx = cv.getContext("2d"), r = z.k / z0.k;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(r, 0, 0, r, dpr * (z.x - r * z0.x), dpr * (z.y - r * z0.y)); ctx.drawImage(snap, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+function snapshot(cv) { const c = document.createElement("canvas"); c.width = cv.width; c.height = cv.height; c.getContext("2d").drawImage(cv, 0, 0); return c; }
+
+/* ---------------- state map rendering ---------------- */
+// The fitted frame (scale, offsets, canvas size) and a pixel -> unit nearest-neighbour grid in fitted device pixels, once per state and width.
+function viewBase(data) {
+  const stage = $("stage"), W = stage.clientWidth;
+  if (S.vb && S.vb.data === data && S.vb.W === W) return S.vb;
+  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+  for (const poly of data.outline) for (const ring of poly) for (const [x, y] of ring) { if (x < minx) minx = x; if (x > maxx) maxx = x; if (y < miny) miny = y; if (y > maxy) maxy = y; }
+  const pad = 12, aspect = (maxy - miny) / (maxx - minx);
+  const H = Math.round(Math.min(Math.max(W * aspect, 260), Math.max(320, window.innerHeight * 0.68)));
+  const sc = Math.min((W - 2 * pad) / (maxx - minx), (H - 2 * pad) / (maxy - miny));
+  const ox = (W - sc * (maxx - minx)) / 2 - sc * minx, oy = (H + sc * (maxy - miny)) / 2 + sc * miny;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const pw = Math.round(W * dpr), ph = Math.round(H * dpr), n = data.n;
+  const ux = new Float32Array(n), uy = new Float32Array(n);
+  for (let i = 0; i < n; i++) { ux[i] = (ox + sc * data.x[i]) * dpr; uy[i] = (oy - sc * data.y[i]) * dpr; }
+  return (S.vb = { data, W, H, pw, ph, dpr, sc, ox, oy, nearest: gridNearest(ux, uy, n, pw, ph, 1.2, 4) });
+}
+// pixel -> unit lookup at the current zoom, inside the outline mask (outline re-rasterised at this zoom, so its edge stays sharp)
+function buildView(data, z) {
+  z = z || { k: 1, x: 0, y: 0 };
+  const B = viewBase(data), { W, H, pw, ph, dpr } = B, cv = $("map"), ov = $("overlay");
+  for (const c of [cv, ov]) { c.width = pw; c.height = ph; c.style.height = H + "px"; }
+  const sc = B.sc * z.k, ox = B.ox * z.k + z.x, oy = B.oy * z.k + z.y;
+  const toPx = (x, y) => [(ox + sc * x) * dpr, (oy - sc * y) * dpr];
+  const m = document.createElement("canvas"); m.width = pw; m.height = ph; const mc = m.getContext("2d");
+  const outlinePath = new Path2D();
+  for (const poly of data.outline) for (const ring of poly) { ring.forEach(([x, y], i) => { const [px, py] = toPx(x, y); i ? outlinePath.lineTo(px, py) : outlinePath.moveTo(px, py); }); outlinePath.closePath(); }
+  mc.fillStyle = "#000"; mc.fill(outlinePath, "evenodd");
+  const mask = mc.getImageData(0, 0, pw, ph).data;
+  const n = data.n, ux = new Float32Array(n), uy = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const [px, py] = toPx(data.x[i], data.y[i]); ux[i] = px; uy[i] = py; }
+  const pix = new Int32Array(pw * ph).fill(-1), ik = 1 / z.k, zx = z.x * dpr, zy = z.y * dpr;
+  for (let y = 0; y < ph; y++) { const by = (y + .5 - zy) * ik; for (let x = 0; x < pw; x++) { const p = y * pw + x; if (mask[p * 4 + 3] > 100) pix[p] = B.nearest((x + .5 - zx) * ik, by); } }
+  return { W, H, pw, ph, dpr, sc, ox, oy, z: { ...z }, toPx, fromPx: (px, py) => [((px / dpr) - ox) / sc, (oy - py / dpr) / sc], outlinePath, pix, ux, uy, img: cv.getContext("2d").createImageData(pw, ph) };
+}
+function stPreview(z) {
+  const V = S.view; if (!V) return;
+  if (!S.zsnap) S.zsnap = snapshot($("map"));
+  zoomPreview($("map"), S.zsnap, V.z, z, V.dpr);
+  $("overlay").getContext("2d").clearRect(0, 0, V.pw, V.ph); $("tip").hidden = true;
+  zoomHint("stZhint", z, S.mode === "view" ? "drag to pan" : "shift-drag to pan");
+}
+function stCommit(z) {
+  if (!S.data) return;
+  S.zsnap = null; S.view = buildView(S.data, z); draw();
+}
+
+/* Mesh layer: faint Delaunay edges cached on an offscreen canvas once per view (and per theme). Big states are thinned. */
+function ensureMesh(V) {
+  const col = css("--mesh");
+  if (V.meshCv && V.meshCol === col) return;
+  const e = S.data.edges, ne = e.length / 2, keep = Math.min(1, 22000 / ne);
+  const cv = V.meshCv || document.createElement("canvas"); cv.width = V.pw; cv.height = V.ph;
+  const c = cv.getContext("2d"); c.clearRect(0, 0, V.pw, V.ph);
+  c.beginPath();
+  for (let i = 0; i < ne; i++) {
+    if (keep < 1 && (Math.imul(i + 1, 2654435761) >>> 0) / 4294967296 >= keep) continue;
+    const a = e[2 * i], b = e[2 * i + 1];
+    c.moveTo(V.ux[a], V.uy[a]); c.lineTo(V.ux[b], V.uy[b]);
+  }
+  c.lineWidth = Math.max(1, .75 * V.dpr); c.strokeStyle = col; c.stroke();
+  V.meshCv = cv; V.meshCol = col;
+}
+function districtColors(labels, k) {
+  if (S.lockCols && S.lockCols.length === k) return S.lockCols;   // stable colours while a solve runs
+  // greedy colouring of district adjacency so neighbours differ
+  const nb = Array.from({ length: k }, () => new Set()), e = S.data.edges;
+  for (let i = 0; i < e.length; i += 2) { const a = labels[e[i]], b = labels[e[i + 1]]; if (a !== b && a >= 0 && b >= 0) { nb[a].add(b); nb[b].add(a); } }
+  const order = [...Array(k).keys()].sort((a, b) => nb[b].size - nb[a].size), col = new Array(k).fill(-1);
+  for (const d of order) { const used = new Set([...nb[d]].map(j => col[j])); let c = 0; while (used.has(c)) c++; col[d] = c; }
+  const pal = palette(); return col.map(c => hexRGB(pal[c % pal.length]));
+}
+
+/* ---------------- size function ----------------
+   h(x): the mesh size a generator would be given if element size followed population (research/redistricting_admesh/README.md).
+   rho_i = people in the 16 nearest units / area of the disc they span; h = side of an equilateral triangle holding P_e people;
+   clip to [SF_LO, SF_HI] km; gradation limit h_j <= h_i + g|x_i - x_j| swept over the mesh edges. */
+const SF_LO = 0.5, SF_HI = 40, SF_G = 0.5, SF_K = 16, SF_TICKS = [0.5, 2, 10, 40];
+function sizeField(d) {
+  if (d._sf) return d._sf;
+  const t0 = performance.now(), n = d.n, X = d.x, Y = d.y, pop = d.pop;
+  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity, tot = 0;
+  for (let i = 0; i < n; i++) { if (X[i] < minx) minx = X[i]; if (X[i] > maxx) maxx = X[i]; if (Y[i] < miny) miny = Y[i]; if (Y[i] > maxy) maxy = Y[i]; tot += pop[i]; }
+  const cell = Math.max(0.05, Math.sqrt(((maxx - minx) * (maxy - miny)) / n) * 0.7), gw = Math.floor((maxx - minx) / cell) + 1, gh = Math.floor((maxy - miny) / cell) + 1;
+  // counting-sort the points into grid cells
+  const start = new Int32Array(gw * gh + 1), cid = new Int32Array(n), items = new Int32Array(n);
+  for (let i = 0; i < n; i++) { const c = Math.floor((Y[i] - miny) / cell) * gw + Math.floor((X[i] - minx) / cell); cid[i] = c; start[c + 1]++; }
+  for (let c = 0; c < gw * gh; c++) start[c + 1] += start[c];
+  const fill = start.slice(0, gw * gh); for (let i = 0; i < n; i++) items[fill[cid[i]]++] = i;
+  const Pe = tot / n, K = Math.min(SF_K, n - 1), bd = new Float64Array(K), bi = new Int32Array(K);
+  const rho = new Float32Array(n), h = new Float32Array(n), c0 = 4 * Pe / Math.sqrt(3);
+  for (let i = 0; i < n; i++) {
+    const px = X[i], py = Y[i], gx = Math.floor((px - minx) / cell), gy = Math.floor((py - miny) / cell); let cnt = 0;
+    for (let r = 0; r < Math.max(gw, gh); r++) {
+      if (cnt === K && bd[K - 1] <= (r - 1) * cell * (r - 1) * cell && r > 1) break;
+      const y0 = gy - r, y1 = gy + r, x0 = gx - r, x1 = gx + r;
+      for (let yy = Math.max(0, y0); yy <= Math.min(gh - 1, y1); yy++) {
+        const edgeRow = yy === y0 || yy === y1, step = edgeRow ? 1 : x1 - x0 || 1;
+        for (let xx = x0; xx <= x1; xx += step) {
+          if (xx < 0 || xx >= gw) continue;
+          const c = yy * gw + xx;
+          for (let q = start[c]; q < start[c + 1]; q++) {
+            const j = items[q]; if (j === i) continue;
+            const dx = X[j] - px, dy = Y[j] - py, dd = dx * dx + dy * dy;
+            if (cnt === K && dd >= bd[K - 1]) continue;
+            let m = cnt < K ? cnt++ : K - 1;
+            while (m > 0 && bd[m - 1] > dd) { bd[m] = bd[m - 1]; bi[m] = bi[m - 1]; m--; }
+            bd[m] = dd; bi[m] = j;
+          }
+        }
+      }
+    }
+    let people = 0; for (let m = 0; m < cnt; m++) people += pop[bi[m]];
+    const area = Math.PI * Math.max(bd[cnt - 1], 0.0025);          // km^2; radius floored at 50 m
+    rho[i] = people / area;
+    h[i] = rho[i] > 0 ? Math.min(SF_HI, Math.max(SF_LO, Math.sqrt(c0 / rho[i]))) : SF_HI;
+  }
+  // gradation limit over mesh edges: alternate forward and backward sweeps until nothing changes
+  const e = d.edges, ne = e.length / 2, len = new Float32Array(ne);
+  for (let q = 0; q < ne; q++) len[q] = SF_G * Math.hypot(X[e[2 * q]] - X[e[2 * q + 1]], Y[e[2 * q]] - Y[e[2 * q + 1]]);
+  let passes = 0;
+  for (; passes < 60; passes++) {
+    let changed = false;
+    const fwd = passes % 2 === 0;
+    for (let k = 0; k < ne; k++) {
+      const q = fwd ? k : ne - 1 - k, a = e[2 * q], b = e[2 * q + 1], g = len[q];
+      if (h[b] > h[a] + g) { h[b] = h[a] + g; changed = true; } else if (h[a] > h[b] + g) { h[a] = h[b] + g; changed = true; }
+    }
+    if (!changed) break;
+  }
+  let lo = Infinity, hi = 0; for (let i = 0; i < n; i++) { if (h[i] < lo) lo = h[i]; if (h[i] > hi) hi = h[i]; }
+  return (d._sf = { h, rho, Pe, lo, hi, passes: passes + 1, ms: performance.now() - t0 });
+}
+function sizeColors(sf) {
+  const stops = [0, 1, 2, 3, 4].map(i => hexRGB(css("--sf" + i))), key = stops.join("|");
+  if (sf.colKey === key) return sf.col;
+  const n = sf.h.length, col = new Uint8Array(3 * n), span = Math.log10(SF_HI / SF_LO);
+  for (let i = 0; i < n; i++) {
+    const t = Math.min(1, Math.max(0, Math.log10(sf.h[i] / SF_LO) / span)) * 4, k = Math.min(3, Math.floor(t)), c = mix(stops[k], stops[k + 1], t - k);
+    col[3 * i] = c[0]; col[3 * i + 1] = c[1]; col[3 * i + 2] = c[2];
+  }
+  sf.col = col; sf.colKey = key; return col;
+}
+function buildSfLegend(id = "sfTicks") {
+  const span = Math.log10(SF_HI / SF_LO), t = $(id); t.innerHTML = "";
+  SF_TICKS.forEach((v, i) => { const s = document.createElement("span"); s.textContent = v; s.style.left = (100 * Math.log10(v / SF_LO) / span) + "%"; if (i === 0) s.className = "first"; if (i === SF_TICKS.length - 1) s.className = "last"; t.appendChild(s); });
+}
+function updateSfLegend() {
+  const on = S.colorBy === "size" && !!S.data; $("sfLegend").hidden = !on; if (!on) return;
+  const sf = sizeField(S.data);
+  $("sfCap").textContent = `In this state, elements range from ${sf.lo.toFixed(1)} to ${sf.hi.toFixed(1)} kilometres across, sized so each would hold about ${Math.round(sf.Pe).toLocaleString()} people. Small elements (bright) sit where people are packed together. The colour scale is logarithmic.`;
+}
+
+/* ---------------- lean: heat map + category outlines ----------------
+   Fill: each unit's two-party Dem share, smoothed by pooling votes over the unit and its Delaunay neighbours (self counted twice),
+   cached per state and election; swing is a shift applied at paint time. Ramp: 5 --hm tokens, +-LEAN_SPAN points = full colour.
+   Outline: per district, a 3 px inner-edge stroke in its category colour (--lc0..6) plus a 1 px halo on the heat-map side. */
+const LEAN_SPAN = 25, LEAN_CATS = ["Safe D", "Likely D", "Lean D", "Toss-up", "Lean R", "Likely R", "Safe R"];
+function leanCat(m) { return m >= 15 ? 0 : m >= 8 ? 1 : m >= 3 ? 2 : m > -3 ? 3 : m > -8 ? 4 : m > -15 ? 5 : 6; }
+function leanField(d, el) {
+  d._lean = d._lean || {};
+  if (d._lean[el]) return d._lean[el];
+  const n = d.n, e = d.edges, E = d.elections[el], sD = new Float64Array(n), sR = new Float64Array(n);
+  for (let i = 0; i < n; i++) { sD[i] = 2 * E.d[i]; sR[i] = 2 * E.r[i]; }
+  for (let q = 0; q < e.length; q += 2) { const a = e[q], b = e[q + 1]; sD[a] += E.d[b]; sR[a] += E.r[b]; sD[b] += E.d[a]; sR[b] += E.r[a]; }
+  const sh = new Float32Array(n);
+  for (let i = 0; i < n; i++) sh[i] = (E.d[i] + E.r[i] > 0 && sD[i] + sR[i] > 0) ? sD[i] / (sD[i] + sR[i]) : NaN;
+  return (d._lean[el] = sh);
+}
+function leanLut() {
+  const stops = [0, 1, 2, 3, 4].map(i => hexRGB(css("--hm" + i))), lut = [];
+  for (let g = 0; g < 256; g++) { const t = g / 255 * 4, k = Math.min(3, Math.floor(t)); lut.push(mix(stops[k], stops[k + 1], t - k)); }
+  return lut;
+}
+function leanSummary() {
+  const v = districtVotes(S.data, S.labels, S.k, S.election), sh = sharesFromVotes(v.D, v.R), cat = new Int8Array(S.k), m = new Float64Array(S.k), counts = new Array(7).fill(0);
+  for (let j = 0; j < S.k; j++) { m[j] = (sh[j] + S.swing / 100 - 0.5) * 200; cat[j] = leanCat(m[j]); counts[cat[j]]++; }
+  return { cat, m, counts };
+}
+function updateLeanLegend(counts) {
+  const ul = $("leanCats"), key = counts.join(",") + css("--lc0");
+  if (ul.dataset.k === key) return; ul.dataset.k = key;
+  ul.innerHTML = LEAN_CATS.map((nm, i) => `<li><i style="border-color:var(--lc${i})"></i>${nm} <b>${counts[i]}</b></li>`).join("");
+}
+function leanOutline(V, lab, catRGB, img) {
+  const pix = V.pix, pw = V.pw, N = pix.length, T = Math.max(2, Math.round(3 * V.dpr)), halo = hexRGB(css("--lc-halo"));
+  if (!V.lm || V.lm.length !== N) { V.lm = new Uint8Array(N); V.ll = new Int32Array(N); }
+  const lm = V.lm, ll = V.ll; lm.fill(0); let n = 0;
+  for (let p = 0; p < N; p++) {                                    // level 1: pixels touching another district (both sides get their own)
+    const u = pix[p]; if (u < 0) continue;
+    const d = lab[u], x = p % pw, ur = x + 1 < pw ? pix[p + 1] : -1, ud = p + pw < N ? pix[p + pw] : -1;
+    if (ur >= 0 && lab[ur] !== d) { if (!lm[p]) { lm[p] = 1; ll[n++] = p; } if (!lm[p + 1]) { lm[p + 1] = 1; ll[n++] = p + 1; } }
+    if (ud >= 0 && lab[ud] !== d) { if (!lm[p]) { lm[p] = 1; ll[n++] = p; } if (!lm[p + pw]) { lm[p + pw] = 1; ll[n++] = p + pw; } }
+  }
+  let s0 = 0, s1 = n;
+  for (let lv = 2; lv <= T + 1; lv++) {                            // grow inward through same-district pixels; level T+1 is the halo
+    for (let i = s0; i < s1; i++) {
+      const p = ll[i], d = lab[pix[p]], x = p % pw;
+      for (let k = 0; k < 4; k++) {
+        if ((k === 0 && x === 0) || (k === 1 && x === pw - 1)) continue;
+        const r = p + (k === 0 ? -1 : k === 1 ? 1 : k === 2 ? -pw : pw);
+        if (r < 0 || r >= N || lm[r] || pix[r] < 0 || lab[pix[r]] !== d) continue;
+        lm[r] = lv; ll[n++] = r;
+      }
+    }
+    s0 = s1; s1 = n;
+  }
+  for (let i = 0; i < n; i++) {
+    const p = ll[i], q = p * 4, c = lm[p] > T ? halo : catRGB[lab[pix[p]]];
+    img[q] = c[0]; img[q + 1] = c[1]; img[q + 2] = c[2];
+  }
+}
+function drawLean(V) {
+  const d = S.data, sh = leanField(d, S.election), lut = leanLut(), none = hexRGB(css("--hm-none")), neutral = hexRGB(css("--hm2")), pix = V.pix, img = V.img.data, sw = S.swing / 100;
+  const calm = compareOn() ? 0.3 : 0, col = new Uint8Array(3 * d.n);     // compare mode: heat map pulled toward neutral so the dashed official lines stand out
+  for (let i = 0; i < d.n; i++) {
+    let c = isNaN(sh[i]) ? none : lut[Math.round((Math.min(1, Math.max(-1, (sh[i] + sw - 0.5) * 200 / LEAN_SPAN)) + 1) / 2 * 255)];
+    if (calm && !isNaN(sh[i])) c = mix(c, neutral, calm);
+    col[3 * i] = c[0]; col[3 * i + 1] = c[1]; col[3 * i + 2] = c[2];
+  }
+  for (let p = 0; p < pix.length; p++) {
+    const u = pix[p], o = p * 4;
+    if (u < 0) { img[o + 3] = 0; continue; }
+    img[o] = col[3 * u]; img[o + 1] = col[3 * u + 1]; img[o + 2] = col[3 * u + 2]; img[o + 3] = 255;
+  }
+  const sm = leanSummary(), catRGB = Array.from({ length: 7 }, (_, i) => hexRGB(css("--lc" + i)));
+  leanOutline(V, S.labels, Array.from(sm.cat, c => catRGB[c]), img);
+  const ctx = $("map").getContext("2d");
+  ctx.putImageData(V.img, 0, 0);
+  if (S.showMesh) { ensureMesh(V); ctx.drawImage(V.meshCv, 0, 0); }
+  drawCurrent(V, ctx);
+  ctx.lineWidth = 1.25 * V.dpr; ctx.strokeStyle = css("--ink-2"); ctx.stroke(V.outlinePath);
+  updateLeanLegend(sm.counts); drawOverlay();
+}
+
+/* District borders as the boundary between nearest-centroid cells (the label raster), not as Delaunay edges between centroids:
+   marching squares over 2x2 blocks of pixel centres. Two differing sides -> a segment between their midpoints; three or four (a junction)
+   -> each differing midpoint to the block centre. Pixels outside the state are ignored (the outline is stroked separately). The path is
+   in device pixels at the current zoom, so it is rebuilt with the view and stays crisp. */
+function boundaryPath(V, lab) {
+  const pix = V.pix, pw = V.pw, ph = V.ph, seg = [];            // segment endpoints in half-pixel units (integers)
+  const L = (p) => { const u = pix[p]; return u < 0 ? -1 : lab[u]; };
+  for (let y = 0; y + 1 < ph; y++) {
+    let a = L(y * pw), d = L((y + 1) * pw);
+    for (let x = 0; x + 1 < pw; x++) {
+      const b = L(y * pw + x + 1), c = L((y + 1) * pw + x + 1);
+      const t = a >= 0 && b >= 0 && a !== b, r = b >= 0 && c >= 0 && b !== c, bo = c >= 0 && d >= 0 && c !== d, l = d >= 0 && a >= 0 && d !== a;
+      const k = t + r + bo + l;
+      if (k >= 2) {
+        const X = 2 * x, Y = 2 * y, pts = [];
+        if (t) pts.push(X + 2, Y + 1); if (r) pts.push(X + 3, Y + 2); if (bo) pts.push(X + 2, Y + 3); if (l) pts.push(X + 1, Y + 2);
+        if (k === 2) seg.push(pts[0], pts[1], pts[2], pts[3]);
+        else for (let i = 0; i < pts.length; i += 2) seg.push(pts[i], pts[i + 1], X + 2, Y + 2);
+      }
+      a = b; d = c;
+    }
+  }
+  // chain the segments into polylines (so dashes run continuously and joins are clean); junctions end a polyline
+  const ns = seg.length / 4, W2 = 2 * pw + 8, key = (x, y) => y * W2 + x, at = new Map();
+  for (let i = 0; i < ns; i++) for (let e = 0; e < 2; e++) {
+    const kk = key(seg[4 * i + 2 * e], seg[4 * i + 2 * e + 1]), l0 = at.get(kk);
+    if (l0) l0.push(i); else at.set(kk, [i]);
+  }
+  const used = new Uint8Array(ns), P = new Path2D();
+  const other = (i, x, y) => (seg[4 * i] === x && seg[4 * i + 1] === y) ? [seg[4 * i + 2], seg[4 * i + 3]] : [seg[4 * i], seg[4 * i + 1]];
+  const walk = (x, y, out) => {
+    for (;;) {
+      const l0 = at.get(key(x, y)); if (!l0 || l0.length !== 2) return;
+      const j = used[l0[0]] ? (used[l0[1]] ? -1 : l0[1]) : l0[0]; if (j < 0) return;
+      used[j] = 1; [x, y] = other(j, x, y); out.push(x, y);
+    }
+  };
+  for (let i = 0; i < ns; i++) {
+    if (used[i]) continue; used[i] = 1;
+    const fw = [seg[4 * i + 2], seg[4 * i + 3]], bw = [seg[4 * i], seg[4 * i + 1]];
+    walk(fw[0], fw[1], fw); walk(bw[0], bw[1], bw);
+    P.moveTo(bw[bw.length - 2] / 2, bw[bw.length - 1] / 2);
+    for (let q = bw.length - 4; q >= 0; q -= 2) P.lineTo(bw[q] / 2, bw[q + 1] / 2);
+    for (let q = 0; q < fw.length; q += 2) P.lineTo(fw[q] / 2, fw[q + 1] / 2);
+  }
+  return P;
+}
+function draw() {
+  const V = S.view; if (!V) return;
+  $("curLegend").classList.toggle("lean", S.colorBy === "lean");
+  if (S.colorBy === "size") { drawSize(V); return; }
+  if (S.colorBy === "lean") { drawLean(V); return; }
+  const cols = districtColors(S.labels, S.k), lab = S.labels, pix = V.pix, img = V.img.data, pw = V.pw, ph = V.ph;
+  for (let p = 0; p < pix.length; p++) {
+    const u = pix[p], o = p * 4;
+    if (u < 0) { img[o + 3] = 0; continue; }
+    const c = cols[lab[u]] || [200, 200, 200];
+    img[o] = c[0]; img[o + 1] = c[1]; img[o + 2] = c[2]; img[o + 3] = 255;
+  }
+  const ctx = $("map").getContext("2d");
+  ctx.putImageData(V.img, 0, 0);
+  if (S.showMesh) { ensureMesh(V); ctx.drawImage(V.meshCv, 0, 0); }
+  // district borders between cells; with the mesh on they are drawn heavier in the highlight colour
+  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.lineWidth = (S.showMesh ? 1.6 : 1.1) * V.dpr; ctx.strokeStyle = css(S.showMesh ? "--edge-hi" : "--bd"); ctx.stroke(boundaryPath(V, lab)); ctx.restore();
+  drawCurrent(V, ctx);
+  ctx.lineWidth = 1.25 * V.dpr; ctx.strokeStyle = css("--ink-2"); ctx.stroke(V.outlinePath);
+  drawOverlay();
+}
+/* Our district borders over the size field: a 2-device-px line with a 1px halo, both from theme tokens. Pure pixel work, so it
+   is cheap enough to redo on every solver snapshot, drag step and brush stroke. */
+function sizeBorders(V, lab, img) {
+  const pix = V.pix, pw = V.pw, N = pix.length, line = hexRGB(css("--sf-line")), halo = hexRGB(css("--sf-halo"));
+  if (!V.bm || V.bm.length !== N) { V.bm = new Uint8Array(N); V.bl = new Int32Array(N); }
+  const bm = V.bm, bl = V.bl; bm.fill(0); let n = 0;
+  for (let p = 0; p < N; p++) {
+    const u = pix[p]; if (u < 0) continue;
+    const d = lab[u], x = p % pw;
+    const ur = x + 1 < pw ? pix[p + 1] : -1, ud = p + pw < N ? pix[p + pw] : -1;
+    if (ur >= 0 && lab[ur] !== d) { if (!bm[p]) { bm[p] = 1; bl[n++] = p; } if (!bm[p + 1]) { bm[p + 1] = 1; bl[n++] = p + 1; } }
+    if (ud >= 0 && lab[ud] !== d) { if (!bm[p]) { bm[p] = 1; bl[n++] = p; } if (!bm[p + pw]) { bm[p + pw] = 1; bl[n++] = p + pw; } }
+  }
+  const offs = [-1, 1, -pw, pw];
+  for (let i = 0; i < n; i++) for (const o of offs) {
+    const r = bl[i] + o; if (r < 0 || r >= N || bm[r] || pix[r] < 0) continue;
+    const q = r * 4; img[q] = halo[0]; img[q + 1] = halo[1]; img[q + 2] = halo[2];
+  }
+  for (let i = 0; i < n; i++) { const q = bl[i] * 4; img[q] = line[0]; img[q + 1] = line[1]; img[q + 2] = line[2]; }
+}
+function drawSize(V) {
+  const col = sizeColors(sizeField(S.data)), pix = V.pix, img = V.img.data;
+  for (let p = 0; p < pix.length; p++) {
+    const u = pix[p], o = p * 4;
+    if (u < 0) { img[o + 3] = 0; continue; }
+    img[o] = col[3 * u]; img[o + 1] = col[3 * u + 1]; img[o + 2] = col[3 * u + 2]; img[o + 3] = 255;
+  }
+  sizeBorders(V, S.labels, img);
+  const ctx = $("map").getContext("2d");
+  ctx.putImageData(V.img, 0, 0);
+  if (S.showMesh) { ensureMesh(V); ctx.drawImage(V.meshCv, 0, 0); }
+  drawCurrent(V, ctx);
+  ctx.lineWidth = 1.25 * V.dpr; ctx.strokeStyle = css("--ink-2"); ctx.stroke(V.outlinePath);
+  updateSfLegend(); drawOverlay();
+}
+function drawOverlay() {
+  const V = S.view, ctx = $("overlay").getContext("2d");
+  ctx.clearRect(0, 0, V.pw, V.ph);
+  if (S.seedDots && S.trail && S.trail.length > 1) {
+    ctx.save(); ctx.lineWidth = 1.5 * V.dpr; ctx.strokeStyle = css("--accent"); ctx.globalAlpha = 0.55;
+    for (let j = 0; j < S.seedDots.length / 2; j++) {
+      ctx.beginPath();
+      S.trail.forEach((c, t) => { if (2 * j + 1 >= c.length) return; const [px, py] = V.toPx(c[2 * j], c[2 * j + 1]); t ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  if (S.seedDots) {
+    for (let j = 0; j < S.seedDots.length / 2; j++) {
+      const [px, py] = V.toPx(S.seedDots[2 * j], S.seedDots[2 * j + 1]);
+      ctx.beginPath(); ctx.arc(px, py, 6 * V.dpr, 0, Math.PI * 2);
+      ctx.fillStyle = css("--accent"); ctx.fill(); ctx.lineWidth = 2.5 * V.dpr; ctx.strokeStyle = css("--map-bg"); ctx.stroke();
+    }
+  }
+  if (S.mode !== "drag" || !S.centers) return;
+  ctx.font = `${11 * V.dpr}px ${css("--font-mono") || "monospace"}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (let j = 0; j < S.k; j++) {
+    const [px, py] = V.toPx(S.centers[2 * j], S.centers[2 * j + 1]), r = 10 * V.dpr;
+    ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = css("--accent"); ctx.fill(); ctx.lineWidth = 2 * V.dpr; ctx.strokeStyle = css("--map-bg"); ctx.stroke();
+    ctx.fillStyle = css("--accent-ink"); ctx.fillText(String(j + 1), px, py + .5);
+  }
+}
+
+/* ---------------- compare with the official districts ----------------
+   data.current: per-unit official district label (any int/string; null or -1 = unassigned). data.current_meta: {label, source, as_of, outdated, district_ids}.
+   Everything here is a no-op when a state has no `current`. */
+function compareOn() { return !!((S.compare || S.lcActive) && S.data && S.data.current); }
+function curInfo(d) {
+  if (!d.current) return null;
+  if (d._cur) return d._cur;
+  const meta = d.current_meta || {}, ids = new Map(), n = d.n, lab = new Int32Array(n).fill(-1);
+  // labels are integer indices 0..k-1 (district_ids only names them)
+  let kmax = -1;
+  for (let i = 0; i < n; i++) {
+    const v = d.current[i]; if (v === null || v === undefined || v === -1 || v === "") continue;
+    lab[i] = +v; if (+v > kmax) kmax = +v;
+  }
+  const k = Math.max(kmax + 1, (meta.district_ids || []).length), fill = Int32Array.from(lab), e = d.edges;
+  for (let pass = 0; pass < 60; pass++) {              // unassigned units borrow a neighbour's label so engine stats stay defined
+    let changed = false;
+    for (let i = 0; i < e.length; i += 2) { const a = e[i], b = e[i + 1]; if (fill[a] < 0 && fill[b] >= 0) { fill[a] = fill[b]; changed = true; } else if (fill[b] < 0 && fill[a] >= 0) { fill[b] = fill[a]; changed = true; } }
+    if (!changed) break;
+  }
+  for (let i = 0; i < n; i++) if (fill[i] < 0) fill[i] = 0;
+  return (d._cur = { lab, fill, k, meta, stats: null });
+}
+// official border: the boundary between cells with different official labels (same tracing as our borders), dashed, at the current zoom
+function drawCurrent(V, ctx) {
+  if (!compareOn()) return;
+  const info = curInfo(S.data), lean = S.colorBy === "lean", d = V.dpr;
+  if (!V.curPath || V.curFor !== info) { V.curPath = boundaryPath(V, info.lab); V.curFor = info; }
+  ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "butt";
+  if (lean) {                                       // Lean view: long dashes, core + halo
+    ctx.setLineDash([14 * d, 8 * d]); ctx.lineWidth = 4.2 * d; ctx.strokeStyle = css("--cur-halo"); ctx.stroke(V.curPath);
+    ctx.lineWidth = 2 * d; ctx.strokeStyle = css("--cur-core"); ctx.stroke(V.curPath);
+  } else { ctx.setLineDash([6 * d, 4 * d]); ctx.lineWidth = 2 * d; ctx.strokeStyle = css("--official"); ctx.stroke(V.curPath); }
+  ctx.restore();
+}
+function updateCompare() {
+  const info = S.data ? curInfo(S.data) : null, on = compareOn();
+  $("curToggleWrap").hidden = !info; $("showCur").checked = !!S.compare && !!info;
+  $("curLegend").hidden = !on; $("cmpPanel").hidden = !on;
+  if (!on) return;
+  const meta = info.meta, lg = $("curLegend"); lg.innerHTML = "";
+  const add = (cls, txt) => { const sp = document.createElement("span"); if (cls) sp.className = cls; sp.textContent = txt; lg.appendChild(sp); };
+  add("ours", "ours (solid line)"); add("off", "official (dashed line)");
+  add("", [meta.label, meta.as_of ? "as of " + meta.as_of : ""].filter(Boolean).join(" · ") || "official districts");
+  if (meta.outdated) add("stale", "(may be outdated)");
+  if (meta.source) lg.title = meta.source;
+  if (!info.stats) info.stats = DistrictEngine.stats(S.prep, info.fill, info.k);
+  const d = S.data, el = S.election, ov = districtVotes(d, info.lab, info.k, el), us = districtVotes(d, S.labels, S.k, el);
+  const [od, or_] = seatsOf(sharesFromVotes(ov.D, ov.R), S.swing), [ud, ur] = seatsOf(sharesFromVotes(us.D, us.R), S.swing);
+  const so = info.stats, su = statsCache;
+  const row = (name, a, b) => `<tr><th scope="row">${name}</th><td>${a}</td><td>${b}</td></tr>`;
+  $("cmpK").textContent = `${info.k} official · ${S.k} ours`;
+  $("cmpBody").innerHTML =
+    row(`Projected seats · ${ELECTION_LABEL[el]}${S.swing ? " · " + $("swingOut").textContent : ""}`, `${od} D · ${or_} R`, `${ud} D · ${ur} R`) +
+    row("Worst population gap", so.maxAbsDevPct.toFixed(2) + "%", su.maxAbsDevPct.toFixed(2) + "%") +
+    row("Counties split", so.countiesSplit, su.countiesSplit) +
+    row("Neighbour links cut", (so.cutEdgeFraction * 100).toFixed(1) + "%", (su.cutEdgeFraction * 100).toFixed(1) + "%");
+  // population-weighted best-match overlap: a person counts when their new district takes more than half of its people from the district they are in now
+  const kk = S.k, x = new Float64Array(info.k * kk), tot = new Float64Array(kk); let all = 0;
+  for (let i = 0; i < d.n; i++) { const c = info.lab[i]; if (c < 0) continue; x[c * kk + S.labels[i]] += d.pop[i]; tot[S.labels[i]] += d.pop[i]; all += d.pop[i]; }
+  let kept = 0;
+  for (let j = 0; j < kk; j++) { let best = 0; for (let c = 0; c < info.k; c++) best = Math.max(best, x[c * kk + j]); if (best > 0.5 * tot[j]) kept += best; }
+  $("cmpOverlap").innerHTML = `<b>${all ? (100 * kept / all).toFixed(0) : 0}%</b> of people would live in a district that mostly matches the one they are in now.`;
+}
+
+/* ---------------- scorecard ---------------- */
+let statsCache = null;
+function updateScore() {
+  if (!S.data) return;
+  const st = DistrictEngine.stats(S.prep, S.labels, S.k); statsCache = st; setLive(st);
+  const v = districtVotes(S.data, S.labels, S.k, S.election), sh = sharesFromVotes(v.D, v.R);
+  const [d, r] = seatsOf(sh, S.swing);
+  const fairV = districtVotes(S.data, S.fair, S.us.states[S.data.abbr].seats, S.election), [fd] = seatsOf(sharesFromVotes(fairV.D, fairV.R), S.swing);
+  $("scoreTitle").textContent = `Projected seats · ${ELECTION_LABEL[S.election]} votes${S.swing ? " · swing " + $("swingOut").textContent : ""}`;
+  $("stD").textContent = d; $("stR").textContent = r;
+  const isFair = isFairNow();
+  $("stDelta").textContent = isFair ? "the fair map" : (d - fd === 0 ? "same Democratic seats as the fair map" : `${d - fd > 0 ? "+" : "−"}${Math.abs(d - fd)} D vs the fair map`);
+  let TD = 0, TR = 0; for (let j = 0; j < S.k; j++) { TD += v.D[j]; TR += v.R[j]; }
+  $("kvVote").textContent = `D ${((TD / (TD + TR) + S.swing / 100) * 100).toFixed(1)}%`;
+  $("kvDev").innerHTML = `${st.maxAbsDevPct.toFixed(2)}% <span class="pill ${st.maxAbsDevPct <= 1 ? "ok" : "bad"}">${st.maxAbsDevPct <= 1 ? "balanced" : "unequal"}</span>`;
+  $("kvContig").innerHTML = st.allContiguous ? `<span class="pill ok">yes</span>` : `<span class="pill bad">no</span>`;
+  $("kvCty").textContent = st.countiesSplit;
+  $("kvCut").textContent = (st.cutEdgeFraction * 100).toFixed(1) + "%";
+  const eg = efficiencyGap(v.D, v.R, S.swing);
+  $("kvEG").textContent = Math.abs(eg) < 0.005 ? "≈ 0" : `${(Math.abs(eg) * 100).toFixed(1)}% → ${eg > 0 ? "R" : "D"}`;
+  drawLadder(sh); updateCompare();
+}
+function drawLadder(sh) {
+  const svg = $("ladder"), k = sh.length, W = 320, H = 150, top = 8, bot = 18, bw = (W - 20) / k;
+  const sorted = Array.from(sh, (s, j) => [s + S.swing / 100, j]).sort((a, b) => b[0] - a[0]);
+  const y = (s) => top + (1 - Math.min(1, Math.max(0, (s - 0.2) / 0.6))) * (H - top - bot);
+  let out = `<line x1="10" x2="${W - 10}" y1="${y(.5)}" y2="${y(.5)}" stroke="currentColor" stroke-width="1" style="color:var(--ink)"/>`;
+  out += `<text x="10" y="${y(.5) - 3}">50%</text><text x="10" y="${y(.8) + 8}">D 80%</text><text x="10" y="${H - 4}">R 80%</text>`;
+  sorted.forEach(([s, j], i) => {
+    const x = 10 + i * bw + bw * .12, w = bw * .76, y0 = y(.5), y1 = y(s);
+    out += `<rect x="${x.toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(1, Math.abs(y1 - y0)).toFixed(1)}" fill="${s > .5 ? "var(--dem)" : "var(--rep)"}"><title>District ${j + 1}: ${margin(s)}</title></rect>`;
+  });
+  svg.innerHTML = out;
+}
+
+/* ---------------- solver log ---------------- */
+const LOG_MAX = 90;
+function contigCount(st) { let c = 0; for (const p of st.piecesPerDistrict) if (p === 1) c++; return c; }
+function setLive(st) {
+  $("liveDev").textContent = st.maxAbsDevPct.toFixed(2) + "%";
+  $("liveContig").textContent = `${contigCount(st)}/${S.k}`;
+}
+function logClear(msg) {
+  const ul = $("logList"); ul.innerHTML = ""; ul.dataset.stage = "idle";
+  if (msg) { const li = document.createElement("li"); li.className = "idle"; li.textContent = msg; ul.appendChild(li); }
+}
+function logLine(secs, stage, st, cls, msg) {
+  const ul = $("logList"); ul.dataset.stage = cls || stage;
+  const idle = ul.querySelector(".idle"); if (idle) idle.remove();
+  const li = document.createElement("li"); if (cls) li.className = cls;
+  const mk = (c, txt) => { const s = document.createElement("span"); s.className = c; s.textContent = txt; return s; };
+  li.append(mk("t", secs == null ? "" : secs.toFixed(1) + "s"), mk("s", stage), mk("m", msg || `gap ${st.maxAbsDevPct.toFixed(2)}%  whole ${contigCount(st)}/${S.k}`));
+  ul.appendChild(li);
+  while (ul.children.length > LOG_MAX) ul.firstChild.remove();
+  ul.scrollTop = ul.scrollHeight;
+}
+
+/* ---------------- state lifecycle ---------------- */
+function isFairNow() { if (S.k !== S.us.states[S.data.abbr].seats) return false; for (let i = 0; i < S.data.n; i++) if (S.labels[i] !== S.fair[i]) return false; return true; }
+function commitEdit() {
+  const abbr = S.data.abbr;
+  if (isFairNow()) delete S.edited[abbr]; else S.edited[abbr] = { k: S.k, labels: Int32Array.from(S.labels), data: S.data };
+  renderNation(); updateScore(); $("mapState").textContent = isFairNow() ? "fair map" : "your map";
+  for (const p of $("usmap").querySelectorAll("path")) p.classList.toggle("sel", p.dataset.abbr === abbr);
+}
+const cache = {};
+async function loadState(abbr) {
+  if (!cache[abbr]) { const r = await fetch(`data/${abbr}.json`); if (!r.ok) throw new Error(`Could not load data for ${abbr} (HTTP ${r.status}).`); cache[abbr] = await r.json(); }
+  return cache[abbr];
+}
+async function openState(abbr, scroll) {
+  stopRun(); setMode("view"); S.lcActive = false;
+  $("loading").hidden = false; $("loading").textContent = `Loading ${S.us.states[abbr].name} block groups…`;
+  $("stateTitle").textContent = S.us.states[abbr].name; $("statePick").value = abbr;
+  if (scroll) $("lab").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  try { if (location.hash !== "#" + abbr) history.replaceState(null, "", "#" + abbr); } catch (e) {}
+  let data;
+  try { data = await loadState(abbr); } catch (err) { $("loading").textContent = err.message; return; }
+  await new Promise(r => setTimeout(r, 20));
+  S.lockCols = null; S.data = data; S.prep = DistrictEngine.prepare(data); sizeField(data); S.fair = Int32Array.from(data.plan);
+  const ed = S.edited[abbr];
+  S.k = ed ? ed.k : data.seats; S.labels = ed ? Int32Array.from(ed.labels) : Int32Array.from(S.fair);
+  S.centers = centroids(S.labels, S.k);
+  if (S.stZoom) { S.stZoom.silentReset(); zoomHint("stZhint", S.stZoom.z); }
+  S.zsnap = null; S.view = buildView(data);
+  $("loading").hidden = true;
+  $("kOut").textContent = `${S.k} seat${S.k > 1 ? "s" : ""}`;
+  $("stateKicker").textContent = `State lab · ${data.seats} seat${data.seats > 1 ? "s" : ""} apportioned · ${data.n.toLocaleString()} block groups`;
+  lcInit(); buildPaintbar(); draw(); commitEdit();
+  logClear(); logLine(null, ed ? "your map" : "loaded", statsCache, "idle2"); $("logList").dataset.stage = "idle";
+}
+function centroids(labels, k) {
+  const c = new Float64Array(2 * k), w = new Float64Array(k), d = S.data;
+  for (let i = 0; i < d.n; i++) { const l = labels[i], p = d.pop[i] + 1e-6; c[2 * l] += p * d.x[i]; c[2 * l + 1] += p * d.y[i]; w[l] += p; }
+  for (let j = 0; j < k; j++) { c[2 * j] /= w[j] || 1; c[2 * j + 1] /= w[j] || 1; }
+  return c;
+}
+
+/* ---------------- generate (animated) ---------------- */
+const STAGE_TEXT = { seed: "seed", lloyd: "relax", balance: "balance", contiguity: "stitch", refine: "polish", done: "done" };   // relax = shift centres to the middle of their districts; stitch = reattach stray pieces; polish = swap border neighbourhoods
+function stopRun() { if (S.runner) { cancelAnimationFrame(S.runner.raf); S.runner = null; $("btnGen").textContent = "▶ Draw it fresh"; } S.seedDots = null; S.trail = null; if (S.view) drawOverlay(); }
+/* Small seeded PRNG (mulberry32), seeded from the clock, so every fresh draw starts somewhere new. */
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+/* k distinct units, drawn with probability proportional to population; no two within the engine's 0.5 km separation. Returns [x0,y0,x1,y1,...]. */
+function randomCenters(data, k, rng) {
+  const n = data.n, cum = new Float64Array(n); let tot = 0;
+  for (let i = 0; i < n; i++) { tot += Math.max(0, data.pop[i]); cum[i] = tot; }
+  const pick = () => { const r = rng() * tot; let lo = 0, hi = n - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (cum[m] > r) hi = m; else lo = m + 1; } return lo; };
+  const chosen = [], used = new Set(), MIN2 = 0.5 * 0.5;
+  const far = (u) => chosen.every(c => (data.x[u] - data.x[c]) ** 2 + (data.y[u] - data.y[c]) ** 2 >= MIN2);
+  for (let j = 0; j < k; j++) {
+    let u = -1;
+    for (let t = 0; t < 400 && u < 0; t++) { const c = pick(); if (!used.has(c) && far(c)) u = c; }
+    if (u < 0) for (let c = 0; c < n && u < 0; c++) if (!used.has(c) && far(c)) u = c;       // fallback: first unit that is far enough
+    if (u < 0) for (let c = 0; c < n && u < 0; c++) if (!used.has(c)) u = c;
+    used.add(u); chosen.push(u);
+  }
+  const out = new Float64Array(2 * k);
+  chosen.forEach((u, j) => { out[2 * j] = data.x[u]; out[2 * j + 1] = data.y[u]; });
+  return out;
+}
+function generate() {
+  if (S.runner) { stopRun(); return; }
+  setMode("view"); lcDetach();
+  const randomStart = S.k > 1;
+  const start = randomStart ? randomCenters(S.data, S.k, makeRng(Date.now())) : null;
+  const it = DistrictEngine.run(S.prep, S.k, randomStart ? { initialCenters: start } : {});
+  S.lockCols = null; let locked = false;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("btnGen").textContent = "■ Stop";
+  let last = 0; const t0 = performance.now();
+  logClear("solving…");
+  if (randomStart) logLine(null, "seed", { maxAbsDevPct: 0 }, "", `· ${S.k} random centres`);
+  const tick = (t) => {
+    if (!S.runner) return;
+    if (t - last < (reduced ? 0 : 70)) { S.runner.raf = requestAnimationFrame(tick); return; }
+    last = t;
+    let r = it.next();
+    if (reduced) while (!r.done && r.value.stage !== "done") r = it.next();
+    if (r.done) { stopRun(); return; }
+    const snap = r.value;
+    S.labels = Int32Array.from(snap.labels); S.centers = Float64Array.from(snap.centers);
+    if (randomStart) {                                           // show the random starting centres until the districts have begun to grow
+      // follow the centres for the whole solve, with a short trail of where they have been
+      if (snap.stage !== "done" && snap.centers && snap.centers.length) {
+        if (!S.trail) S.trail = [];
+        if (!snap.partial) { S.trail.push(Float64Array.from(snap.centers)); if (S.trail.length > 24) S.trail.shift(); }
+        S.seedDots = Float64Array.from(snap.centers);
+      } else { S.seedDots = null; S.trail = null; }
+    }
+    if (!locked && !snap.partial && S.colorBy === "district") { S.lockCols = null; S.lockCols = districtColors(S.labels, S.k); locked = true; }
+    if (snap.stats) { setLive(snap.stats); if (!snap.partial && snap.stage !== "seed") logLine((performance.now() - t0) / 1000, STAGE_TEXT[snap.stage] + (snap.stage === "lloyd" || snap.stage === "refine" ? " " + snap.step : ""), snap.stats, snap.stage === "done" ? "done" : ""); }
+    draw();
+    if (snap.stage === "done") {
+      const nb = snap.numbered || DistrictEngine.numberDistricts(S.labels, S.centers);
+      if (S.lockCols) { const nc = new Array(S.k); for (let j = 0; j < S.k; j++) nc[nb.remap[j]] = S.lockCols[j]; S.lockCols = nc; }
+      S.labels = Int32Array.from(nb.labels); S.centers = centroids(S.labels, S.k); S.rebalV = null;
+      stopRun(); draw(); commitEdit(); return;
+    }
+    S.runner.raf = requestAnimationFrame(tick);
+  };
+  S.runner = { raf: requestAnimationFrame(tick) };
+}
+
+/* ---------------- modes ---------------- */
+function setMode(m) {
+  S.mode = m;
+  $("btnDrag").setAttribute("aria-pressed", m === "drag"); $("btnPaint").setAttribute("aria-pressed", m === "paint");
+  $("paintTools").hidden = m !== "paint"; $("dragHint").hidden = m !== "drag";
+  $("stage").style.cursor = m === "paint" ? "crosshair" : (m === "drag" ? "grab" : "default");
+  if (S.view) drawOverlay();
+}
+function buildPaintbar() {
+  const bar = $("paintbar"); bar.innerHTML = "";
+  const cols = districtColors(S.labels, S.k);
+  for (let j = 0; j < S.k; j++) {
+    const b = document.createElement("button"); b.textContent = j + 1; b.style.background = `rgb(${cols[j]})`;
+    b.setAttribute("aria-pressed", j === S.paintD); b.setAttribute("aria-label", `Paint district ${j + 1}`);
+    b.addEventListener("click", () => { S.paintD = j; bar.querySelectorAll("button").forEach((x, i) => x.setAttribute("aria-pressed", i === j)); });
+    bar.appendChild(b);
+  }
+}
+function evtPx(e) { const r = $("overlay").getBoundingClientRect(), V = S.view; return [(e.clientX - r.left) * V.dpr, (e.clientY - r.top) * V.dpr]; }
+let drag = null, painting = false, pending = false;
+function paintAt(px, py) {
+  const V = S.view, rad = 9 * V.dpr, r2 = rad * rad;
+  for (let y = Math.max(0, Math.floor(py - rad)); y < Math.min(V.ph, py + rad); y += 2)
+    for (let x = Math.max(0, Math.floor(px - rad)); x < Math.min(V.pw, px + rad); x += 2) {
+      if ((x - px) ** 2 + (y - py) ** 2 > r2) continue;
+      const u = V.pix[y * V.pw + x]; if (u >= 0) S.labels[u] = S.paintD;
+    }
+}
+function scheduleDraw(withScore) {
+  if (pending) return; pending = true;
+  requestAnimationFrame(() => { pending = false; draw(); if (withScore) updateScore(); });
+}
+function onDown(e) {
+  if (!S.view) return;
+  const [px, py] = evtPx(e);
+  if (S.lcActive && (S.mode === "drag" || S.mode === "paint")) lcDetach();
+  if (S.mode === "drag") {
+    let best = -1, bd = (16 * S.view.dpr) ** 2;
+    for (let j = 0; j < S.k; j++) { const [cx, cy] = S.view.toPx(S.centers[2 * j], S.centers[2 * j + 1]); const d = (cx - px) ** 2 + (cy - py) ** 2; if (d < bd) { bd = d; best = j; } }
+    if (best >= 0) { drag = best; $("overlay").setPointerCapture(e.pointerId); $("stage").style.cursor = "grabbing"; e.preventDefault(); }
+  } else if (S.mode === "paint") {
+    painting = true; $("overlay").setPointerCapture(e.pointerId); paintAt(px, py); scheduleDraw(true); e.preventDefault();
+  }
+}
+let rebalBusy = false;
+function rebalanceNow() {
+  if (rebalBusy) return; rebalBusy = true;
+  requestAnimationFrame(() => {
+    const out = DistrictEngine.rebalance(S.prep, S.k, S.centers, { v: S.rebalV || undefined });
+    S.rebalV = out.v; S.labels = Int32Array.from(out.labels); draw(); updateScore(); rebalBusy = false;
+  });
+}
+function onMove(e) {
+  if (!S.view) return;
+  const [px, py] = evtPx(e);
+  if (drag !== null) {
+    const [x, y] = S.view.fromPx(px, py); S.centers[2 * drag] = x; S.centers[2 * drag + 1] = y; drawOverlay(); rebalanceNow(); return;
+  }
+  if (painting) { paintAt(px, py); scheduleDraw(true); return; }
+  // tooltip
+  const u = S.view.pix[Math.floor(py) * S.view.pw + Math.floor(px)], tip = $("tip");
+  if (u === undefined || u < 0 || !statsCache) { tip.hidden = true; return; }
+  if (S.colorBy === "size") {
+    const sf = sizeField(S.data), cty0 = S.data.counties[S.data.cty[u]];
+    tip.innerHTML = `<strong>element size ${sf.h[u] < 10 ? sf.h[u].toFixed(2) : sf.h[u].toFixed(1)} kilometres</strong><br>${Math.round(sf.rho[u]).toLocaleString()} people per square kilometre<br>${cty0 && cty0.name ? cty0.name + " County" : ""}`;
+    tip.hidden = false;
+    const r0 = $("stage").getBoundingClientRect(), tx0 = e.clientX - r0.left + 14, ty0 = e.clientY - r0.top + 14;
+    tip.style.left = Math.min(tx0, r0.width - tip.offsetWidth - 6) + "px"; tip.style.top = Math.min(ty0, r0.height - tip.offsetHeight - 6) + "px";
+    return;
+  }
+  const d = S.labels[u], v = districtVotes(S.data, S.labels, S.k, S.election), s = v.D[d] / (v.D[d] + v.R[d] || 1) + S.swing / 100;
+  const ideal = S.data.pop.reduce((a, b) => a + b, 0) / S.k;
+  const cty = S.data.counties[S.data.cty[u]];
+  let own = "";
+  if (S.colorBy === "lean") {
+    const us = leanField(S.data, S.election)[u], sm = leanSummary();
+    own = `Unit: ${isNaN(us) ? "no votes" : margin(us + S.swing / 100)}<br><strong>District ${d + 1}</strong> · ${margin(s)} · ${LEAN_CATS[sm.cat[d]]}<br>`;
+  }
+  tip.innerHTML = own + `${own ? "" : `<strong>District ${d + 1}</strong> · ${margin(s)}<br>`}${Math.round(statsCache.pops[d]).toLocaleString()} people (${fmtPct((statsCache.pops[d] / ideal - 1) * 100, 2)})<br>${cty && cty.name ? cty.name + " County" : ""}`;
+  tip.hidden = false;
+  const r = $("stage").getBoundingClientRect(), tx = e.clientX - r.left + 14, ty = e.clientY - r.top + 14;
+  tip.style.left = Math.min(tx, r.width - tip.offsetWidth - 6) + "px"; tip.style.top = Math.min(ty, r.height - tip.offsetHeight - 6) + "px";
+}
+function onUp() {
+  if (drag !== null) { drag = null; $("stage").style.cursor = "grab"; const out = DistrictEngine.rebalance(S.prep, S.k, S.centers, { v: S.rebalV || undefined }); S.rebalV = out.v; S.labels = Int32Array.from(out.labels); draw(); commitEdit(); }
+  if (painting) { painting = false; draw(); commitEdit(); }
+}
+
+/* ---------------- one country, no state lines ----------------
+   data/national.json (build_national.py): every block group in one km frame (Albers USA), one adjacency graph that crosses state lines,
+   each unit's state and fair-plan district (global 0..434), and d/r votes. The solve runs DistrictEngine.run in a Web Worker built from the
+   inlined engine source (a blob: URL), Euclidean distances: a geodesic round on 239k units takes ~28 s, and a run needs ~20 rounds. */
+const NAT_MS = 1.5;                                     // canvas pixels per map-frame pixel (975 x 610)
+const NAT_K = 435, NAT_MAXITER = 20;
+function natDecode(doc) {
+  const bin = atob(doc.bin), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const T = { float32: Float32Array, uint16: Uint16Array, uint8: Uint8Array, int32: Int32Array }, A = {};
+  for (const l of doc.layout) A[l.name] = new T[l.type](bytes.buffer, l.offset, l.length);
+  const n = doc.n, E = new Int32Array(2 * doc.edges), fwd = A.fwd, adj = A.adj;
+  let p = 0, q = 0;
+  for (let a = 0; a < n; a++) {
+    let b = a;
+    for (let c = 0; c < fwd[a]; c++) {
+      let v = 0, s = 0, byte;
+      do { byte = adj[p++]; v += (byte & 127) * Math.pow(2, s); s += 7; } while (byte & 128);
+      b += v; E[q++] = a; E[q++] = b;
+    }
+  }
+  if (q !== E.length) throw new Error("national edge list is damaged");
+  const elections = {};
+  for (const el of doc.elections) elections[el] = { d: A[el + "_d"], r: A[el + "_r"] };
+  return { doc, n, x: A.x, y: A.y, pop: A.pop, state: A.state, plan: A.plan, E, elections, seats: doc.seats, abbrs: doc.states, k: doc.k };
+}
+// uniform-grid nearest neighbour over pixel-space points (same method as the state view)
+function gridNearest(ux, uy, n, pw, ph, fac = 1.5, minCell = 3) {
+  const cell = Math.max(minCell, Math.sqrt(pw * ph / n) * fac), gw = Math.ceil(pw / cell) + 1, gh = Math.ceil(ph / cell) + 1;
+  const head = new Int32Array(gw * gh).fill(-1), next = new Int32Array(n);
+  for (let i = 0; i < n; i++) { const g = Math.min(gh - 1, Math.max(0, Math.floor(uy[i] / cell))) * gw + Math.min(gw - 1, Math.max(0, Math.floor(ux[i] / cell))); next[i] = head[g]; head[g] = i; }
+  return function nearest(px, py) {
+    const gx = Math.floor(px / cell), gy = Math.floor(py / cell); let best = -1, bd = Infinity;
+    for (let r = 0; r < Math.max(gw, gh); r++) {
+      for (let yy = gy - r; yy <= gy + r; yy++) {
+        if (yy < 0 || yy >= gh) continue;
+        for (let xx = gx - r; xx <= gx + r; xx++) {
+          if (xx < 0 || xx >= gw || (Math.abs(yy - gy) !== r && Math.abs(xx - gx) !== r)) continue;
+          for (let i = head[yy * gw + xx]; i >= 0; i = next[i]) { const dx = ux[i] - px, dy = uy[i] - py, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } }
+        }
+      }
+      if (best >= 0 && (r * cell) * (r * cell) > bd) break;
+    }
+    return best;
+  };
+}
+// nearest-unit grid in the fixed frame (975 x 610 px at NAT_MS), built once
+function natBase(N) {
+  const f = N.doc.frame, pw = Math.round(f.px_w * NAT_MS), ph = Math.round(f.px_h * NAT_MS);
+  const ux = new Float32Array(N.n), uy = new Float32Array(N.n);
+  for (let i = 0; i < N.n; i++) { ux[i] = (N.x[i] / f.km_per_px + f.tx) * NAT_MS; uy[i] = (f.ty - N.y[i] / f.km_per_px) * NAT_MS; }
+  return { nearest: gridNearest(ux, uy, N.n, pw, ph) };
+}
+/* pixel -> unit lookup for the national canvases at zoom z, at screen resolution (capped at 1.5 device px per CSS px). Row-chunked so the
+   page stays responsive; a newer zoom supersedes an older build (returns null). */
+async function natPix(N, z, progress) {
+  const gen = (S.natGen = (S.natGen || 0) + 1), st = document.querySelector(".natstage");
+  const w = st.clientWidth || 975, h = st.clientHeight || 610, R = Math.min(1.5, window.devicePixelRatio || 1);
+  const pw = Math.round(w * R), ph = Math.round(h * R), s = z.k * w / 975, f = N.doc.frame;    // fitted CSS px per frame px
+  const m = document.createElement("canvas"); m.width = pw; m.height = ph; const mc = m.getContext("2d");
+  mc.setTransform(R * s, 0, 0, R * s, R * z.x, R * z.y); mc.fillStyle = "#000";
+  for (const stt of Object.values(S.us.states)) mc.fill(new Path2D(stt.path), "evenodd");
+  const mask = mc.getImageData(0, 0, pw, ph).data, pix = new Int32Array(pw * ph).fill(-1), g = NAT_MS / (R * s);
+  let t0 = performance.now();
+  for (let y = 0; y < ph; y++) {
+    const gy = (y + .5 - R * z.y) * g;
+    for (let x = 0; x < pw; x++) { const p = y * pw + x; if (mask[p * 4 + 3] > 100) pix[p] = N.base.nearest((x + .5 - R * z.x) * g, gy); }
+    if (performance.now() - t0 > 40) {
+      if (progress) progress(y / ph);
+      await new Promise(r => setTimeout(r, 0)); t0 = performance.now();
+      if (gen !== S.natGen) return null;
+    }
+  }
+  if (gen !== S.natGen) return null;
+  const cv = $("natMos"), ov = $("natOv"); cv.width = ov.width = pw; cv.height = ov.height = ph;
+  const toPx = (x, y) => [R * (z.k * (x / f.km_per_px + f.tx) * w / 975 + z.x), R * (z.k * (f.ty - y / f.km_per_px) * w / 975 + z.y)];
+  return { pw, ph, R, z: { ...z }, pix, toPx, img: cv.getContext("2d").createImageData(pw, ph) };
+}
+async function ensureNational() {
+  if (S.nn) return S.nn;
+  if (S.nnLoading) return S.nnLoading;
+  S.nnLoading = (async () => {
+    $("natLoading").hidden = false; $("natLoading").textContent = "Loading 239,209 block groups… (9 MB)";
+    try {
+      const r = await fetch("data/national.json"); if (!r.ok) throw new Error("HTTP " + r.status);
+      const doc = await r.json(); $("natLoading").textContent = "Decoding the national mesh…"; await new Promise(r => setTimeout(r, 0));
+      const N = natDecode(doc);
+      N.base = natBase(N);
+      let V = null;
+      while (!V) V = await natPix(N, S.natZoom.z, (q) => { $("natLoading").textContent = `Placing block groups on the map… ${Math.round(100 * q)}%`; });
+      N.view = V;
+      N.lab = Int32Array.from(N.plan); N.fairLab = N.lab; N.freeLab = null; N.res = null; N.centers = null; N.trail = null; N.cols = null; N.show = "fair";
+      N.nd = { n: N.n, elections: N.elections };
+      S.nn = N; $("natLoading").hidden = true; return N;
+    } catch (err) { $("natLoading").textContent = "Could not load the national data (" + err.message + ")."; S.nnLoading = null; throw err; }
+  })();
+  return S.nnLoading;
+}
+// greedy colouring of the district adjacency (cross-district mesh edges), as a palette index per district
+function natColors(N, lab, k) {
+  const adj = new Uint8Array(k * k), E = N.E, deg = new Int32Array(k);
+  for (let i = 0; i < E.length; i += 2) { const a = lab[E[i]], b = lab[E[i + 1]]; if (a !== b && !adj[a * k + b]) { adj[a * k + b] = adj[b * k + a] = 1; deg[a]++; deg[b]++; } }
+  const order = [...Array(k).keys()].sort((a, b) => deg[b] - deg[a]), col = new Int8Array(k).fill(-1), P = 8;
+  for (const d of order) { const used = new Uint8Array(P + 1); for (let j = 0; j < k; j++) if (adj[d * k + j] && col[j] >= 0) used[col[j]] = 1; let c = 0; while (c < P && used[c]) c++; col[d] = c % P; }
+  return col;
+}
+function natDraw() {
+  const N = S.nn; if (!N || $("natMos").hidden) return;
+  const V = N.view, lab = N.lab, pix = V.pix, img = V.img.data, pw = V.pw, NP = pix.length;
+  if (!N.cols || N.colsFor !== lab.length) { N.cols = natColors(N, lab, NAT_K); N.colsFor = lab.length; }
+  const pal = palette().map(hexRGB), bd = hexRGB(css("--bd")), ci = N.cols;
+  for (let p = 0; p < NP; p++) {
+    const u = pix[p], o = p * 4;
+    if (u < 0) { img[o + 3] = 0; continue; }
+    const d = lab[u], c = pal[ci[d]];
+    const ur = (p % pw) + 1 < pw ? pix[p + 1] : -1, ud = p + pw < NP ? pix[p + pw] : -1;
+    if ((ur >= 0 && lab[ur] !== d) || (ud >= 0 && lab[ud] !== d)) { img[o] = (c[0] * .5 + bd[0] * .5) | 0; img[o + 1] = (c[1] * .5 + bd[1] * .5) | 0; img[o + 2] = (c[2] * .5 + bd[2] * .5) | 0; }
+    else { img[o] = c[0]; img[o + 1] = c[1]; img[o + 2] = c[2]; }
+    img[o + 3] = 255;
+  }
+  $("natMos").getContext("2d").putImageData(V.img, 0, 0);
+  natDrawOverlay();
+}
+function natDrawOverlay() {
+  const N = S.nn; if (!N) return; const V = N.view, ctx = $("natOv").getContext("2d");
+  ctx.clearRect(0, 0, V.pw, V.ph);
+  if (!N.centers || !N.running) return;
+  const toPx = V.toPx, k = N.centers.length / 2, NAT_MS = V.R;
+  if (N.trail && N.trail.length > 1) {
+    ctx.save(); ctx.lineWidth = 1 * NAT_MS; ctx.strokeStyle = css("--accent"); ctx.globalAlpha = .5; ctx.beginPath();
+    for (let j = 0; j < k; j++) N.trail.forEach((c, t) => { const [px, py] = toPx(c[2 * j], c[2 * j + 1]); t ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.stroke(); ctx.restore();
+  }
+  ctx.fillStyle = css("--accent"); ctx.strokeStyle = css("--map-bg"); ctx.lineWidth = 1.5 * NAT_MS;
+  for (let j = 0; j < k; j++) { const [px, py] = toPx(N.centers[2 * j], N.centers[2 * j + 1]); ctx.beginPath(); ctx.arc(px, py, 3 * NAT_MS, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+}
+function natScoreParts(labels) {
+  const N = S.nn, v = districtVotes(N.nd, labels, NAT_K, S.election), sh = sharesFromVotes(v.D, v.R);
+  const [d, r] = seatsOf(sh, S.swing); return { d, r };
+}
+function natGap(labels) {
+  const N = S.nn, pops = new Float64Array(NAT_K); let tot = 0;
+  for (let i = 0; i < N.n; i++) { pops[labels[i]] += N.pop[i]; tot += N.pop[i]; }
+  let md = 0; for (let j = 0; j < NAT_K; j++) md = Math.max(md, Math.abs(pops[j] / (tot / NAT_K) - 1)); return 100 * md;
+}
+function natCrossing(labels) {
+  const N = S.nn, seen = new Uint8Array(NAT_K * 50), cnt = new Int32Array(NAT_K); let c = 0;
+  for (let i = 0; i < N.n; i++) { const q = labels[i] * 50 + N.state[i]; if (!seen[q]) { seen[q] = 1; if (++cnt[labels[i]] === 2) c++; } }
+  return c;
+}
+function natUpdateScore() {
+  const N = S.nn; if (!N) return;
+  const base = natScoreParts(N.fairLab), res = N.res, el = ELECTION_LABEL[S.election], sw = S.swing ? " · swing " + $("swingOut").textContent : "";
+  $("nsBase").textContent = `${base.d} D · ${base.r} R`;
+  if (!res) { $("natScoreTitle").textContent = `Fair map in each state · ${el} votes${sw}`; $("nsD").textContent = base.d; $("nsR").textContent = base.r; $("nsDelta").textContent = "the state-by-state fair maps"; 
+    $("nsDev").textContent = natGap(N.fairLab).toFixed(2) + "%"; $("nsContig").textContent = "–"; $("nsCross").textContent = natCrossing(N.fairLab) + " (none by design)"; return; }
+  const free = natScoreParts(N.freeLab), diff = free.d - base.d;
+  $("natScoreTitle").textContent = `Borderless map${res.stopped ? " (stopped early)" : ""} · ${el} votes${sw}`;
+  $("nsD").textContent = free.d; $("nsR").textContent = free.r;
+  $("nsDelta").textContent = diff === 0 ? "same Democratic seats as the state-by-state fair maps" : `${diff > 0 ? "+" : "−"}${Math.abs(diff)} D vs the state-by-state fair maps`;
+  $("nsDev").innerHTML = `${res.gap.toFixed(2)}% <span class="pill ${res.gap <= 1 ? "ok" : "bad"}">${res.gap <= 1 ? "balanced" : "unequal"}</span>`;
+  $("nsContig").innerHTML = `${res.whole}/${NAT_K} <span class="pill ${res.whole === NAT_K ? "ok" : "bad"}">${res.whole === NAT_K ? "all" : "some split"}</span>`;
+  $("nsCross").textContent = `${res.crossing} of ${NAT_K}`;
+  $("nsMode").textContent = `${res.mode}, ${res.seconds.toFixed(0)} s${res.stopped ? ", stopped" : ""}`;
+}
+function setNatShow(which) {
+  const N = S.nn; if (!N) return;
+  N.show = which === "free" && N.freeLab ? "free" : "fair"; N.lab = N.show === "free" ? N.freeLab : N.fairLab; N.cols = null;
+  $("natShowFair").setAttribute("aria-pressed", N.show === "fair"); $("natShowFree").setAttribute("aria-pressed", N.show === "free");
+  $("natChip").textContent = N.show === "free" ? "borderless map" : "fair map in each state"; natDraw();
+}
+async function setNatView(v) {
+  const mos = v === "mos";
+  $("natViewStates").setAttribute("aria-pressed", !mos); $("natViewMos").setAttribute("aria-pressed", mos);
+  document.querySelector(".nation").classList.toggle("mos", mos);
+  if (mos && S.natSize) { $("natSize").checked = false; await setNatSize(false); }
+  $("natMosPanel").hidden = !mos;
+  if (!mos) { $("natMos").hidden = true; $("natOv").hidden = true; $("natLoading").hidden = true; return; }
+  try { await ensureNational(); } catch (e) { return; }
+  if (document.querySelector(".nation").classList.contains("mos")) {
+    $("natMos").hidden = false; $("natOv").hidden = false;
+    const z = S.natZoom.z, V = S.nn.view;
+    if (V.z.k !== z.k || V.z.x !== z.x || V.z.y !== z.y || V.pw !== Math.round(document.querySelector(".natstage").clientWidth * V.R)) { const V2 = await natPix(S.nn, z); if (V2) S.nn.view = V2; }
+    natDraw(); natUpdateScore();
+  }
+}
+/* The worker's whole program. It is serialised with Function.toString and appended to the engine source. */
+function natWorkerMain() {
+  self.onmessage = (ev) => {
+    const m = ev.data;
+    try {
+      const prep = DistrictEngine.prepare({ n: m.n, x: m.x, y: m.y, pop: m.pop, edges: m.edges });
+      self.postMessage({ type: "ready" });
+      const it = DistrictEngine.run(prep, m.k, { initialCenters: m.centers, geodesic: m.geodesic, maxIter: m.maxIter, budgetMs: 80 });
+      const t0 = performance.now(); let lastPost = 0, lastTick = 0;
+      for (;;) {
+        const r = it.next(); if (r.done) break;
+        const s = r.value, t = performance.now();
+        if (s.partial) { if (t - lastTick > 600) { lastTick = t; self.postMessage({ type: "tick", stage: s.stage, step: s.step, t: (t - t0) / 1000 }); } continue; }
+        if (s.stage !== "done" && t - lastPost < m.minGapMs) continue;
+        lastPost = lastTick = t;
+        const labels = s.labels.slice(), centers = s.centers.slice(), st = s.stats; let whole = 0;
+        for (const p of st.piecesPerDistrict) if (p === 1) whole++;
+        const ex = s.extra || {};
+        self.postMessage({ type: "snap", stage: s.stage, step: s.step, t: (t - t0) / 1000, labels, centers, gap: st.maxAbsDevPct, whole, contiguous: st.allContiguous, cut: st.cutEdgeFraction,
+          moves: ex.moves, lloydIterations: ex.lloydIterations, refinePasses: ex.refinePasses, seconds: ex.seconds }, [labels.buffer, centers.buffer]);
+      }
+      self.postMessage({ type: "end" });
+    } catch (e) { self.postMessage({ type: "error", message: String((e && e.message) || e) }); }
+  };
+}
+const NAT_STAGE = { seed: "placing centres", lloyd: "relaxing", balance: "balancing", contiguity: "stitching", refine: "polishing", done: "done" };
+function natProgress(stage, step, gap) {
+  const f = stage === "seed" ? .02 : stage === "lloyd" ? .03 + .72 * Math.min(1, step / NAT_MAXITER) : stage === "balance" ? .76 : stage === "contiguity" ? .8 : stage === "refine" ? .8 + .19 * Math.min(1, step / 1200) : 1;
+  $("natProgBar").style.width = (100 * f).toFixed(0) + "%";
+}
+function natSetRunning(on) {
+  const N = S.nn; if (N) N.running = on;
+  $("btnNatSolve").hidden = on; $("btnNatStop").hidden = !on; $("natProg").hidden = !on;
+}
+function natFinish(snap, stopped) {
+  const N = S.nn, w = N.worker; if (w) { w.terminate(); N.worker = null; }
+  natSetRunning(false);
+  const lab = Int32Array.from(snap.labels);
+  N.freeLab = lab; N.res = { gap: natGap(lab), whole: snap.whole, crossing: natCrossing(lab), seconds: (performance.now() - N.tStart) / 1000, mode: "Euclidean distances, live in your browser", stopped: !!stopped, contiguous: snap.contiguous };
+  $("natShowFree").disabled = false; N.centers = null; N.trail = null; N.cols = null;
+  setNatShow("free"); natUpdateScore();
+  const sc = natScoreParts(lab), base = natScoreParts(N.fairLab);
+  $("natLog").innerHTML = `${stopped ? "<b>stopped</b>" : "<b>done</b>"} in ${N.res.seconds.toFixed(0)} s: worst population gap <b>${N.res.gap.toFixed(2)}%</b>, ${snap.whole}/${NAT_K} districts in one piece, ${N.res.crossing} cross a state line. ${sc.d} D · ${sc.r} R borderless vs ${base.d} D · ${base.r} R with the fair map in each state (${ELECTION_LABEL[S.election]} votes).${stopped ? " A stopped run is not a finished map: populations are still uneven." : ""}`;
+}
+async function natSolve() {
+  if (S.nn && S.nn.running) return;
+  await setNatView("mos");
+  let N; try { N = await ensureNational(); } catch (e) { return; }
+  if (!document.querySelector(".nation").classList.contains("mos")) return;
+  document.getElementById("natMosPanel").scrollIntoView({ block: "nearest", behavior: "auto" });
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const start = randomCenters(N, NAT_K, makeRng(Date.now()));
+  let worker;
+  try { worker = new Worker(URL.createObjectURL(new Blob([document.getElementById("engineSrc").textContent, "\n(", natWorkerMain.toString(), ")();"], { type: "text/javascript" }))); }
+  catch (err) { $("natLog").textContent = "This browser can't start the background solver (" + err.message + ")."; return; }
+  N.worker = worker; N.freeLab = null; N.res = null; N.trail = []; N.centers = start; N.cols = null; N.tStart = performance.now();
+  natSetRunning(true); $("natShowFree").disabled = true; $("natProgBar").style.width = "0%";
+  N.lab = N.fairLab; $("natShowFair").setAttribute("aria-pressed", "true"); $("natShowFree").setAttribute("aria-pressed", "false"); $("natChip").textContent = "solving"; N.show = "fair";
+  natUpdateScore(); natDraw();
+  const el = () => (performance.now() - N.tStart) / 1000;
+  $("natLog").innerHTML = `<b>solving</b> · preparing the national mesh (${N.n.toLocaleString()} block groups, ${N.doc.edges.toLocaleString()} links)…`;
+  worker.onmessage = (ev) => {
+    const m = ev.data;
+    if (m.type === "ready") { $("natLog").innerHTML = `<b>solving</b> · ${NAT_K} random centres, Euclidean distances, ${NAT_MAXITER} relaxation rounds…`; return; }
+    if (m.type === "tick") { $("natLog").innerHTML = `<b>solving</b> · ${NAT_STAGE[m.stage]}${m.stage === "lloyd" ? " round " + m.step + " of up to " + NAT_MAXITER : ""} · ${el().toFixed(0)} s`; natProgress(m.stage, m.step); return; }
+    if (m.type === "error") { natSetRunning(false); N.worker = null; worker.terminate(); $("natLog").textContent = "The solver stopped: " + m.message + (/memory|alloc|array/i.test(m.message) ? " This run needs about 1 GB of memory; try a desktop browser." : ""); return; }
+    if (m.type !== "snap") return;
+    if (m.stage === "done") { natFinish(m, false); return; }
+    N.lab = m.labels; N.show = "fair"; N.cols = (m.stage === "balance" || (m.stage === "lloyd" && m.step % 5 === 1) || !N.cols) ? null : N.cols;
+    N.centers = m.centers;
+    if (!reduced) { N.trail.push(m.centers); if (N.trail.length > 18) N.trail.shift(); }
+    $("natLog").innerHTML = `<b>solving</b> · ${NAT_STAGE[m.stage]}${m.stage === "lloyd" || m.stage === "refine" ? " " + m.step : ""} · ${el().toFixed(0)} s · worst gap ${m.gap.toFixed(1)}% · ${m.whole}/${NAT_K} districts whole`;
+    natProgress(m.stage, m.step); N.last = m; natDraw();
+  };
+  worker.onerror = (e) => { natSetRunning(false); N.worker = null; worker.terminate(); $("natLog").textContent = "The solver stopped: " + (e.message || "worker error") + "."; };
+  worker.postMessage({ n: N.n, x: N.x, y: N.y, pop: N.pop, edges: N.E, k: NAT_K, centers: start, geodesic: false, maxIter: NAT_MAXITER, minGapMs: reduced ? 2500 : 300 });
+}
+function natStop() {
+  const N = S.nn; if (!N || !N.running) return;
+  const last = N.last; N.worker && N.worker.terminate(); N.worker = null;
+  if (!last) { natSetRunning(false); N.centers = null; natDraw(); $("natLog").textContent = "Stopped before the first map was ready."; return; }
+  natFinish({ labels: last.labels, whole: last.whole, contiguous: last.contiguous, t: last.t }, true);
+}
+
+/* ---------------- how far from fair? (least-change slider) ----------------
+   Method, in one line: blend each district's centre from the official map toward the fair map, and rebalance at every step.
+   Fair district j is matched to the official district it shares the most people with (Hungarian algorithm on the overlap table).
+   At t, centre j = (1-t) * official centre of its match + t * fair centre j; DistrictEngine.rebalance (Euclidean, warm-started v) draws
+   equal-population districts around those centres. t = 0 shows the official labels exactly, t = 1 the fair plan exactly. Not an optimal
+   (fewest-moves) solution, and not claimed to be. Labels live in fair-district index space so colours stay put while the map morphs. */
+const LC_STEPS = 10;
+function hungarian(cost, n) {                      // min-cost assignment, rows -> cols (e-maxx potentials, O(n^3))
+  const INF = 1e18, u = new Float64Array(n + 1), v = new Float64Array(n + 1), p = new Int32Array(n + 1), way = new Int32Array(n + 1);
+  for (let i = 1; i <= n; i++) {
+    p[0] = i; let j0 = 0; const minv = new Float64Array(n + 1).fill(INF), used = new Uint8Array(n + 1);
+    do {
+      used[j0] = 1; const i0 = p[j0]; let delta = INF, j1 = 0;
+      for (let j = 1; j <= n; j++) if (!used[j]) {
+        const cur = cost[(i0 - 1) * n + (j - 1)] - u[i0] - v[j];
+        if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+        if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+      }
+      for (let j = 0; j <= n; j++) if (used[j]) { u[p[j]] += delta; v[j] -= delta; } else minv[j] -= delta;
+      j0 = j1;
+    } while (p[j0] !== 0);
+    do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+  }
+  const ans = new Int32Array(n); for (let j = 1; j <= n; j++) ans[p[j] - 1] = j - 1; return ans;
+}
+function lcInit() {
+  S.lc = null; S.lcActive = false; const d = S.data, info = d ? curInfo(d) : null, k = d ? d.seats : 0;
+  const ok = !!info && k > 1 && info.k === k;
+  $("lcPanel").hidden = !ok; if (!ok) return;
+  const n = d.n, ov = new Float64Array(k * k), tot = new Float64Array(k); let all = 0;
+  for (let i = 0; i < n; i++) { ov[S.fair[i] * k + info.fill[i]] += d.pop[i]; tot[S.fair[i]] += d.pop[i]; all += d.pop[i]; }
+  const cost = new Float64Array(k * k); for (let i = 0; i < k * k; i++) cost[i] = -ov[i];
+  const sig = hungarian(cost, k), inv = new Int32Array(k); for (let j = 0; j < k; j++) inv[sig[j]] = j;
+  const off = new Int32Array(n); for (let i = 0; i < n; i++) off[i] = inv[info.fill[i]];     // official map in fair-index space
+  const cf = centroids(S.fair, k), co = centroids(off, k);
+  S.lc = { k, info, sig, off, cf, co, all, samples: null, cache: new Map(), vOf: new Map(), busy: false, tNow: 1 };
+  $("lcSlider").value = 100; $("lcSlider").disabled = false; $("lcSentence").textContent = ""; $("lcPlot").toggleAttribute("hidden", true);
+  $("lcOut").textContent = "Slide toward the official map to see the districts morph.";
+}
+function lcDetach() {
+  if (!S.lcActive) return; S.lcActive = false; S.lockCols = null;
+  if (S.lc) { $("lcSlider").value = 100; S.lc.tNow = 1; $("lcOut").textContent = "Slide toward the official map to see the districts morph."; lcPlot(); }
+}
+function lcMoved(labels) {
+  const L = S.lc, pop = S.data.pop; let m = 0;
+  for (let i = 0; i < S.data.n; i++) if (labels[i] !== L.off[i]) m += pop[i];
+  return 100 * m / L.all;
+}
+// one point of the curve at t in [0, 1]: labels (fair-index space) and its numbers
+function lcAt(t) {
+  const L = S.lc, key = Math.round(t * 100);
+  if (L.cache.has(key)) return L.cache.get(key);
+  let labels, st, v = null;
+  if (key === 0) { labels = L.off; st = DistrictEngine.stats(S.prep, labels, L.k); }
+  else if (key === 100) { labels = S.fair; st = DistrictEngine.stats(S.prep, labels, L.k); }
+  else {
+    const c = new Float64Array(2 * L.k);
+    for (let j = 0; j < L.k; j++) {
+      // co[j] is the centre of the official district matched to fair district j
+      c[2 * j] = (1 - t) * L.co[2 * j] + t * L.cf[2 * j]; c[2 * j + 1] = (1 - t) * L.co[2 * j + 1] + t * L.cf[2 * j + 1];
+    }
+    let near = null, nd = 1e9;                                     // warm start from the closest finished step
+    for (const [kk, vv] of L.vOf) if (Math.abs(kk - key) < nd) { nd = Math.abs(kk - key); near = vv; }
+    const out = DistrictEngine.rebalance(S.prep, L.k, c, { v: near || undefined });
+    labels = out.labels; st = out.stats; v = out.v; L.vOf.set(key, v);
+  }
+  const r = { t, key, labels: Int32Array.from(labels), moved: lcMoved(labels), cut: 100 * st.cutEdgeFraction, gap: st.maxAbsDevPct, whole: st.allContiguous };
+  L.cache.set(key, r); return r;
+}
+async function lcPrepare() {
+  const L = S.lc; if (!L) return;
+  if (L.samples) return;
+  if (L.busy) return L.busy;
+  L.busy = (async () => {
+    const out = [];
+    for (let s = LC_STEPS; s >= 0; s--) {                          // from the fair end: each step warm-starts the next
+      $("lcOut").textContent = `Preparing the curve… step ${LC_STEPS - s + 1} of ${LC_STEPS + 1}`;
+      await new Promise(r => setTimeout(r, 15));
+      if (S.lc !== L) return;
+      out.push(lcAt(s / LC_STEPS));
+    }
+    out.sort((a, b) => a.t - b.t); L.samples = out; L.busy = false;
+    lcSentence();
+  })();
+  return L.busy;
+}
+function lcSentence() {
+  const L = S.lc, s = L.samples; if (!s) return;
+  const c0 = s[0].cut, c1 = s[s.length - 1].cut, name = S.us.states[S.data.abbr].name;
+  let msg;
+  if (!(c0 - c1 > 0.2)) msg = `Compactness: the official map for ${name} already cuts about as few neighbour links (${c0.toFixed(1)}%) as the fair map (${c1.toFixed(1)}%), so there is little tidiness to gain.`;
+  else {
+    let hit = s[s.length - 1];
+    for (const p of s) if ((c0 - p.cut) / (c0 - c1) >= 0.8) { hit = p; break; }
+    const gain = 100 * (c0 - hit.cut) / (c0 - c1);
+    msg = `Moving <b>${hit.moved.toFixed(0)}%</b> of people in ${name} gets <b>${gain.toFixed(0)}%</b> of the compactness gain; all of it moves <b>${s[s.length - 1].moved.toFixed(0)}%</b>.`;
+  }
+  $("lcSentence").innerHTML = msg; lcPlot();
+}
+function lcPlot() {
+  const L = S.lc, svg = $("lcPlot"); if (!L || !L.samples) { svg.toggleAttribute("hidden", true); return; }
+  svg.toggleAttribute("hidden", false);
+  const s = L.samples, cur = L.cache.get(Math.round(L.tNow * 100)) || s[s.length - 1];
+  const W = 400, x0 = 46, x1 = 388, xmax = Math.max(1, ...s.map(p => p.moved), cur.moved);
+  const X = (m) => x0 + (x1 - x0) * m / xmax;
+  const panels = [
+    { y0: 34, y1: 94, get: p => p.cut, title: "Tidiness: neighbour links cut (%) · lower is tidier", fmt: v => v.toFixed(1) },
+    { y0: 134, y1: 188, get: p => p.gap, title: "Worst population gap (%) · lower is more equal", fmt: v => v.toFixed(v < 10 ? 1 : 0) },
+  ];
+  let out = "";
+  for (const P of panels) {
+    const vals = s.map(P.get).concat(P.get(cur)), lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * .12 || 1, a = lo - pad, b = hi + pad;
+    const Y = (v) => P.y1 - (P.y1 - P.y0) * (v - a) / (b - a);
+    out += `<text class="ttl" x="${x0}" y="${P.y0 - 12}">${P.title}</text><path class="ax" d="M${x0} ${P.y0}V${P.y1}H${x1}"/>`;
+    out += `<text x="${x0 - 5}" y="${P.y0 + 4}" text-anchor="end">${P.fmt(hi)}</text><text x="${x0 - 5}" y="${P.y1 + 1}" text-anchor="end">${P.fmt(lo)}</text>`;
+    out += `<polyline class="ln" points="${s.map(p => X(p.moved).toFixed(1) + "," + Y(P.get(p)).toFixed(1)).join(" ")}"/>`;
+    for (const p of s) out += `<circle class="pt" cx="${X(p.moved).toFixed(1)}" cy="${Y(P.get(p)).toFixed(1)}" r="3"><title>${p.moved.toFixed(1)}% of people moved: ${P.fmt(P.get(p))}</title></circle>`;
+    out += `<line class="guide" x1="${X(cur.moved).toFixed(1)}" x2="${X(cur.moved).toFixed(1)}" y1="${P.y0}" y2="${P.y1}"/><circle class="now" cx="${X(cur.moved).toFixed(1)}" cy="${Y(P.get(cur)).toFixed(1)}" r="5.5"><title>Now: ${cur.moved.toFixed(1)}% moved, ${P.fmt(P.get(cur))}</title></circle>`;
+  }
+  out += `<text x="${x0}" y="206" >0%</text><text x="${x1}" y="206" text-anchor="end">${xmax.toFixed(0)}%</text>`;
+  out += `<text class="ttl" x="${(x0 + x1) / 2}" y="224" text-anchor="middle">People moved from their official district (%)</text>`;
+  svg.innerHTML = out;
+}
+let lcPending = false, lcLatest = 100, lcCommitReq = false;
+async function lcSet(v, commit) {
+  const L = S.lc; if (!L) return; lcLatest = v; if (commit) lcCommitReq = true;
+  if (!S.lcActive) {
+    S.lcActive = true; S.lockCols = null; S.lockCols = districtColors(S.fair, L.k); stopRun(); setMode("view");
+    if (S.k !== L.k) { S.k = L.k; $("kOut").textContent = `${S.k} seat${S.k > 1 ? "s" : ""}`; }
+    buildPaintbar();
+  }
+  if (!L.samples) { await lcPrepare(); if (S.lc !== L) return; }
+  if (lcPending) return;
+  lcPending = true;
+  requestAnimationFrame(() => {
+    lcPending = false; if (S.lc !== L || !S.lcActive) return;
+    const commitNow = lcCommitReq; lcCommitReq = false;
+    const t = lcLatest / 100, r = lcAt(t); L.tNow = t;
+    S.labels = Int32Array.from(r.labels); S.centers = centroids(S.labels, S.k);
+    $("lcOut").textContent = lcLatest === 100 ? "Fair map (100%)." : lcLatest === 0 ? "Official 2026 map (0%)." : `${r.moved.toFixed(1)}% of people are in a different district from the official map; ${r.cut.toFixed(1)}% of neighbour links cut; worst population gap ${r.gap.toFixed(2)}%.`;
+    lcPlot(); draw(); updateScore();
+    if (commitNow) commitEdit();
+  });
+}
+
+/* ---------------- wiring ---------------- */
+function wire() {
+  for (const b of document.querySelectorAll("[data-el]")) b.addEventListener("click", () => {
+    S.election = b.dataset.el; document.querySelectorAll("[data-el]").forEach(x => x.setAttribute("aria-pressed", x === b)); refreshAll();
+  });
+  $("swing").addEventListener("input", (e) => {
+    S.swing = +e.target.value; $("swingOut").textContent = S.swing === 0 ? "even" : (S.swing > 0 ? "D+" : "R+") + Math.abs(S.swing).toFixed(1); refreshAll();
+  });
+  $("btnGen").addEventListener("click", generate);
+  $("kMinus").addEventListener("click", () => changeK(-1)); $("kPlus").addEventListener("click", () => changeK(1));
+  $("colDistrict").addEventListener("click", () => setColor("district")); $("colLean").addEventListener("click", () => setColor("lean")); $("colSize").addEventListener("click", () => setColor("size"));
+  $("btnDrag").addEventListener("click", () => setMode(S.mode === "drag" ? "view" : "drag"));
+  $("btnPaint").addEventListener("click", () => { setMode(S.mode === "paint" ? "view" : "paint"); if (S.mode === "paint") buildPaintbar(); });
+  $("btnReset").addEventListener("click", () => {
+    lcDetach(); S.lockCols = null; stopRun(); S.k = S.data.seats; S.labels = Int32Array.from(S.fair); S.centers = centroids(S.labels, S.k);
+    $("kOut").textContent = `${S.k} seat${S.k > 1 ? "s" : ""}`; buildPaintbar(); draw(); commitEdit(); logClear(); logLine(null, "reset", statsCache, "idle2"); $("logList").dataset.stage = "idle";
+  });
+  $("showMesh").addEventListener("change", (e) => { S.showMesh = e.target.checked; if (S.view) draw(); });
+  $("showCur").addEventListener("change", (e) => { S.compare = e.target.checked; if (S.view) { draw(); updateScore(); } });
+  $("natSize").addEventListener("change", async (e) => { if (e.target.checked && document.querySelector(".nation").classList.contains("mos")) await setNatView("states"); setNatSize(e.target.checked); });
+  $("natViewStates").addEventListener("click", () => setNatView("states")); $("natViewMos").addEventListener("click", () => setNatView("mos"));
+  $("btnNatSolve").addEventListener("click", natSolve); $("btnNatStop").addEventListener("click", natStop);
+  $("natShowFair").addEventListener("click", () => setNatShow("fair")); $("natShowFree").addEventListener("click", () => setNatShow("free"));
+  $("lcSlider").addEventListener("input", (e) => lcSet(+e.target.value, false)); $("lcSlider").addEventListener("change", (e) => lcSet(+e.target.value, true));
+  $("themeBtn").addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : !matchMedia("(prefers-color-scheme: light)").matches;
+    document.documentElement.dataset.theme = dark ? "light" : "dark"; themeChanged();
+  });
+  const ov = $("overlay");
+  ov.addEventListener("pointerdown", onDown); ov.addEventListener("pointermove", onMove);
+  ov.addEventListener("pointerup", onUp); ov.addEventListener("pointercancel", onUp);
+  ov.addEventListener("pointerleave", () => { $("tip").hidden = true; });
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => {
+    if (S.data) { S.stZoom.silentReset(); zoomHint("stZhint", S.stZoom.z); S.zsnap = null; S.view = buildView(S.data); draw(); }
+    if (S.natZoom.z.k > 1) S.natZoom.reset();
+  }, 250); });
+  // zoom + pan: state map (pan with a plain drag in view mode, shift-drag or middle button while painting / moving centres)
+  const nearCentre = (e) => {
+    if (!S.view || !S.centers) return false; const [px, py] = evtPx(e), r2 = (16 * S.view.dpr) ** 2;
+    for (let j = 0; j < S.k; j++) { const [cx, cy] = S.view.toPx(S.centers[2 * j], S.centers[2 * j + 1]); if ((cx - px) ** 2 + (cy - py) ** 2 < r2) return true; }
+    return false;
+  };
+  S.stZoom = makeZoom($("stage"), {
+    enabled: () => !!S.view,
+    canPan: (e) => e.shiftKey || S.mode === "view" || (S.mode === "drag" && !nearCentre(e)),
+    cancel: () => { if (painting) { painting = false; draw(); commitEdit(); } drag = null; },
+    preview: stPreview, commit: (z) => { stCommit(z); zoomHint("stZhint", z, S.mode === "view" ? "drag to pan" : "shift-drag to pan"); },
+    afterPan: () => { $("stage").style.cursor = S.mode === "paint" ? "crosshair" : (S.mode === "drag" ? "grab" : ""); },
+  });
+  $("stZin").addEventListener("click", () => S.stZoom.zoomBy(1.6)); $("stZout").addEventListener("click", () => S.stZoom.zoomBy(1 / 1.6));
+  $("stZreset").addEventListener("click", () => S.stZoom.reset());
+  // zoom + pan: national map (US states SVG, mesh-size raster, 435-district mosaic)
+  S.natZoom = makeZoom(document.querySelector(".natstage"), {
+    enabled: () => !!S.us, canPan: () => true, preview: natPreview, commit: natCommit,
+  });
+  $("natZin").addEventListener("click", () => S.natZoom.zoomBy(1.6)); $("natZout").addEventListener("click", () => S.natZoom.zoomBy(1 / 1.6));
+  $("natZreset").addEventListener("click", () => S.natZoom.reset());
+  window.addEventListener("hashchange", () => { const a = location.hash.slice(1).toUpperCase(); if (S.us.states[a] && (!S.data || S.data.abbr !== a)) openState(a, true); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
+}
+function themeChanged() { if (S.nn) natDraw(); if (S.natSize) paintNat(); if (S.view) S.view.meshCol = null; if (S.us) renderNation(); if (S.view) { S.lockCols = null; draw(); buildPaintbar(); } }
+function setColor(c) { S.colorBy = c; $("colDistrict").setAttribute("aria-pressed", c === "district"); $("colLean").setAttribute("aria-pressed", c === "lean"); $("colSize").setAttribute("aria-pressed", c === "size"); $("sfLegend").hidden = c !== "size"; $("leanLegend").hidden = c !== "lean"; draw(); }
+function changeK(dk) {
+  const k = Math.max(1, Math.min(Math.min(60, Math.floor(S.data.n / 20)), S.k + dk)); if (k === S.k) return;
+  stopRun(); lcDetach(); S.k = k; $("kOut").textContent = `${k} seat${k > 1 ? "s" : ""}`;
+  if (k === 1) { S.labels = new Int32Array(S.data.n); S.centers = centroids(S.labels, 1); draw(); commitEdit(); buildPaintbar(); return; }
+  S.paintD = 0; generate();
+}
+function refreshAll() { renderNation(); if (S.nn) natUpdateScore(); if (S.data) { draw(); updateScore(); } }
+
+async function boot() {
+  wire(); buildSfLegend(); buildSfLegend("natSfTicks");
+  try {
+    const r = await fetch("data/us.json"); if (!r.ok) throw new Error("HTTP " + r.status);
+    S.us = await r.json();
+  } catch (err) { $("loading").textContent = "Could not load the national data file. Reload the page to try again."; return; }
+  if (S.us.method) $("elecMethod").textContent = S.us.method;
+  buildUSMap(); renderNation();
+  const want = location.hash.slice(1).toUpperCase();
+  openState(S.us.states[want] ? want : "PA", false);
+}
+boot();
+})();
+</script>
