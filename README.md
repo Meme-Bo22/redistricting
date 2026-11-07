@@ -4,15 +4,31 @@
 
 Fair-lines redistricting toys: equal-population, contiguous, compact districts built from Census block groups with meshing and optimal-transport methods.
 
+## Try it
+
+**Live:** https://domattioli.github.io/redistricting/ (note: the first Pages deploy failed because Pages is not yet enabled in repo settings; until then use "Run locally")
+
+- State solver and Borderless US: https://domattioli.github.io/redistricting/fair-lines/
+- Draw your own: https://domattioli.github.io/redistricting/draw/
+- Re-draw the states: https://domattioli.github.io/redistricting/regions/
+
+**Run locally** (no build step, just Python 3):
+
+```
+git clone https://github.com/domattioli/redistricting && cd redistricting && python -m http.server -d site 8000
+```
+
+Then open http://localhost:8000. The tools are the static pages in `site/` ([site/index.html](site/index.html) is the landing page).
+
 ## Toys
 
-**1. State solver.** Pick any state and get equal-population, contiguous, compact districts from Census block groups, computed with a balanced centroidal power diagram. A "how far from fair?" least-change slider morphs the fair plan toward the official map and shows how many people must move.
+**1. State solver** ([live](https://domattioli.github.io/redistricting/fair-lines/), [`site/fair-lines/index.html`](site/fair-lines/index.html)). Pick any state and get equal-population, contiguous, compact districts from Census block groups, computed with a balanced centroidal power diagram. A "how far from fair?" least-change slider morphs the fair plan toward the official map and shows how many people must move.
 
-**2. Borderless US.** The same solver run across the whole country: 435 equal-population districts that ignore state lines.
+**2. Borderless US** ([live](https://domattioli.github.io/redistricting/fair-lines/), [`site/fair-lines/index.html`](site/fair-lines/index.html), national view). The same solver run across the whole country: 435 equal-population districts that ignore state lines.
 
-**3. Draw your own.** Segment-Anything-style drawing: click a block group and a district grows from it. Then hand off with Finish my map, Improve my map or Solve from my seeds, and compare your plan to the official map on a scorecard.
+**3. Draw your own** ([live](https://domattioli.github.io/redistricting/draw/), [`site/draw/index.html`](site/draw/index.html)). Segment-Anything-style drawing: click a block group and a district grows from it. Then hand off with Finish my map, Improve my map or Solve from my seeds, and compare your plan to the official map on a scorecard.
 
-**4. Re-draw the states.** Regroup the borderless districts into 50 new contiguous states. In progress.
+**4. Re-draw the states** ([live](https://domattioli.github.io/redistricting/regions/), [`site/regions/index.html`](site/regions/index.html)). Regroup the borderless districts into 50 new contiguous states. In progress.
 
 ## How it works
 
@@ -42,6 +58,6 @@ Check the site: `python scripts/verify_site.py` (needs Playwright with Chromium;
 
 ## Links
 
-- Live demo: https://domattioli.github.io/redistricting/ (pending enable, see "Site and deployment")
+- Live demo: https://domattioli.github.io/redistricting/ (first deploy failed: Pages not yet enabled, see "Site and deployment"; run locally meanwhile)
 - Write-up: [TBD]
 - Origin: research in the SegmentAnyMesh repo (`research/redistricting_*`, `redistricting/`)

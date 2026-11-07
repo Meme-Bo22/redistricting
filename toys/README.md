@@ -1,8 +1,10 @@
 # Toys
 
-- State solver and Borderless US ("Fair Lines"): source currently lives in SegmentAnyMesh/research/redistricting_toy/; to be migrated.
-- Draw your own: source currently lives in SegmentAnyMesh/research/redistricting_draw/; to be migrated.
-- Re-draw the states: source currently lives in SegmentAnyMesh/research/redistricting_regions/; to be migrated.
-- Solver package (Python): source currently lives in SegmentAnyMesh/redistricting/; to be migrated.
+Built, runnable toys. Open them live or serve `site/` locally (`python -m http.server -d site 8000`, then http://localhost:8000).
 
-Synced copies now live under `site/` (pages and data) and `redistricting/` (solver); see README, "Site and deployment". Builders and research scripts still live only in SegmentAnyMesh.
+- **State solver and Borderless US (Fair Lines)**: equal-population, contiguous, compact districts for any state, or all 435 across the country. Live: https://domattioli.github.io/redistricting/fair-lines/ . Here: `site/fair-lines/index.html`. Upstream source: SegmentAnyMesh `research/redistricting_toy/`.
+- **Draw your own**: click a block group and a district grows from it; compare to the official map. Live: https://domattioli.github.io/redistricting/draw/ . Here: `site/draw/index.html`. Upstream source: SegmentAnyMesh `research/redistricting_draw/`.
+- **Re-draw the states**: regroup the borderless districts into 50 new contiguous states (in progress). Live: https://domattioli.github.io/redistricting/regions/ . Here: `site/regions/index.html`. Upstream source: SegmentAnyMesh `research/redistricting_regions/`.
+- **Solver package (Python)**: `redistricting/` here. Upstream source: SegmentAnyMesh `redistricting/`.
+
+The files here are synced copies (see README, "Site and deployment"); edit upstream in SegmentAnyMesh.
