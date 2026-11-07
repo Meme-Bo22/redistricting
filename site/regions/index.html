@@ -62,7 +62,7 @@ tr.hi td { background: var(--panel-2); }
 <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <body>
 <header>
-  <a class="site-back" href="/projects/redistricting/">&larr; Redistricting</a>
+  <a class="site-back" href="../">&larr; Redistricting</a><script>(function(a){if(location.pathname.indexOf("/projects/redistricting/")===0)a.href="/projects/redistricting/"})(document.currentScript.previousElementSibling)</script>
   <h1>Re-draw the state lines</h1>
   <div class="sub" id="sub">435 districts with no state lines, grouped into 50 new states. Each keeps its seat count.</div>
   <button id="theme" aria-label="Toggle light and dark theme">Theme</button>

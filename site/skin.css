@@ -1,9 +1,9 @@
 /* Site skin for the redistricting toys: domattioli.com fonts, chrome colours and back link.
    Map and data colours stay with each toy. Selectors mirror the toys' own theme blocks so this file wins on load order. */
-@font-face{font-family:"Alegreya";src:url(/fonts/alegreya-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
-@font-face{font-family:"Alegreya Sans";src:url(/fonts/alegreya-sans-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"Alegreya Sans";src:url(/fonts/alegreya-sans-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
-@font-face{font-family:"Latin Modern Mono";src:url(/fonts/lmmono10-regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Alegreya";src:url(fonts/alegreya-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/alegreya-sans-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/alegreya-sans-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Latin Modern Mono";src:url(fonts/lmmono10-regular.woff2) format("woff2");font-weight:400;font-display:swap}
 :root{
   --font-body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-display:"Alegreya",Georgia,serif;

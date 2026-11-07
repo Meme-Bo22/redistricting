@@ -113,7 +113,7 @@ td.best { color: var(--ok-ink); font-weight: 600; }
 <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <body>
 <header>
-  <a class="site-back" href="/projects/redistricting/">&larr; Redistricting</a>
+  <a class="site-back" href="../">&larr; Redistricting</a><script>(function(a){if(location.pathname.indexOf("/projects/redistricting/")===0)a.href="/projects/redistricting/"})(document.currentScript.previousElementSibling)</script>
   <h1>Draw your own districts</h1>
   <div class="sub" id="sub">Click to grow a district to an equal share of people. Let the solver finish.</div>
   <button id="theme" aria-label="Toggle light and dark theme">Theme</button>

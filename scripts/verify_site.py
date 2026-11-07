@@ -118,7 +118,7 @@ def main():
         used = pg.evaluate("new Set(Array.from(S.labels).filter(l => l >= 0)).size")
         check(used == 3, f"draw: 3 districts accepted (got {used})")
         pg.click("#finish")
-        pg.wait_for_function("S.sol && S.sol.labels", timeout=180000)
+        pg.wait_for_function("S.sol && S.sol.stage === 'done' && !S.running", timeout=180000)
         r = pg.evaluate("({k: S.k, n: new Set(Array.from(S.sol.labels)).size, neg: Array.from(S.sol.labels).filter(l => l < 0).length})")
         check(r["n"] == r["k"] and r["neg"] == 0, f"draw: Finish completes all {r['k']} districts {r}")
         check(not pg.errs, f"draw: no console errors through Finish {pg.errs}")
