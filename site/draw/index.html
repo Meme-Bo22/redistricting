@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><link rel="icon" href="data:,"><script>/* data base: window.REDISTRICTING_DATA_BASE (set before load) or ?data-base=, default ../data/ */var __RD_DATA_BASE=(function(){var b=window.REDISTRICTING_DATA_BASE;try{var q=new URLSearchParams(location.search).get("data-base");if(q)b=q}catch(e){}b=b||"../data/";return /\/$/.test(b)?b:b+"/"})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Draw Your Own Districts</title>
 <style>
@@ -109,10 +109,13 @@ td.best { color: var(--ok-ink); font-weight: 600; }
 .log { white-space: pre-wrap; font: 11.5px/1.5 var(--font-mono); color: var(--ink-2); max-height: 90px; overflow: auto; margin-top: 6px; }
 </style>
 </head>
+<link rel="stylesheet" href="../skin.css">
+<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <body>
 <header>
+  <a class="site-back" href="../">&larr; Redistricting</a><script>(function(a){if(location.pathname.indexOf("/projects/redistricting/")===0)a.href="/projects/redistricting/"})(document.currentScript.previousElementSibling)</script>
   <h1>Draw your own districts</h1>
-  <div class="sub" id="sub">Click a block group and the district grows outward to an equal share of people. Then let the solver finish or polish your map.</div>
+  <div class="sub" id="sub">Click to grow a district to an equal share of people. Let the solver finish.</div>
   <button id="theme" aria-label="Toggle light and dark theme">Theme</button>
 </header>
 <div class="wrap">
@@ -146,7 +149,7 @@ td.best { color: var(--ok-ink); font-weight: 600; }
       <label class="chk"><input type="checkbox" id="offline"> official lines</label>
       <label class="chk"><input type="checkbox" id="trails" checked> show centres &amp; trails</label>
     </div>
-    <p class="hint"><b>Click</b> a block group: a proposal grows to one district's share of people, taking whole counties first. <kbd>Shift</kbd>-click adds a point to extend toward it, <kbd>Alt</kbd>/<kbd>Ctrl</kbd>-click carves away from one. <kbd>Enter</kbd> accepts, <kbd>Esc</kbd> cancels, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes. Wheel or pinch zooms; hold <kbd>Space</kbd> and drag (or middle-drag, or the Pan tool) to pan. Hatched = unassigned.</p>
+    <p class="hint"><b>Click</b> seeds a district. More clicks add points. <b>Right-click</b> carves. <kbd>Enter</kbd> accepts; <kbd>Esc</kbd> cancels; Undo (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) removes the last point. Pinch or wheel to zoom; <kbd>Space</kbd>-drag to pan. Hatched = unassigned.</p>
   </section>
   <aside class="side">
     <div class="card">
@@ -1375,7 +1378,49 @@ td.best { color: var(--ok-ink); font-weight: 600; }
       if (cum + w[v] / 2 < quota) { cum += w[v]; out.push(v); } else { exhausted = false; break; }
     }
     if (cum >= quota) exhausted = false;
+    var fp = fillPockets(prep, labels, out, cum, inF, g.dist, quota * (1 + tolr)); out = fp.out; cum = fp.cum;
     return finishGrow(prep, labels, out, cum, forced, skipped, exhausted);
+  }
+
+  // Pockets: free land the proposal walls off (cut off from the largest free area) joins the proposal; then the
+  // proposal sheds its units farthest from your clicks, only where they touch the largest free area, until it is back
+  // under quota*(1+tol). Shedding there never opens a new pocket, and the proposal stays one piece.
+  function fillPockets(prep, labels, out, cum, inF, dist, hi) {
+    var n = prep.n, ip = prep.indptr, ix = prep.indices, w = prep.w, inP = new Uint8Array(n), i, e;
+    out = out.slice(); out.forEach(function (u) { inP[u] = 1; });
+    function freeComps() {
+      var comp = new Int32Array(n).fill(-1), pops = [], nc = 0;
+      for (var s = 0; s < n; s++) if (comp[s] < 0 && labels[s] < 0 && !inP[s]) {
+        var q = [s], pp = 0; comp[s] = nc;
+        while (q.length) { var a = q.pop(); pp += w[a]; for (var k = ip[a]; k < ip[a + 1]; k++) { var b = ix[k]; if (comp[b] < 0 && labels[b] < 0 && !inP[b]) { comp[b] = nc; q.push(b); } } }
+        pops.push(pp); nc++;
+      }
+      var big = 0; for (var c = 1; c < nc; c++) if (pops[c] > pops[big]) big = c;
+      return { comp: comp, big: nc ? big : -1 };
+    }
+    var fc = freeComps(), touch = new Uint8Array(n), added = 0;
+    for (i = 0; i < n; i++) if (fc.comp[i] >= 0 && fc.comp[i] !== fc.big) {   // a pocket: does it touch the proposal?
+      for (e = ip[i]; e < ip[i + 1]; e++) if (inP[ix[e]]) { touch[fc.comp[i]] = 1; break; }
+    }
+    for (i = 0; i < n; i++) if (fc.comp[i] >= 0 && fc.comp[i] !== fc.big && touch[fc.comp[i]]) { inP[i] = 1; out.push(i); cum += w[i]; added++; }
+    if (!added || cum <= hi) return { out: out, cum: cum };
+    var bigC = fc.big, comp = fc.comp;
+    function connectedWithout(x) {
+      var start = -1, cnt = 0; for (var j = 0; j < out.length; j++) if (inP[out[j]] && out[j] !== x) { cnt++; if (start < 0) start = out[j]; }
+      if (start < 0) return false; var seen = new Uint8Array(n), q = [start], c = 1; seen[start] = 1;
+      while (q.length) { var a = q.pop(); for (var k = ip[a]; k < ip[a + 1]; k++) { var b = ix[k]; if (!seen[b] && inP[b] && b !== x) { seen[b] = 1; c++; q.push(b); } } }
+      return c === cnt;
+    }
+    var order = out.filter(function (u) { return !inF[u]; }).sort(function (a, b) { return (dist[b] || 0) - (dist[a] || 0); });
+    for (var guard = 0; cum > hi && guard < 4; guard++) {
+      for (i = 0; i < order.length && cum > hi; i++) {
+        var u = order[i]; if (!inP[u]) continue;
+        var edge = false; for (e = ip[u]; e < ip[u + 1]; e++) if (comp[ix[e]] === bigC) { edge = true; break; }
+        if (!edge || cum - w[u] < hi * 0.97 || !connectedWithout(u)) continue;
+        inP[u] = 0; comp[u] = bigC; cum -= w[u];
+      }
+    }
+    return { out: out.filter(function (u) { return inP[u]; }), cum: cum };
   }
 
   // counties this proposal cuts: it takes some, but not all, of the county's still-unassigned people
@@ -1397,6 +1442,8 @@ td.best { color: var(--ok-ink); font-weight: 600; }
     var set = forced.slice(), inSet = Uint8Array.from(inF), cum = 0, i, exhausted = false;
     for (i = 0; i < set.length; i++) cum += w[set[i]];
     var forcedC = new Uint8Array(prep.ncty); for (i = 0; i < set.length; i++) forcedC[cty[set[i]]] = 1;
+    var clicks = [req.root].concat(req.waypoints || []).filter(function (u) { return inSet[u]; });
+    var dClick = dijkstra(prep, clicks, function (v) { return labels[v] < 0 && !isNeg[v]; }, null, -1).dist;
     while (cum < lo) {
       var g = dijkstra(prep, set, function (v) { return labels[v] < 0 && !isNeg[v] && !inSet[v]; }, dneg, -1,
         function (u, v) { return inSet[u] || cty[u] === cty[v]; });
@@ -1404,19 +1451,24 @@ td.best { color: var(--ok-ink); font-weight: 600; }
       for (i = 0; i < g.order.length; i++) {
         var v = g.order[i]; if (inSet[v]) continue;
         var gr = groups.get(cty[v]);
-        if (!gr) { gr = { c: cty[v], d: g.dist[v], units: [], pop: 0 }; groups.set(cty[v], gr); }
-        gr.units.push(v); gr.pop += w[v];
+        if (!gr) { gr = { c: cty[v], d: Infinity, units: [], pop: 0 }; groups.set(cty[v], gr); }
+        gr.units.push(v); gr.pop += w[v]; gr.d = Math.min(gr.d, dClick[v] < Infinity ? dClick[v] : g.dist[v] + 1e9);
       }
       if (!groups.size) { exhausted = true; break; }
       var cand = Array.from(groups.values()).sort(function (a, b) { return ((forcedC[a.c] ? -1 : a.d) - (forcedC[b.c] ? -1 : b.d)) || a.c - b.c; });
-      var pick = null;
-      for (i = 0; i < cand.length; i++) if (cum + cand[i].pop <= hi) { pick = cand[i]; break; }
+      var pick = null, sp = null;
+      for (i = 0; i < cand.length; i++) {
+        if (cum + cand[i].pop <= hi) { pick = cand[i]; break; }
+        if (forcedC[cand[i].c]) { sp = cand[i]; break; }   // a county you clicked in does not fit: split it, nearest your clicks first
+      }
+      if (sp) { sp.units.sort(function (a, b) { return dClick[a] - dClick[b]; }); for (i = 0; i < sp.units.length; i++) { if (cum + w[sp.units[i]] / 2 < quota) { cum += w[sp.units[i]]; set.push(sp.units[i]); inSet[sp.units[i]] = 1; } } break; }
       if (pick) { pick.units.forEach(function (u) { set.push(u); inSet[u] = 1; }); cum += pick.pop; forcedC[pick.c] = 1; continue; }
-      var sp = cand[0], need = quota - cum;                // nothing fits: split the county with the least leftover
+      sp = cand[0]; var need = quota - cum;                // nothing fits: split the county with the least leftover
       for (i = 1; i < cand.length; i++) if (cand[i].pop - need < sp.pop - need - 1e-9) sp = cand[i];
       for (i = 0; i < sp.units.length; i++) { if (cum + w[sp.units[i]] / 2 < quota) { cum += w[sp.units[i]]; set.push(sp.units[i]); inSet[sp.units[i]] = 1; } else break; }
       break;
     }
+    var f = fillPockets(prep, labels, set, cum, inF, dClick, hi); set = f.out; cum = f.cum;
     if (cum < lo) exhausted = true;
     return finishGrow(prep, labels, set, cum, forced, skipped, exhausted);
   }
@@ -1978,7 +2030,8 @@ function onPoint(u, mode) {
   if (mode !== 'neg' && S.labels[u] >= 0) { say('Block group already in district ' + (S.labels[u] + 1) + '. Remove that district in the list to redraw it.'); return; }
   if (mode === 'neg' && !S.prop) { say('Carving needs a proposal first: click a block group to seed one.'); return; }
   if (mode === 'neg' && S.labels[u] >= 0) return;
-  if (mode === 'new' || !S.prop) S.prop = { root: u, wps: [], negs: [], res: null };
+  if (S.prop && mode !== 'new') snapProp();
+  if (mode === 'new' || !S.prop) S.prop = { root: u, wps: [], negs: [], res: null, past: [] };
   else if (mode === 'pos') { if (u !== S.prop.root && !S.prop.wps.includes(u)) S.prop.wps.push(u); }
   else if (mode === 'neg') { if (u !== S.prop.root) S.prop.negs.push(u); }
   say(''); recompute(); refreshAll();
@@ -1987,7 +2040,7 @@ function scribble(units) {
   if (!units.length) return;
   if (S.view !== 'mine') setView('mine');
   const free = units.filter(u => S.labels[u] < 0); if (!free.length) return;
-  if (!S.prop) S.prop = { root: free[0], wps: [], negs: [], res: null };
+  if (S.prop) snapProp(); else S.prop = { root: free[0], wps: [], negs: [], res: null, past: [] };
   const keep = free.filter((u, i) => i === 0 ? false : true);
   const start = S.prop.root === free[0] ? 1 : 0;
   for (let i = start; i < free.length; i++) if (free[i] !== S.prop.root && !S.prop.wps.includes(free[i])) S.prop.wps.push(free[i]);
@@ -2006,10 +2059,11 @@ function accept() {
   say('District ' + (slot + 1) + ' saved.' + (pockets ? ' ' + pockets + ' small unassigned pocket(s) left; "Finish" will fold them into a neighbour.' : ''));
   refreshAll();
 }
+function snapProp() { const p = S.prop; (p.past || (p.past = [])).push({ wps: p.wps.slice(), negs: p.negs.slice() }); }
 function pushUndo() { S.undo.push({ labels: Int32Array.from(S.labels), colors: S.colors.slice() }); if (S.undo.length > 60) S.undo.shift(); }
 function undo() {
   if (S.running) return;
-  if (S.prop) { S.prop = null; refreshAll(); return; }
+  if (S.prop) { const h = S.prop.past && S.prop.past.pop(); if (h) { S.prop.wps = h.wps; S.prop.negs = h.negs; recompute(); say('Last point undone.'); } else { S.prop = null; say('Proposal removed.'); } refreshAll(); return; }
   const s = S.undo.pop(); if (!s) return;
   S.labels = s.labels; S.colors = s.colors; S.sol = null; $('v-sol').disabled = true; $('s-sol').disabled = true; setView('mine', true); refreshAll();
 }
@@ -2226,9 +2280,10 @@ function setupPointer() {
     if (e.button === 1 || (e.button === 0 && (S.tool === 'pan' || spaceDown))) {
       e.preventDefault(); const [x, y] = stageXY(e); panDrag = { x, y, vx: S.vt.vx, vy: S.vt.vy }; ov.setPointerCapture(e.pointerId); $('stage').classList.add('panning'); return;
     }
+    if (e.button === 2) { const u = unitAt(e); if (u >= 0 && S.tool !== 'pan') onPoint(u, 'neg'); return; }
     if (e.button !== 0) return;
     const u = unitAt(e); if (u < 0) return;
-    const neg = e.altKey || e.ctrlKey || e.metaKey || S.tool === 'neg', pos = e.shiftKey || S.tool === 'pos';
+    const neg = e.altKey || e.ctrlKey || e.metaKey || S.tool === 'neg', pos = e.shiftKey || S.tool === 'pos' || (S.tool === 'seed' && !!S.prop);
     if (S.tool === 'scr') { drag = { units: [u], mode: pos && S.prop ? 'extend' : 'new' }; ov.setPointerCapture(e.pointerId); return; }
     onPoint(u, neg ? 'neg' : pos ? 'pos' : 'new');
   });
@@ -2332,10 +2387,10 @@ async function boot() {
   const qs = new URLSearchParams(location.search), q = qs.get('state'), qr = qs.get('region');
   let data = JSON.parse($('state-data').textContent || 'null');
   if (qr && (!data || data.abbr !== qr.toUpperCase() + '+')) {
-    try { data = await (await fetch('regions/' + qr.toUpperCase() + '.json')).json(); } catch (e) { log('could not load region ' + qr + ': ' + e.message); }
+    try { data = await (await fetch(__RD_DATA_BASE + 'regions/' + qr.toUpperCase() + '.json')).json(); } catch (e) { log('could not load region ' + qr + ': ' + e.message); }
   } else if (q && (!data || data.abbr !== q.toUpperCase())) {
-    try { data = await (await fetch('../fair-lines/data/' + q.toUpperCase() + '.json')).json(); } catch (e) { log('could not load state ' + q + ': ' + e.message); }
-    try { data.layers = await (await fetch('layers/' + q.toUpperCase() + '.json')).json(); } catch (e) { log('no constraint layers for ' + q + ': ' + e.message); }
+    try { data = await (await fetch(__RD_DATA_BASE + q.toUpperCase() + '.json')).json(); } catch (e) { log('could not load state ' + q + ': ' + e.message); }
+    try { data.layers = await (await fetch(__RD_DATA_BASE + 'layers/' + q.toUpperCase() + '.json')).json(); } catch (e) { log('no constraint layers for ' + q + ': ' + e.message); }
   }
   init(data);
 }

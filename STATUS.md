@@ -8,9 +8,9 @@
 - Optional edge penalties in the draw tool: state lines, rivers and lakes, commuting zones.
 
 ## Site
-- `site/` is a deployable static prototype (landing, Fair Lines, Draw, Re-draw the states), synced from SegmentAnyMesh commit recorded in `site/SYNC.json`. Smoke-tested with Playwright (`scripts/verify_site.py`): zero console errors, PA solve and draw Finish both run.
-- GitHub Pages workflow is in place but Pages is not enabled yet: Settings, Pages, Source = GitHub Actions, then push to `main` or run the workflow. The deploy only runs from `main`; this work is on `development`.
-- Draw page only ships constraint layers for states present in SegmentAnyMesh `layers/`; the "region" datasets (`?region=XX`) ship only for CA (3 MB) because the rest are gitignored upstream.
+- `site/` is a self-contained static prototype (copy the folder; no hosting service assumed) (landing, Fair Lines, Draw, Re-draw the states), synced from SegmentAnyMesh commit recorded in `site/SYNC.json`. Smoke-tested with Playwright (`scripts/verify_site.py`): zero console errors, PA solve and draw Finish both run.
+- Embedding: `site/` copies as a unit under any subpath; all toys read shared data from `site/data/` by default and from `window.REDISTRICTING_DATA_BASE` or `?data-base=` when set (for example a jsDelivr URL). See `embed/README.md` and `embed/manifest.json`. The jsDelivr URL could not be fetched from the build sandbox (proxy 403), so only a stand-in CORS server was tested.
+- Draw page only ships constraint layers (`site/data/layers/`) for states present in SegmentAnyMesh `layers/`; the "region" datasets (`?region=XX`) ship only for CA, TX and PA (`site/data/regions/`) because the rest are gitignored upstream.
 
 ## In progress
 - Re-draw the states: grouping borderless districts into 50 contiguous new states.
