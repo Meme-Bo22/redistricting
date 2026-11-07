@@ -1,9 +1,6 @@
 <meta charset="utf-8"><link rel="icon" href="data:,"><script>/* data base: window.REDISTRICTING_DATA_BASE (set before load) or ?data-base=, default ../data/ */var __RD_DATA_BASE=(function(){var b=window.REDISTRICTING_DATA_BASE;try{var q=new URLSearchParams(location.search).get("data-base");if(q)b=q}catch(e){}b=b||"../data/";return /\/$/.test(b)?b:b+"/"})();</script>
 <title>Fair Lines</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <style>
 /* "The mesh is the map." A research notebook: the population mesh is drawn under the districts, the solver
    narrates itself in a log, and party colour appears only in Lean mode and the small seat readouts.
@@ -255,16 +252,19 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
 .notes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; border-top: 1px solid var(--rule); padding-top: 16px; font-size: 13px; color: var(--ink-2); }
 .notes p { max-width: 90ch; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
-</style>
+</style><link rel="stylesheet" href="../skin.css">
+<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+
 
 <div class="wrap">
   <header class="mast">
+  <a class="site-back" href="/projects/redistricting/">&larr; Redistricting</a>
     <div class="mast-top">
       <h1>Fair Lines</h1>
       <button class="themebtn" id="themeBtn" aria-label="Toggle light and dark theme">theme</button>
     </div>
     <div class="byline">by Dominik Mattioli · 50 states · 435 districts · no party data used</div>
-    <p class="lede">These congressional districts are drawn by a computer program that sees only <b>where people live</b>, never how they vote. Each dot is a Census block group (a small neighbourhood of a few thousand people) and each line joins two neighbours. The program colours that web into districts with equal populations. Pick a state on the map, watch the districts grow, then try to bend the lines yourself.</p>
+    <p class="lede">A program draws these districts from <b>where people live</b>, never how they vote. Each dot is a Census block group. Each line joins two neighbours. Pick a state, watch the districts grow, then bend the lines.</p>
   </header>
 
   <section class="nation" aria-labelledby="natTitle">
@@ -295,8 +295,8 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
           <button id="natShowFair" aria-pressed="true">Fair map in each state</button><button id="natShowFree" aria-pressed="false" disabled>Borderless map</button>
         </div>
         <div class="natprog" id="natProg" hidden><i id="natProgBar"></i></div>
-        <p class="natlog" id="natLog" role="status" aria-live="polite">Each patch of colour is one of the 435 districts, drawn from every block group in the country. Thin lines are state borders.</p>
-        <p class="natnote" id="natMethod">The solver is the same one the state lab uses, started from 435 random, population-weighted centres, but it treats the whole country as one region: districts may cross state lines.</p>
+        <p class="natlog" id="natLog" role="status" aria-live="polite">Each colour is one of 435 districts. Thin lines are state borders.</p>
+        <p class="natnote" id="natMethod">Same solver as the state view, but districts may cross state lines.</p>
       </div>
       <div class="panel" aria-live="polite">
         <div class="panel-head"><span class="label" id="natScoreTitle">Borderless map · 2020 votes</span></div>
@@ -308,7 +308,7 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
           <dt>Districts that cross a state line</dt><dd id="nsCross">–</dd>
           <dt>Solver</dt><dd id="nsMode">–</dd>
         </dl>
-        <p class="natnote"><b>This is a thought experiment.</b> Real congressional districts can&rsquo;t cross state lines, because each state is given its own number of seats. Running the solver on the whole country shows how much of the House balance comes from where the state lines fall, rather than from how the lines inside each state are drawn.</p>
+        <p class="natnote"><b>Thought experiment.</b> Real districts cannot cross state lines. This view shows how much of the House balance comes from the state lines themselves.</p>
       </div>
     </div>
     <div class="sflegend" id="natSfLegend" hidden>
@@ -369,7 +369,7 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
         <p class="lc-read" id="lcOut" aria-live="polite">Slide toward the official map to see the districts morph.</p>
         <p class="lc-sentence" id="lcSentence" aria-live="polite"></p>
         <svg id="lcPlot" class="lcplot" viewBox="0 0 400 232" role="img" aria-label="Compactness and population gap against the share of people moved" hidden></svg>
-        <p class="hint" style="margin:0;font-size:12px">Method: blends district centres from the official map toward the fair map and rebalances at each step (Euclidean distances, equal populations). It matches each fair district to the official district it overlaps most. It does not claim to find the fewest possible moves. The official districts are not round, power-diagram cells, so even the first step (10%) redraws them that way and moves a lot of people at once. Official districts are assigned by block-group centre, so their populations here are only within about 2% of equal. Dashed lines are the official districts.</p>
+        <p class="hint" style="margin:0;font-size:12px">Method: centres move from the official map toward the fair map; populations rebalance at each step. This is not the fewest possible moves. Official districts here are within about 2% of equal. Dashed lines are official districts.</p>
       </div>
       <div class="toolbar">
         <button class="btn" id="btnDrag" aria-pressed="false">Move centres</button>
@@ -378,7 +378,7 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
       </div>
       <div id="paintTools" hidden>
         <div class="paintbar" id="paintbar" aria-label="District to paint"></div>
-        <p class="hint">Pick a district, then drag across the map to hand neighbourhoods to it. The solver log and scorecard show whether the populations stay equal and every district stays in one piece.</p>
+        <p class="hint">Pick a district. Drag across the map to give it neighbourhoods. The log shows if populations stay equal and districts stay whole.</p>
       </div>
       <p class="hint" id="dragHint" hidden>Drag a numbered centre. The map rebalances to equal populations around wherever you put it.</p>
     </div>
@@ -399,7 +399,7 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
           <dt>Boundary length (share of neighbour links cut)</dt><dd id="kvCut">–</dd>
           <dt>Wasted-vote gap</dt><dd id="kvEG">–</dd>
         </dl>
-        <p class="hint" style="margin:0;font-size:12px">Population gap: how far the most over- or under-filled district is from an equal share. Wasted-vote gap: how many more votes one party throws away than the other (on losing, or on surplus winning, ballots) as a share of all votes; near zero is even, and the letter names the party that gains.</p>
+        <p class="hint" style="margin:0;font-size:12px"><b>Population gap:</b> the largest miss from an equal share. <b>Wasted-vote gap:</b> extra votes one party wastes, as a share of all votes. Near zero is even; the letter names the party that gains.</p>
         <div class="ladder">
           <div class="label" style="margin-bottom:4px">Districts, safest D to safest R</div>
           <svg id="ladder" viewBox="0 0 320 150" role="img" aria-label="District margins"></svg>
@@ -432,8 +432,8 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
 
   <section class="why" aria-labelledby="whyTitle">
     <h2 id="whyTitle">Why a mesh</h2>
-    <p>Drawing districts is a <b>cutting problem</b>. Picture the state as a web of neighbourhoods, each joined to the ones next to it. You must cut that web into pieces that each hold the same number of people, stay in one connected piece, and have short, tidy borders. Engineers solve the same problem when they split a coastal ocean model across many computer processors, and this tool grows out of that work (the ADMESH and CHILmesh mesh-building software). Here every dot is a block group weighted by its population, so those methods apply directly, and we can compare them with other districting methods on exactly the same data.</p>
-    <p>The <b>Mesh size</b> view shows the other half of the link. A mesh builder steers its grid with a size map, the target width of a grid cell at each place. If cells followed population, so each held about the same number of people, they would be small in cities and large in empty land, and that is what the view paints. We tested the idea and it did not pay off: meshing to this size map did not beat cutting the block groups directly (see <span class="num" style="overflow-wrap:anywhere">research/redistricting_mesh_vs_bg/results.md</span>). So here it is a way to look at the data, and the solver does not use it.</p>
+    <p>Districting is a <b>cutting problem</b>. Cut a web of neighbourhoods into pieces with equal people, one piece each, and short borders. Ocean modellers solve the same problem when they split a mesh across processors. This tool comes from that work (ADMESH and CHILmesh).</p>
+    <p>The <b>Mesh size</b> view paints cell size by population: small in cities, large in empty land. Meshing to this size map did not beat cutting the block groups directly. The solver does not use it.</p>
     <table class="bench">
       <caption>Four methods on the same block groups, the same mesh and the same scoring code. &ldquo;Population gap&rdquo; is how far the worst district is from an equal share (smaller is better). &ldquo;Compactness&rdquo; is the average Polsby-Popper score: 1 means a perfect circle, and values near 0 mean long, stringy shapes (higher is better). &ldquo;Seconds&rdquo; is run time. The GerryChain row is the most compact map found in 5,000 random steps.</caption>
       <thead><tr><th>Method</th><th>Population gap %</th><th>Compactness</th><th>Seconds</th></tr></thead>
@@ -455,12 +455,12 @@ select { border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; ba
         <tr><td>Standard graph-partitioning program (METIS)</td><td>2.538</td><td>0.155</td><td>1.1</td></tr>
       </tbody>
     </table>
-    <p><b>Honest framing.</b> This is not a new method. It combines published techniques (Hess 1965; Cohen-Addad, Klein &amp; Young 2018; and the border-swapping step used by METIS, a standard graph-partitioning program) and was tuned until it behaved well on real block-group data. GerryChain&rsquo;s random-map sampler (called ReCom) is built to produce many different maps, not one tightly balanced map, so its population-gap column says little about what it is for. Shortest splitline, which repeatedly cuts the state in two with the shortest line that splits the people evenly, wins on compactness in two of the three states. † In California, shortest splitline produced a map with a district in more than one piece. Source: <span class="num" style="overflow-wrap:anywhere">research/redistricting_baselines/results.md</span>.</p>
+    <p><b>Not a new method.</b> It combines published techniques: Hess (1965), Cohen-Addad, Klein and Young (2018), and the METIS border swap. GerryChain ReCom samples many maps, so its population gap says little. Shortest splitline wins on compactness in 2 of 3 states. † In California, shortest splitline split one district into pieces.</p>
   </section>
 
   <footer class="notes">
-    <p><strong>How the lines are drawn.</strong> We join the Census block groups into a web of neighbours (a Delaunay triangulation, trimmed to the state outline, with islands linked across water). The program picks starting centres, then grows districts outward from them over that web in a way that keeps each one the same size in people; this is a population-balanced version of a centroidal power diagram (each district is the area closest to its centre, with sizes adjusted for population). It then reattaches any stray pieces and swaps border neighbourhoods one at a time to even out the populations. The only inputs are head counts and locations. For large states the picture shows a thinned-out web to stay fast, but the solver always uses every link. &ldquo;Draw it fresh&rdquo; and the seat buttons start from random centres, chosen so that crowded areas are more likely to get one, so each run can end up slightly different.</p>
-    <p><strong>Read the numbers loosely.</strong> Population comes from the 2020 Census, by block group, with the 2020 count of seats per state. Districts are equal to within about 0.2%, which is looser than the near-exact equality courts require. Votes are presidential results <span id="elecMethod">estimated down to block groups</span>. They come from the Voting and Election Science Team (VEST) precinct data, as spread to blocks by the ALARM Project (Algorithm-Assisted Redistricting Methodology; CC BY 4.0 / CC BY-SA 4.0), and from 2024 county totals published by Dave&rsquo;s Redistricting (DRA) and the Redistricting Data Hub (RDH) (CC BY-SA 4.0). So the seat counts show how those presidential votes would fall under each map, not how House races would turn out. No Voting Rights Act analysis is included. These are hypothetical maps.</p>
+    <p><strong>How it works.</strong> Block groups form a web of neighbours (a Delaunay triangulation clipped to the state; islands link across water). Districts grow from starting centres with equal population (a balanced power diagram). Stray pieces reattach. Border swaps even out the populations. Inputs are only head counts and locations. Starts are random and weighted by population, so runs differ slightly.</p>
+    <p><strong>Data and limits.</strong> Population: 2020 Census block groups and 2020 seat counts. Districts are within about 0.2% of equal; courts need near-exact. Votes: presidential results <span id="elecMethod">estimated down to block groups</span>, from VEST precinct data spread by the ALARM Project (CC BY 4.0 / CC BY-SA 4.0) and 2024 county totals from Dave&rsquo;s Redistricting and the Redistricting Data Hub (CC BY-SA 4.0). Seat counts show presidential votes, not House races. No Voting Rights Act analysis. Maps are hypothetical.</p>
   </footer>
 </div>
 

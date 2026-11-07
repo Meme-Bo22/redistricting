@@ -32,7 +32,9 @@ h1 { font-size: 20px; margin: 0; } .sub { color: var(--ink-2); flex: 1; min-widt
 @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
 .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 12px; }
 .stage { position: relative; background: var(--map-bg); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
-.stage canvas { display: block; width: 100%; }
+.stage canvas { display: block; width: 100%; touch-action: none; }
+.sim { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; color: var(--ink-2); }
+.stage[data-mode="move"] canvas { cursor: grab; } .stage[data-mode="add"] canvas { cursor: copy; } .stage[data-mode="remove"] canvas { cursor: not-allowed; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; color: var(--ink-2); }
 .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
 .seg button { border: 0; border-radius: 0; border-right: 1px solid var(--rule); }
@@ -56,10 +58,13 @@ td .bar { display: inline-block; height: 7px; border-radius: 3px; background: va
 tr.hi td { background: var(--panel-2); }
 </style>
 </head>
+<link rel="stylesheet" href="../skin.css">
+<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <body>
 <header>
+  <a class="site-back" href="/projects/redistricting/">&larr; Redistricting</a>
   <h1>Re-draw the state lines</h1>
-  <div class="sub" id="sub">The 435 districts drawn with no state lines, grouped into 50 new states that keep their seat counts.</div>
+  <div class="sub" id="sub">435 districts with no state lines, grouped into 50 new states. Each keeps its seat count.</div>
   <button id="theme" aria-label="Toggle light and dark theme">Theme</button>
 </header>
 <div class="wrap">
@@ -81,6 +86,20 @@ tr.hi td { background: var(--panel-2); }
       <label class="chk"><input type="checkbox" id="regions"> Census regions</label>
       <label class="chk"><input type="checkbox" id="divisions"> divisions</label>
     </div>
+    <div class="sim">
+      <span>Simulator</span>
+      <button id="run">Run</button>
+      <button id="undo">Undo</button>
+      <button id="reset">Reset</button>
+      <span>Click mode</span>
+      <div class="seg" role="group" aria-label="Click mode">
+        <button id="m-look" aria-pressed="true">Look</button>
+        <button id="m-move" aria-pressed="false">Move seed</button>
+        <button id="m-add" aria-pressed="false">Add seed</button>
+        <button id="m-remove" aria-pressed="false">Remove seed</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="seeds" checked> seeds</label>
+    </div>
     <div class="stage" id="stage"><canvas id="map" role="img" aria-label="Map of the United States with new state lines"></canvas></div>
     <div class="statusline" id="hover">&nbsp;</div>
     <div class="legend" id="legend"></div>
@@ -99,15 +118,17 @@ const $ = id => document.getElementById(id);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const hexRGB = h => { const v = parseInt(h.replace('#', ''), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; };
 const R = JSON.parse($('regions-data').textContent);
-const S = { lines: 'new', fill: 'new', sort: ['retained_pct', 1], hi: -1 };
+const S = { lines: 'new', fill: 'new', sort: ['retained_pct', 1], hi: -1, mode: 'look' };
 function unRLE(b64, n) {
   const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
   const r = new Uint32Array(u8.buffer), out = new Int16Array(n); let p = 0;
   for (let i = 0; i < r.length; i += 2) { out.fill(r[i] - 1, p, p + r[i + 1]); p += r[i + 1]; }
   if (p !== n) throw new Error('raster length mismatch'); return out;
 }
-const W = R.W, H = R.H, N = W * H, dist = unRLE(R.rle, N), old = unRLE(R.rle_old, N), dnew = Int16Array.from(R.district_new);
-const nw = new Int16Array(N); for (let p = 0; p < N; p++) nw[p] = dist[p] < 0 ? -1 : dnew[dist[p]];
+const W = R.W, H = R.H, N = W * H, dist = unRLE(R.rle, N), old = unRLE(R.rle_old, N);
+let dnew = Int16Array.from(R.district_new);
+const nw = new Int16Array(N); const paint = () => { for (let p = 0; p < N; p++) nw[p] = dist[p] < 0 ? -1 : dnew[dist[p]]; }; paint();
+const ST = { names: R.names.slice(), abbrs: R.abbrs.slice(), colors: R.colors.slice(), rows: R.rows.map((r, s) => Object.assign({ s }, r)), labels: R.labels, sim: false };
 const REG = [...new Set(R.division.map(d => d[0]))], DIV = [...new Set(R.division.map(d => d[1]))];
 const regOf = R.division.map(d => REG.indexOf(d[0])), divOf = R.division.map(d => DIV.indexOf(d[1]));
 // colours for "today's state" fill: same palette, greedy on today's adjacency
@@ -123,7 +144,7 @@ function render() {
   const cv = $('map'), ctx = cv.getContext('2d'); cv.width = W; cv.height = H;
   const img = ctx.createImageData(W, H), o = img.data, bg = hexRGB(css('--map-bg')), k = parseFloat(css('--fill-k'));
   const mix = (c, t) => [bg[0] + (c[0] - bg[0]) * t | 0, bg[1] + (c[1] - bg[1]) * t | 0, bg[2] + (c[2] - bg[2]) * t | 0];
-  const newRGB = R.colors.map(c => mix(hexRGB(c), k)), oldRGB = oldCol.map(c => mix(hexRGB(c), k));
+  const newRGB = ST.colors.map(c => mix(hexRGB(c), k)), oldRGB = oldCol.map(c => mix(hexRGB(c), k));
   const gain = mix([95, 208, 192], k), lost = mix([238, 122, 110], k), same = mix([128, 140, 150], k * 0.5);
   const lOld = hexRGB(css('--old')), lNew = hexRGB(css('--new')), lReg = hexRGB(css('--reg')), lDiv = hexRGB(css('--div'));
   const showOld = S.lines !== 'new', showNew = S.lines !== 'old', showD = $('dist').checked, showR = $('regions').checked, showV = $('divisions').checked;
@@ -148,12 +169,14 @@ function render() {
     o[q] = c[0]; o[q + 1] = c[1]; o[q + 2] = c[2]; o[q + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
+  if ($('seeds').checked && ST.sim) drawSeeds(ctx);
   // labels: the old name at the new state's population centre (new lines) or at today's centre (old lines)
-  const useNew = S.lines !== 'old', pts = useNew ? R.labels : R.old_labels;
+  const useNew = S.lines !== 'old', pts = useNew ? ST.labels : R.old_labels;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  R.abbrs.forEach((ab, s) => {
-    const [fx, fy] = pts[s], X = fx * R.scale, Y = fy * R.scale, row = R.rows[s];
-    const t1 = row.seats >= 6 ? R.names[s] : ab, t2 = useNew ? Math.round(row.retained_pct) + '%' : row.seats + (row.seats === 1 ? ' seat' : ' seats');
+  (useNew ? ST.rows.map(r => r.s) : [...R.abbrs.keys()]).forEach(s => {
+    const ab = useNew ? ST.abbrs[s] : R.abbrs[s], row = useNew ? ST.rows.find(r => r.s === s) : R.rows[s]; if (!pts[s]) return;
+    const [fx, fy] = pts[s], X = fx * R.scale, Y = fy * R.scale;
+    const t1 = row.seats >= 6 ? (useNew ? ST.names : R.names)[s] : ab, t2 = useNew ? (row.retained_pct == null ? row.seats + ' seats' : Math.round(row.retained_pct) + '%') : row.seats + (row.seats === 1 ? ' seat' : ' seats');
     ctx.font = `700 ${s === S.hi ? 15 : 12}px ${css('--font-body')}`; ctx.lineWidth = 3; ctx.strokeStyle = css('--map-bg'); ctx.fillStyle = css('--ink');
     ctx.strokeText(t1, X, Y - 6); ctx.fillText(t1, X, Y - 6);
     ctx.font = `500 10.5px ${css('--font-mono')}`; ctx.strokeText(t2, X, Y + 7); ctx.fillText(t2, X, Y + 7);
@@ -167,11 +190,11 @@ function render() {
   }
   $('legend').innerHTML = (showNew ? `<span><i style="border-color:${css('--new')}"></i>new state lines</span>` : '') + (showOld ? `<span><i style="border-color:${css('--old')};border-top-width:1px"></i>today's state lines</span>` : '') +
     (showR ? `<span><i style="border-color:${css('--reg')}"></i>Census regions (4)</span>` : '') + (showV ? `<span><i style="border-color:${css('--div')};border-top-style:dashed"></i>Census divisions (9)</span>` : '') +
-    (S.fill === 'lost' ? (S.hi < 0 ? '<span>grey: same state today and new · red: changes state (click a state to focus)</span>' : `<span>red: leaves ${R.names[S.hi]} · teal: joins ${R.names[S.hi]}</span>`) : '');
+    (S.fill === 'lost' ? (S.hi < 0 ? '<span>grey: same state today and new · red: changes state (click a state to focus)</span>' : `<span>red: leaves ${ST.names[S.hi]} · teal: joins ${ST.names[S.hi]}</span>`) : '');
 }
 function table() {
-  const [k, dir] = S.sort, rows = R.rows.map((r, s) => Object.assign({ s }, r)).sort((a, b) => (a[k] < b[k] ? -1 : a[k] > b[k] ? 1 : 0) * dir);
-  $('tbl').querySelector('tbody').innerHTML = rows.map(r => `<tr data-s="${r.s}" class="${r.s === S.hi ? 'hi' : ''}"><td>${r.name}</td><td class="num">${r.seats}</td><td class="num"><span class="bar" style="width:${(r.retained_pct * 0.5).toFixed(0)}px"></span>${r.retained_pct.toFixed(1)}%</td><td class="num">${r.new_from_old_pct.toFixed(1)}%</td></tr>`).join('');
+  const [k, dir] = S.sort, rows = ST.rows.slice().sort((a, b) => (a[k] < b[k] ? -1 : a[k] > b[k] ? 1 : 0) * dir);
+  $('tbl').querySelector('tbody').innerHTML = rows.map(r => `<tr data-s="${r.s}" class="${r.s === S.hi ? 'hi' : ''}"><td>${r.name}</td><td class="num">${r.seats}</td><td class="num"><span class="bar" style="width:${((r.retained_pct || 0) * 0.5).toFixed(0)}px"></span>${r.retained_pct == null ? 'new' : r.retained_pct.toFixed(1) + '%'}</td><td class="num">${r.new_from_old_pct == null ? '' : r.new_from_old_pct.toFixed(1) + '%'}</td></tr>`).join('');
   $('tbl').querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => { S.hi = S.hi === +tr.dataset.s ? -1 : +tr.dataset.s; table(); render(); });
 }
 function press(ids, on) { ids.forEach(id => $(id).setAttribute('aria-pressed', id === on)); }
@@ -184,17 +207,170 @@ function wire() {
   $('map').addEventListener('mousemove', e => {
     const r = $('map').getBoundingClientRect(), x = Math.floor((e.clientX - r.left) / r.width * W), y = Math.floor((e.clientY - r.top) / r.height * H);
     if (x < 0 || y < 0 || x >= W || y >= H) return; const p = y * W + x;
-    $('hover').textContent = dist[p] < 0 ? ' ' : `district ${dist[p] + 1} · today ${R.names[old[p]]} · new ${R.names[nw[p]]}` + (old[p] === nw[p] ? '' : '  (changes state)');
+    $('hover').textContent = dist[p] < 0 ? ' ' : `district ${dist[p] + 1} · today ${R.names[old[p]]} · new ${ST.names[nw[p]]}` + (old[p] === nw[p] ? '' : '  (changes state)');
   });
   $('map').addEventListener('click', e => {
+    if (S.mode !== 'look') return;
     const r = $('map').getBoundingClientRect(), x = Math.floor((e.clientX - r.left) / r.width * W), y = Math.floor((e.clientY - r.top) / r.height * H), p = y * W + x;
     if (p < 0 || p >= N || nw[p] < 0) return; S.hi = S.hi === nw[p] ? -1 : nw[p]; table(); render();
   });
 }
-$('sub').textContent = `The 435 districts drawn with no state lines (worst population gap ${R.plan.maxAbsDevPct.toFixed(2)}%), grouped into 50 new states: each keeps its 2020 seat count, is one connected piece of districts, and keeps as many of its people as possible.`;
+$('sub').textContent = `435 districts drawn with no state lines (worst population gap ${R.plan.maxAbsDevPct.toFixed(2)}%), grouped into 50 new states. Each new state keeps its 2020 seat count and is one connected piece.`;
 $('total').textContent = `${R.retained_total_pct.toFixed(1)}% of Americans live in the new state that carries their state's name. Click a row or the map to highlight a state.`;
-$('method').textContent = 'Method: greedy seed per state (the district holding most of its people), greedy growth by overlap, repair chains for districts no neighbour could take, then pairwise swaps until none gains. Census regions and divisions are whole states (from state FIPS) and shown only as an overlay. Grouping: build_regions.py; borderless plan: solve_national.js.';
-wire(); table(); render(); window.__ready = true;
+$('method').textContent = 'Method: each state starts from one seed district. It grows to its seat count, then swaps border districts while a swap keeps more people. Run the simulator to repeat this with your own seeds. Move a seed, add one with a click (it takes half of a state\'s seats) or remove one with a right-click (a neighbour takes its seats). Census regions and divisions are an overlay only.';
+// ---- simulator: seeds grow into states with fixed seat quotas, then boundary moves improve the fit ----
+const ND = R.district_new.length, NS0 = R.abbrs.length;
+const G = (() => {
+  const nb = Array.from({ length: ND }, () => new Set()), px = new Float64Array(ND), cx = new Float64Array(ND), cy = new Float64Array(ND);
+  const ov = Array.from({ length: ND }, () => new Map());
+  for (let p = 0; p < N; p++) {
+    const d = dist[p]; if (d < 0) continue; const x = p % W, y = (p / W) | 0;
+    px[d]++; cx[d] += x; cy[d] += y; ov[d].set(old[p], (ov[d].get(old[p]) || 0) + 1);
+    if (x + 1 < W) { const e = dist[p + 1]; if (e >= 0 && e !== d) { nb[d].add(e); nb[e].add(d); } }
+    if (y + 1 < H) { const e = dist[p + W]; if (e >= 0 && e !== d) { nb[d].add(e); nb[e].add(d); } }
+  }
+  for (let d = 0; d < ND; d++) { cx[d] /= px[d]; cy[d] /= px[d]; }
+  const maj = new Int16Array(ND); ov.forEach((m, d) => { let b = -1, bv = -1; m.forEach((v, k) => { if (v > bv) { bv = v; b = k; } }); maj[d] = b; });
+  const d2 = (a, b) => (cx[a] - cx[b]) ** 2 + (cy[a] - cy[b]) ** 2;
+  // islands (Alaska, Hawaii, small pieces): link each graph component to the nearest district outside it
+  for (;;) {
+    const comp = new Int16Array(ND).fill(-1); let nc = 0;
+    for (let d = 0; d < ND; d++) if (comp[d] < 0) { const q = [d]; comp[d] = nc; while (q.length) { const a = q.pop(); nb[a].forEach(b => { if (comp[b] < 0) { comp[b] = nc; q.push(b); } }); } nc++; }
+    if (nc === 1) break;
+    const size = new Array(nc).fill(0); comp.forEach(c => size[c]++); const small = size.indexOf(Math.min(...size));
+    let ba = -1, bb = -1, bv = Infinity;
+    for (let a = 0; a < ND; a++) if (comp[a] === small) for (let b = 0; b < ND; b++) if (comp[b] !== small) { const v = d2(a, b); if (v < bv) { bv = v; ba = a; bb = b; } }
+    nb[ba].add(bb); nb[bb].add(ba);
+  }
+  return { nb: nb.map(s => [...s]), cx, cy, maj, d2 };
+})();
+// people kept is estimated per district: a district counts for the today's state that covers most of its area
+const majCount = new Array(NS0).fill(0); G.maj.forEach(m => majCount[m]++);
+const defaultSeeds = () => R.abbrs.map((_, s) => { let b = -1, bv = -1; for (let d = 0; d < ND; d++) if (G.maj[d] === s) { const own = R.district_new[d] === s ? 1 : 0; const v = own * 1e6 - G.d2(d, d); if (b < 0 || v > bv) { bv = v; b = d; } } return { s, d: b >= 0 ? b : s, seats: R.seats[s] }; });
+const SIM = { seeds: defaultSeeds(), next: NS0, timer: 0, drag: null };
+SIM.seeds.forEach(sd => { // seed = the district of this state nearest its people's centre
+  let b = sd.d, bv = Infinity; const [lx, ly] = R.old_labels[sd.s]; for (let d = 0; d < ND; d++) if (G.maj[d] === sd.s) { const v = (G.cx[d] - lx * R.scale) ** 2 + (G.cy[d] - ly * R.scale) ** 2; if (v < bv) { bv = v; b = d; } } sd.d = b; });
+const DEFAULT = SIM.seeds.map(x => Object.assign({}, x));
+function connectedWithout(asg, A, skip) {
+  let start = -1, n = 0; for (let d = 0; d < ND; d++) if (asg[d] === A && d !== skip) { n++; if (start < 0) start = d; }
+  if (n === 0) return false; const seen = new Uint8Array(ND); seen[start] = 1; const q = [start]; let c = 1;
+  while (q.length) { const a = q.pop(); for (const b of G.nb[a]) if (!seen[b] && b !== skip && asg[b] === A) { seen[b] = 1; c++; q.push(b); } }
+  return c === n;
+}
+function* solve() {
+  const seeds = SIM.seeds, quota = new Map(seeds.map(x => [x.s, x.seats])), isSeed = new Set(seeds.map(x => x.d));
+  const asg = new Int16Array(ND).fill(-1), size = new Map(seeds.map(x => [x.s, 0]));
+  seeds.forEach(x => { asg[x.d] = x.s; size.set(x.s, 1); });
+  const own = (d, s) => G.nb[d].reduce((a, b) => a + (asg[b] === s), 0) / G.nb[d].length;
+  // 1. grow: the state furthest below its quota takes its best neighbouring district
+  let stuck = new Set(), step = 0;
+  for (;;) {
+    let pick = null, pv = -1;
+    for (const x of seeds) { if (stuck.has(x.s)) continue; const need = (quota.get(x.s) - size.get(x.s)) / quota.get(x.s); if (need > 0 && need > pv) { pv = need; pick = x; } }
+    if (!pick) break;
+    let bd = -1, bv = -Infinity;
+    for (let d = 0; d < ND; d++) if (asg[d] < 0 && G.nb[d].some(b => asg[b] === pick.s)) { const v = (G.maj[d] === pick.s ? 2 : 0) + own(d, pick.s) - 1e-6 * G.d2(d, pick.d); if (v > bv) { bv = v; bd = d; } }
+    if (bd < 0) { stuck.add(pick.s); continue; }
+    asg[bd] = pick.s; size.set(pick.s, size.get(pick.s) + 1);
+    if (++step % 25 === 0) yield asg;
+  }
+  // 2. leftovers go to the neighbouring state with the most room
+  for (let left = true; left;) { left = false; for (let d = 0; d < ND; d++) if (asg[d] < 0) { let b = -1, bv = Infinity; for (const e of G.nb[d]) if (asg[e] >= 0) { const v = size.get(asg[e]) - quota.get(asg[e]); if (v < bv) { bv = v; b = asg[e]; } } if (b >= 0) { asg[d] = b; size.set(b, size.get(b) + 1); } else left = true; } }
+  yield asg;
+  // 3. local search: single moves and pair swaps across borders, cost = quota miss, then districts kept, then border length
+  const cost1 = (s, n) => Math.abs(n - quota.get(s)) * 1000;
+  const keep = (d, s) => (G.maj[d] === s ? 1 : 0);
+  const cut = (d, s) => G.nb[d].reduce((a, b) => a + (asg[b] !== s), 0);
+  for (let pass = 0, better = true; better && pass < 40; pass++) {
+    better = false;
+    for (let d = 0; d < ND; d++) {
+      const A = asg[d]; if (isSeed.has(d)) continue;
+      for (const B of new Set(G.nb[d].map(e => asg[e]))) {
+        if (B === A) continue;
+        const dq = cost1(A, size.get(A) - 1) + cost1(B, size.get(B) + 1) - cost1(A, size.get(A)) - cost1(B, size.get(B));
+        const dk = keep(d, B) - keep(d, A), dc = 0.05 * (cut(d, B) - cut(d, A));
+        if (dq - dk + dc < -1e-9 && connectedWithout(asg, A, d)) { asg[d] = B; size.set(A, size.get(A) - 1); size.set(B, size.get(B) + 1); better = true; break; }
+        if (dq === 0 && dk <= 0) continue;
+        // pair swap: d goes A to B, some e goes B to A; sizes stay equal
+        if (dk > 0 || dc < 0) for (const e of G.nb[d]) {
+          if (asg[e] !== B || isSeed.has(e)) continue;
+          const gain = dk + keep(e, A) - keep(e, B);
+          if (gain <= 0) continue;
+          if (!connectedWithout(asg, A, d)) break;
+          asg[d] = B; if (connectedWithout(asg, B, e) && G.nb[e].some(f => asg[f] === A)) { asg[e] = A; better = true; break; } asg[d] = A;
+        }
+        if (asg[d] !== A) break;
+      }
+    }
+    yield asg;
+  }
+  // 4. repair seat counts: pass one district along a chain of states from a state with a surplus to one with a deficit
+  const giveable = (A, B) => { let best = -1, bv = -Infinity; for (let d = 0; d < ND; d++) if (asg[d] === A && !isSeed.has(d) && G.nb[d].some(e => asg[e] === B)) { const v = keep(d, B) - keep(d, A) - 0.05 * cut(d, B); if (v > bv && connectedWithout(asg, A, d)) { bv = v; best = d; } } return best; };
+  for (let tries = 0; tries < 300; tries++) {
+    const under = seeds.find(x => size.get(x.s) < x.seats); if (!under) break;
+    const prev = new Map([[under.s, null]]), q = [under.s]; let src = null;
+    while (q.length && src === null) { const B = q.shift(); const nbS = new Set(); for (let d = 0; d < ND; d++) if (asg[d] === B) G.nb[d].forEach(e => nbS.add(asg[e]));
+      for (const A of nbS) { if (prev.has(A) || A < 0) continue; if (giveable(A, B) < 0) continue; prev.set(A, B); if (size.get(A) > quota.get(A)) { src = A; break; } q.push(A); } }
+    if (src === null) break;
+    for (let A = src; prev.get(A) !== null; A = prev.get(A)) { const B = prev.get(A), d = giveable(A, B); if (d < 0) break; asg[d] = B; size.set(A, size.get(A) - 1); size.set(B, size.get(B) + 1); }
+    if (tries % 5 === 0) yield asg;
+  }
+  yield asg;
+  return asg;
+}
+function adopt(asg) {
+  dnew = Int16Array.from(asg, v => v < 0 ? 0 : v); paint();
+  const active = SIM.seeds.map(x => x.s), sumx = new Map(), cnt = new Map(), kept = new Map();
+  for (let d = 0; d < ND; d++) { const s = dnew[d]; sumx.set(s, (sumx.get(s) || [0, 0]).map((v, i) => v + (i ? G.cy[d] : G.cx[d]))); cnt.set(s, (cnt.get(s) || 0) + 1); if (G.maj[d] === s) kept.set(s, (kept.get(s) || 0) + 1); }
+  ST.labels = []; active.forEach(s => { const c = cnt.get(s) || 0; if (c) { const [a, b] = sumx.get(s); ST.labels[s] = [a / c / R.scale, b / c / R.scale]; } });
+  ST.rows = SIM.seeds.map(x => { const c = cnt.get(x.s) || 0, k = kept.get(x.s) || 0, orig = x.s < NS0;
+    return { s: x.s, abbr: ST.abbrs[x.s], name: ST.names[x.s], seats: c, retained_pct: orig ? 100 * k / Math.max(1, majCount[x.s]) : null, new_from_old_pct: orig ? 100 * k / Math.max(1, c) : null }; });
+  let tot = 0; for (let d = 0; d < ND; d++) tot += dnew[d] === G.maj[d]; ST.tot = 100 * tot / ND;
+  const miss = SIM.seeds.filter(x => (cnt.get(x.s) || 0) !== x.seats).length;
+  $('total').textContent = `Simulator: ${ST.tot.toFixed(1)}% of districts stay with the state that covers most of their area (an estimate by district, not by person). ${miss ? miss + ' states miss their seat count.' : 'Every state meets its seat count.'}`;
+}
+function run() {
+  cancelAnimationFrame(SIM.timer); ST.sim = true; SIM.done = false; const it = solve();
+  const tick = () => { const r = it.next(); if (r.value) { adopt(r.value); render(); } if (r.done) { SIM.done = true; table(); return; } SIM.timer = requestAnimationFrame(tick); };
+  tick();
+}
+function newColor(s) { // a palette colour not used by the touching states
+  const pal = [...new Set(R.colors)], used = new Set(); for (let d = 0; d < ND; d++) if (dnew[d] === s) G.nb[d].forEach(e => used.add(ST.colors[dnew[e]]));
+  return pal.find(c => !used.has(c)) || pal[s % pal.length];
+}
+function drawSeeds(ctx) {
+  SIM.seeds.forEach(x => { const X = G.cx[x.d], Y = G.cy[x.d]; ctx.beginPath(); ctx.arc(X, Y, x.s === S.hi ? 8 : 6, 0, 7); ctx.fillStyle = css('--accent'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = css('--map-bg'); ctx.stroke(); });
+}
+function at(e) { const r = $('map').getBoundingClientRect(), x = Math.floor((e.clientX - r.left) / r.width * W), y = Math.floor((e.clientY - r.top) / r.height * H); return { x, y, p: x >= 0 && y >= 0 && x < W && y < H ? y * W + x : -1, k: W / r.width }; }
+function nearSeed(pt) { let b = null, bv = (18 * pt.k) ** 2; SIM.seeds.forEach(x => { const v = (G.cx[x.d] - pt.x) ** 2 + (G.cy[x.d] - pt.y) ** 2; if (v < bv) { bv = v; b = x; } }); return b; }
+function snap() { (SIM.hist || (SIM.hist = [])).push({ seeds: SIM.seeds.map(x => Object.assign({}, x)), next: SIM.next }); }
+function say(t) { $('hover').textContent = t; }
+function wireSim() {
+  for (const m of ['look', 'move', 'add', 'remove']) $('m-' + m).onclick = () => { S.mode = m; press(['m-look', 'm-move', 'm-add', 'm-remove'], 'm-' + m); $('stage').dataset.mode = m; if (m !== 'look' && !ST.sim) run(); };
+  $('run').onclick = run;
+  $('undo').onclick = () => { const h = SIM.hist && SIM.hist.pop(); if (!h) return say('nothing to undo'); SIM.seeds = h.seeds; SIM.next = h.next; if (!SIM.seeds.some(x => x.s === S.hi)) S.hi = -1; say('last seed change undone'); run(); };
+  $('reset').onclick = () => { cancelAnimationFrame(SIM.timer); SIM.seeds = DEFAULT.map(x => Object.assign({}, x)); SIM.next = NS0; SIM.hist = []; ST.sim = false; ST.names.length = ST.abbrs.length = ST.colors.length = NS0;
+    dnew = Int16Array.from(R.district_new); paint(); ST.labels = R.labels; ST.rows = R.rows.map((r, s) => Object.assign({ s }, r)); S.hi = -1;
+    $('total').textContent = `${R.retained_total_pct.toFixed(1)}% of Americans live in the new state that carries their state's name. Click a row or the map to highlight a state.`; table(); render(); };
+  $('seeds').onchange = render;
+  const cv = $('map');
+  cv.addEventListener('contextmenu', e => { if (S.mode !== 'look') e.preventDefault(); });
+  cv.addEventListener('pointerdown', e => { if (e.button === 2 && S.mode === 'add') { S.mode = 'remove'; SIM.back = 'add'; return; } if (S.mode !== 'move') return; const sd = nearSeed(at(e)); if (sd) { SIM.drag = sd; cv.setPointerCapture(e.pointerId); say(`moving the ${ST.names[sd.s]} seed`); } });
+  cv.addEventListener('pointerup', e => {
+    const pt = at(e); if (pt.p < 0) { SIM.drag = null; return; } const d = dist[pt.p];
+    if (S.mode === 'move' && SIM.drag) { const sd = SIM.drag; SIM.drag = null; if (d < 0) return; if (SIM.seeds.some(x => x.d === d && x !== sd)) return say('another seed is in that district'); snap(); sd.d = d; run(); return; }
+    if (S.mode === 'add') { if (d < 0) return; if (SIM.seeds.some(x => x.d === d)) return say('a seed is already in that district'); const host = SIM.seeds.find(x => x.s === dnew[d]);
+      if (!host || host.seats < 2) return say('this state has 1 seat; it cannot give one away');
+      snap(); const s = SIM.next++, give = Math.floor(host.seats / 2); host.seats -= give; ST.names[s] = 'New state ' + (s - NS0 + 1); ST.abbrs[s] = 'N' + (s - NS0 + 1); ST.colors[s] = newColor(dnew[d]);
+      SIM.seeds.push({ s, d, seats: give }); say(`${ST.names[s]} takes ${give} of ${ST.names[host.s]}'s seats`); run(); return; }
+    if (S.mode === 'remove') { if (SIM.back) { S.mode = SIM.back; SIM.back = null; } if (d < 0) return; if (SIM.seeds.length < 2) return; const s = dnew[d], i = SIM.seeds.findIndex(x => x.s === s); if (i < 0) return;
+      const votes = new Map(); for (let a = 0; a < ND; a++) if (dnew[a] === s) G.nb[a].forEach(b => { if (dnew[b] !== s) votes.set(dnew[b], (votes.get(dnew[b]) || 0) + 1); });
+      const heir = [...votes].sort((a, b) => b[1] - a[1])[0]; const h = heir && SIM.seeds.find(x => x.s === heir[0]); if (!h) return;
+      snap(); h.seats += SIM.seeds[i].seats; say(`${ST.names[s]} removed; ${ST.names[h.s]} takes its ${SIM.seeds[i].seats} seats`); SIM.seeds.splice(i, 1); if (S.hi === s) S.hi = -1; run(); }
+  });
+}
+
+wire(); wireSim(); table(); render(); window.__ready = true;
 </script>
 </body>
 </html>
