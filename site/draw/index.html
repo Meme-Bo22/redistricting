@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><link rel="icon" href="data:,"><script>/* data base: window.REDISTRICTING_DATA_BASE (set before load) or ?data-base=, default ../data/ */var __RD_DATA_BASE=(function(){var b=window.REDISTRICTING_DATA_BASE;try{var q=new URLSearchParams(location.search).get("data-base");if(q)b=q}catch(e){}b=b||"../data/";return /\/$/.test(b)?b:b+"/"})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Draw Your Own Districts</title>
 <style>
@@ -2332,10 +2332,10 @@ async function boot() {
   const qs = new URLSearchParams(location.search), q = qs.get('state'), qr = qs.get('region');
   let data = JSON.parse($('state-data').textContent || 'null');
   if (qr && (!data || data.abbr !== qr.toUpperCase() + '+')) {
-    try { data = await (await fetch('regions/' + qr.toUpperCase() + '.json')).json(); } catch (e) { log('could not load region ' + qr + ': ' + e.message); }
+    try { data = await (await fetch(__RD_DATA_BASE + 'regions/' + qr.toUpperCase() + '.json')).json(); } catch (e) { log('could not load region ' + qr + ': ' + e.message); }
   } else if (q && (!data || data.abbr !== q.toUpperCase())) {
-    try { data = await (await fetch('../fair-lines/data/' + q.toUpperCase() + '.json')).json(); } catch (e) { log('could not load state ' + q + ': ' + e.message); }
-    try { data.layers = await (await fetch('layers/' + q.toUpperCase() + '.json')).json(); } catch (e) { log('no constraint layers for ' + q + ': ' + e.message); }
+    try { data = await (await fetch(__RD_DATA_BASE + q.toUpperCase() + '.json')).json(); } catch (e) { log('could not load state ' + q + ': ' + e.message); }
+    try { data.layers = await (await fetch(__RD_DATA_BASE + 'layers/' + q.toUpperCase() + '.json')).json(); } catch (e) { log('no constraint layers for ' + q + ': ' + e.message); }
   }
   init(data);
 }

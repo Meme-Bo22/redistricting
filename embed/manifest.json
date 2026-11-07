@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "repo": "https://github.com/domattioli/redistricting",
+  "root": "site/",
+  "notes": "Copy site/ as a unit. All URLs inside are relative, so any mount path works. Every toy reads data from <data-base>, resolved as: ?data-base= query param, else window.REDISTRICTING_DATA_BASE, else ../data/ . Absolute (CDN) bases need CORS (jsDelivr sends Access-Control-Allow-Origin: *).",
+  "data_base": {
+    "default": "../data/",
+    "override_order": [
+      "?data-base=<url> query parameter",
+      "window.REDISTRICTING_DATA_BASE (set before the page script runs)",
+      "../data/"
+    ],
+    "cdn": "https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/",
+    "cdn_note": "Pin <commit-or-tag> to a full commit hash or a tag; branch names are cached by jsDelivr for up to 12 h. The data folder is 39.3 MB (37.5 MiB); the toys only fetch what the visitor opens."
+  },
+  "totals": {
+    "site_mb": 42.4,
+    "site_data_mb": 39.3,
+    "site_without_data_mb": 3.1
+  },
+  "toys": [
+    {
+      "id": "fair-lines",
+      "title": "Fair Lines: state solver and borderless US",
+      "description": "Pick a state and get equal-population, contiguous, compact districts; the national view solves all 435 districts across state lines.",
+      "entry": "site/fair-lines/index.html",
+      "data": {
+        "base_relative_to_entry": "../data/",
+        "files": [
+          {
+            "path": "site/data/us.json",
+            "mb": 0.09,
+            "required": true,
+            "note": "state list and seat counts; fetched at load"
+          },
+          {
+            "path": "site/data/<ST>.json",
+            "mb": 21.1,
+            "required": "per state opened",
+            "note": "51 files (50 states + DC), 0.1 to 2.4 MB each; fetched when a state is opened (PA is 0.88 MB)"
+          },
+          {
+            "path": "site/data/national.json",
+            "mb": 9.3,
+            "required": "national view only",
+            "note": "fetched when the Borderless US view is opened"
+          },
+          {
+            "path": "site/data/us_sizefn.json",
+            "mb": 0.6,
+            "required": "national mesh-size overlay only"
+          }
+        ],
+        "total_mb": 31.1,
+        "cdn_alternative": "https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/{us,national,us_sizefn,<ST>}.json"
+      },
+      "iframe": {
+        "width": "100%",
+        "aspect_ratio": "4 / 3",
+        "min_height_px": 640,
+        "note": "desktop layout was captured at 1360x1000; give it at least 640 px of height",
+        "sandbox": "allow-scripts allow-same-origin",
+        "referrerpolicy": "no-referrer",
+        "allow": "(no permissions-policy features needed)",
+        "loading": "lazy"
+      },
+      "needs_web_worker": true,
+      "csp": "Uses one Web Worker built from a Blob (national solve): script-src 'unsafe-inline' (the page is a single file with inline script/style), worker-src blob:, img-src data: (size-function PNG is a data URI), connect-src 'self' plus the CDN origin if used. Google Fonts (fonts.googleapis.com, fonts.gstatic.com) are optional: without them system fonts are used.",
+      "screenshot": "site/img/fair-lines-state.png",
+      "screenshots_extra": [
+        "site/img/fair-lines-borderless.png"
+      ],
+      "link_url_forms": [
+        "site/fair-lines/#PA (open a state; any two-letter code)"
+      ],
+      "data_base_config": {
+        "window_global": "<script>window.REDISTRICTING_DATA_BASE = \"https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/\";</script> placed before the toy's own script, i.e. only for a toy page you serve yourself; inside an iframe use the query form",
+        "iframe_query": "site/fair-lines/index.html?data-base=https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/",
+        "default": "../data/ (relative to the toy page, i.e. site/data/)"
+      }
+    },
+    {
+      "id": "draw",
+      "title": "Draw your own districts",
+      "description": "Click a block group and a district grows from it; hand off with Finish my map and compare to the official plan.",
+      "entry": "site/draw/index.html",
+      "data": {
+        "base_relative_to_entry": "../data/",
+        "files": [
+          {
+            "path": "(embedded in the page)",
+            "mb": 0.9,
+            "required": true,
+            "note": "Pennsylvania ships inside index.html, so the default view needs no data fetch"
+          },
+          {
+            "path": "site/data/<ST>.json",
+            "mb": 21.1,
+            "required": "?state=<ST> only",
+            "note": "same 51 files as fair-lines"
+          },
+          {
+            "path": "site/data/layers/<ST>.json",
+            "mb": 0.5,
+            "required": "optional with ?state=<ST>",
+            "note": "50 files, constraint layers; absence only logs a note"
+          },
+          {
+            "path": "site/data/regions/<ST>.json",
+            "mb": 7.8,
+            "required": "?region=<ST> only",
+            "note": "3 files: CA, TX, PA"
+          }
+        ],
+        "total_mb": 29.4,
+        "total_mb_note": "worst case, all files; the default view fetches nothing",
+        "cdn_alternative": "https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/{<ST>.json,layers/<ST>.json,regions/<ST>.json}"
+      },
+      "iframe": {
+        "width": "100%",
+        "aspect_ratio": "4 / 3",
+        "min_height_px": 720,
+        "note": "needs room for the map plus the side panel; on phones link out instead",
+        "sandbox": "allow-scripts allow-same-origin",
+        "referrerpolicy": "no-referrer",
+        "allow": "(no permissions-policy features needed)",
+        "loading": "lazy"
+      },
+      "needs_web_worker": false,
+      "csp": "No workers. Single inline script/style file: script-src 'unsafe-inline'; connect-src 'self' plus the CDN origin if used; Google Fonts optional.",
+      "screenshot": "site/img/draw-overview.png",
+      "link_url_forms": [
+        "site/draw/ (Pennsylvania, no fetch)",
+        "site/draw/?state=OH",
+        "site/draw/?region=PA"
+      ],
+      "data_base_config": {
+        "window_global": "<script>window.REDISTRICTING_DATA_BASE = \"https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/\";</script> placed before the toy's own script, i.e. only for a toy page you serve yourself; inside an iframe use the query form",
+        "iframe_query": "site/draw/index.html?data-base=https://cdn.jsdelivr.net/gh/domattioli/redistricting@<commit-or-tag>/site/data/",
+        "default": "../data/ (relative to the toy page, i.e. site/data/)"
+      }
+    },
+    {
+      "id": "regions",
+      "title": "Re-draw the states",
+      "description": "The borderless districts regrouped into 50 new contiguous states (in progress).",
+      "entry": "site/regions/index.html",
+      "data": {
+        "base_relative_to_entry": null,
+        "files": [],
+        "total_mb": 0,
+        "note": "Self-contained: the page embeds its data (0.6 MB file) and fetches nothing.",
+        "cdn_alternative": null
+      },
+      "iframe": {
+        "width": "100%",
+        "aspect_ratio": "4 / 3",
+        "min_height_px": 640,
+        "sandbox": "allow-scripts allow-same-origin",
+        "referrerpolicy": "no-referrer",
+        "allow": "(no permissions-policy features needed)",
+        "loading": "lazy"
+      },
+      "needs_web_worker": false,
+      "csp": "No workers, no fetches. script-src 'unsafe-inline'; Google Fonts optional.",
+      "screenshot": "site/img/regions.png",
+      "data_base_config": "not applicable (the page reads no external data)"
+    }
+  ],
+  "landing": {
+    "entry": "site/index.html",
+    "note": "Optional index linking the three toys; not needed when embedding individually."
+  }
+}

@@ -1,4 +1,4 @@
-<meta charset="utf-8">
+<meta charset="utf-8"><link rel="icon" href="data:,"><script>/* data base: window.REDISTRICTING_DATA_BASE (set before load) or ?data-base=, default ../data/ */var __RD_DATA_BASE=(function(){var b=window.REDISTRICTING_DATA_BASE;try{var q=new URLSearchParams(location.search).get("data-base");if(q)b=q}catch(e){}b=b||"../data/";return /\/$/.test(b)?b:b+"/"})();</script>
 <title>Fair Lines</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1580,7 +1580,7 @@ async function setNatSize(on) {
   if (!S.nat) {
     $("natSfCap").textContent = "Loading the national mesh-size map…";
     try {
-      const r = await fetch("data/us_sizefn.json"); if (!r.ok) throw new Error("HTTP " + r.status);
+      const r = await fetch(__RD_DATA_BASE + "us_sizefn.json"); if (!r.ok) throw new Error("HTTP " + r.status);
       const doc = await r.json(), img = new Image(); img.src = doc.png; await img.decode();
       const c = document.createElement("canvas"); c.width = doc.w; c.height = doc.h; const cx = c.getContext("2d"); cx.drawImage(img, 0, 0);
       S.nat = { doc, src: cx.getImageData(0, 0, doc.w, doc.h).data };
@@ -2210,7 +2210,7 @@ function commitEdit() {
 }
 const cache = {};
 async function loadState(abbr) {
-  if (!cache[abbr]) { const r = await fetch(`data/${abbr}.json`); if (!r.ok) throw new Error(`Could not load data for ${abbr} (HTTP ${r.status}).`); cache[abbr] = await r.json(); }
+  if (!cache[abbr]) { const r = await fetch(`${__RD_DATA_BASE}${abbr}.json`); if (!r.ok) throw new Error(`Could not load data for ${abbr} (HTTP ${r.status}).`); cache[abbr] = await r.json(); }
   return cache[abbr];
 }
 async function openState(abbr, scroll) {
@@ -2482,7 +2482,7 @@ async function ensureNational() {
   S.nnLoading = (async () => {
     $("natLoading").hidden = false; $("natLoading").textContent = "Loading 239,209 block groups… (9 MB)";
     try {
-      const r = await fetch("data/national.json"); if (!r.ok) throw new Error("HTTP " + r.status);
+      const r = await fetch(__RD_DATA_BASE + "national.json"); if (!r.ok) throw new Error("HTTP " + r.status);
       const doc = await r.json(); $("natLoading").textContent = "Decoding the national mesh…"; await new Promise(r => setTimeout(r, 0));
       const N = natDecode(doc);
       N.base = natBase(N);
@@ -2886,7 +2886,7 @@ function refreshAll() { renderNation(); if (S.nn) natUpdateScore(); if (S.data) 
 async function boot() {
   wire(); buildSfLegend(); buildSfLegend("natSfTicks");
   try {
-    const r = await fetch("data/us.json"); if (!r.ok) throw new Error("HTTP " + r.status);
+    const r = await fetch(__RD_DATA_BASE + "us.json"); if (!r.ok) throw new Error("HTTP " + r.status);
     S.us = await r.json();
   } catch (err) { $("loading").textContent = "Could not load the national data file. Reload the page to try again."; return; }
   if (S.us.method) $("elecMethod").textContent = S.us.method;
