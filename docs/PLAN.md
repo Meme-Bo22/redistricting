@@ -2,7 +2,7 @@
 
 ## In short (for people)
 
-This fork adds a **neutral baseline** to the redistricting toys. Instead of judging a map against one "fair" map, it compares any map with 10,000 maps drawn without party data for the same state, the method Moon Duchin and Daryl DeFord's group developed (ReCom). You can now see, for example, that under 2016, 2020 and 2024 votes Pennsylvania's official map gives Democrats as many seats as, or more than, 99% of neutral maps (only 0.1–0.9% of neutral maps give them more).
+This fork adds a **neutral baseline** to the redistricting toys. Instead of judging a map against one "fair" map, it compares any map with 10,000 maps drawn without party data for the same state, the method Moon Duchin and Daryl DeFord's group developed (ReCom). You can now see, for example, that under 2016, 2020 and 2024 votes Pennsylvania's official map gives Democrats as many seats as, or more than, 99% of neutral maps (only 0.1–1% of neutral maps give them more).
 
 - **Done (phases 1 and 2):** baselines for all 50 states, a "Neutral baseline" panel in the Draw and Fair Lines toys, and a sampler in Re-draw the states.
 - **Next (phase 3):** a truer neighbour graph, block-level data, packaging and README notes.
@@ -70,7 +70,7 @@ python -m http.server -d site 8000                                 # then open t
 - [x] Pennsylvania pilot (plain and county-weighted).
 - [x] All 50 states × 2 variants with `batch.py`; all 100 runs pass (Florida and Maryland county-weighted after longer re-runs: 336,000 and 200,000 moves per chain).
 
-Pennsylvania result (county-weighted ensemble, median and 5–95%): 19 (16–22) counties split; Democratic seats 7 (6–8) in 2016, 8 (7–9) in 2020, 6 (5–8) in 2024. Official plan: 14 splits; 8, 9, 8 seats. In each election at least 99% of samples give Democrats as many seats or fewer (strictly fewer: 88%, 74%, 87%), and only 0.1–0.9% give more. Solver's plan: typical seats (6, 8, 6), far more compact than any sample (1,221 cut edges vs 1,622–1,905). Caveats: block-group vote estimates, official plan approximated by block-group centres, 1% tolerance.
+Pennsylvania result (county-weighted ensemble, median and 5–95%): 19 (16–22) counties split; Democratic seats 7 (6–8) in 2016, 8 (7–9) in 2020, 6 (5–8) in 2024. Official plan: 14 splits; 8, 9, 8 seats. In each election at least 99% of samples give Democrats as many seats or fewer (strictly fewer: 88%, 74%, 87%), and only 0.1–1% give more. Solver's plan: typical seats (6, 8, 6), far more compact than any sample (1,221 cut edges vs 1,622–1,905). Caveats: block-group vote estimates, official plan approximated by block-group centres, 1% tolerance.
 
 **Phase 2: toys — done.**
 - [x] Neutral baseline panel (Draw, Fair Lines) with seats histogram, box plot, percentiles, proportional marker, plain/county switch, every-election table.
