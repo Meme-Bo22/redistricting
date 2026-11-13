@@ -669,14 +669,18 @@
   "plain": {
    "file": "PA.json",
    "passed": true,
-   "seats_tv": 0.036,
-   "share_diff": 0.0035
+   "seats_tv": 0.0324,
+   "share_diff": 0.0042,
+   "moves_per_chain": 51000,
+   "attempt": 1
   },
   "county20": {
    "file": "PA.county20.json",
    "passed": true,
-   "seats_tv": 0.0804,
-   "share_diff": 0.0057
+   "seats_tv": 0.0808,
+   "share_diff": 0.0068,
+   "moves_per_chain": 51000,
+   "attempt": 1
   }
  },
  "RI": {

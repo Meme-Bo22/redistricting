@@ -9,7 +9,7 @@ from scipy.sparse.csgraph import connected_components
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from redistricting_addons.ensemble import (  # noqa: E402
-    Graph, grid_graph, plan_stats, recom_chain, summarize, tree_seed)
+    Graph, grid_graph, log_spanning_trees, plan_stats, recom_chain, summarize, tree_seed)
 
 
 def _contiguous(g: Graph, labels, k) -> bool:
@@ -83,6 +83,23 @@ def test_county_weight_reduces_splits():
         s = [plan_stats(g, lab, k)["county_splits"] for i, lab in enumerate(recom_chain(g, start, k, 2000, 0.05, w, seed=6)) if i % 10 == 0]
         return np.mean(s)
     assert mean_splits(20.0) < mean_splits(1.0)
+
+
+def test_log_spanning_trees_known_counts():
+    # 3x3 grid: 192 spanning trees; 2x2 grid: 4; a path: 1 (Kirchhoff's theorem, known values)
+    g = grid_graph(3, 3)
+    assert abs(log_spanning_trees(g, np.zeros(9, int), 1) - np.log(192)) < 1e-9
+    g = grid_graph(4, 2)  # left 2x2 block = district 0, right 2x2 block = district 1
+    labels = np.array([0, 0, 1, 1, 0, 0, 1, 1])
+    assert abs(log_spanning_trees(g, labels, 2) - 2 * np.log(4)) < 1e-9
+    g = grid_graph(5, 1)
+    assert abs(log_spanning_trees(g, np.zeros(5, int), 1)) < 1e-9
+    # a compact split has more trees than a snaky one of the same sizes
+    g = grid_graph(4, 4)
+    halves = np.repeat([0, 1], 8)
+    snake = np.array([0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0])  # 8/8: an L round a block, both connected
+    assert _contiguous(g, snake, 2)
+    assert log_spanning_trees(g, halves, 2) > log_spanning_trees(g, snake, 2)
 
 
 def test_summary_and_votes():

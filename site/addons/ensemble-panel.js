@@ -83,6 +83,81 @@
     e = Int32Array.from(out); edgeCache.set(data, e);
     return e;
   }
+  /* log of the number of spanning trees, summed over districts (Kirchhoff's matrix-tree theorem), as in
+     redistricting_addons.ensemble.log_spanning_trees. Each district (or each piece of a district in pieces) is
+     ordered by reverse Cuthill-McKee and its reduced Laplacian factored by envelope Cholesky:
+     log det = 2 * sum(log L_ii). Higher = more compact. Cached per plan. */
+  const nbrCache = new WeakMap();
+  function neighbours(data) {
+    let A = nbrCache.get(data);
+    if (A) return A;
+    const e = edgesOf(data), deg = new Int32Array(data.n);
+    for (let i = 0; i < e.length; i++) deg[e[i]]++;
+    const start = new Int32Array(data.n + 1);
+    for (let i = 0; i < data.n; i++) start[i + 1] = start[i] + deg[i];
+    const fill = start.slice(0, data.n), adj = new Int32Array(e.length);
+    for (let i = 0; i < e.length; i += 2) { adj[fill[e[i]]++] = e[i + 1]; adj[fill[e[i + 1]]++] = e[i]; }
+    A = { start, adj }; nbrCache.set(data, A);
+    return A;
+  }
+  const treeCache = new Map();
+  function planKey(labels) { let h = 2166136261 >>> 0; for (let i = 0; i < labels.length; i++) h = Math.imul(h ^ (labels[i] + 1), 16777619) >>> 0; return labels.length + ':' + h; }
+  function logTrees(data, labels) {
+    const key = planKey(labels);
+    if (treeCache.has(key)) return treeCache.get(key);
+    const { start, adj } = neighbours(data), n = data.n;
+    const same = (u, v) => labels[u] === labels[v];
+    const seen = new Uint8Array(n), pos = new Int32Array(n).fill(-1);
+    let total = 0;
+    const bfs = (src, inComp, sortByDeg, deg) => {
+      const order = [src], mark = new Set([src]);
+      for (let i = 0; i < order.length; i++) {
+        const u = order[i], next = [];
+        for (let p = start[u]; p < start[u + 1]; p++) { const v = adj[p]; if (inComp(v) && !mark.has(v)) { mark.add(v); next.push(v); } }
+        if (sortByDeg) next.sort((a, b) => deg.get(a) - deg.get(b));
+        for (const v of next) order.push(v);
+      }
+      return order;
+    };
+    for (let s = 0; s < n; s++) {
+      if (seen[s]) continue;
+      // one connected piece of one district
+      const comp = bfs(s, v => same(v, s), false);
+      comp.forEach(v => { seen[v] = 1; });
+      if (comp.length <= 1) continue;
+      const inComp = new Set(comp), deg = new Map();
+      for (const u of comp) { let d = 0; for (let p = start[u]; p < start[u + 1]; p++) if (inComp.has(adj[p])) d++; deg.set(u, d); }
+      const far = bfs(comp[comp.length - 1], v => inComp.has(v), false);           // a peripheral start node
+      const order = bfs(far[far.length - 1], v => inComp.has(v), true, deg).reverse(); // reverse Cuthill-McKee
+      const m = order.length - 1;                                                      // drop the last node (reduced Laplacian)
+      order.forEach((v, i) => { pos[v] = i; });
+      const first = new Int32Array(m), rows = new Array(m);
+      for (let i = 0; i < m; i++) {
+        const u = order[i]; let f = i;
+        for (let p = start[u]; p < start[u + 1]; p++) { const j = pos[adj[p]]; if (j >= 0 && j < m && inComp.has(adj[p]) && j < f) f = j; }
+        first[i] = f; rows[i] = new Float64Array(i - f + 1);
+        for (let p = start[u]; p < start[u + 1]; p++) { const j = pos[adj[p]]; if (j >= 0 && j < i && inComp.has(adj[p])) rows[i][j - f] = -1; }
+        rows[i][i - f] = deg.get(u);
+      }
+      let logdet = 0;
+      for (let i = 0; i < m; i++) {
+        const Ri = rows[i], fi = first[i];
+        for (let j = fi; j <= i; j++) {
+          const Rj = rows[j], fj = first[j], k0 = Math.max(fi, fj);
+          let s2 = Ri[j - fi];
+          for (let q = k0; q < j; q++) s2 -= Ri[q - fi] * Rj[q - fj];
+          if (j < i) Ri[j - fi] = s2 / Rj[j - fj];
+          else { const d = Math.sqrt(s2); Ri[i - fi] = d; logdet += Math.log(d); }
+        }
+      }
+      total += 2 * logdet;
+      order.forEach(v => { pos[v] = -1; });
+    }
+    if (treeCache.size > 30) treeCache.clear();
+    treeCache.set(key, total);
+    return total;
+  }
+
   function stats(data, labels, k, el) {
     const E = data.elections[el], D = new Float64Array(k), R = new Float64Array(k);
     for (let i = 0; i < data.n; i++) { D[labels[i]] += E.d[i]; R[labels[i]] += E.r[i]; }
@@ -97,7 +172,7 @@
       const c = data.cty[i], f = first.get(c);
       if (f === undefined) first.set(c, labels[i]); else if (f !== labels[i]) split.add(c);
     }
-    return { seats, share, cut, splits: split.size };
+    return { seats, share, cut, splits: split.size, trees: () => logTrees(data, labels) };
   }
 
   /* ---------- drawing ---------- */
@@ -166,6 +241,13 @@
     const P = [5, 25, 50, 75, 95];
     if (v < q[0]) return 'more compact than 95% of plans';
     if (v > q[4]) return 'less compact than 95% of plans';
+    for (let i = 0; i < 4; i++) if (v <= q[i + 1]) return `between the ${P[i]}th and ${P[i + 1]}th percentile`;
+    return '';
+  }
+  function treeBand(q, v) {  // more spanning trees = more compact
+    const P = [5, 25, 50, 75, 95];
+    if (v > q[4]) return 'more compact than 95% of plans';
+    if (v < q[0]) return 'less compact than 95% of plans';
     for (let i = 0; i < 4; i++) if (v <= q[i + 1]) return `between the ${P[i]}th and ${P[i + 1]}th percentile`;
     return '';
   }
@@ -274,8 +356,10 @@
         placed.map(p => `<th>${esc(p.name)}</th>`).join('') + `</tr></thead><tbody>${allRows}</tbody></table>` +
         `<p class="ens-note">Democratic seats. A map is flagged when it gives more (or fewer) seats than 95% of neutral plans.</p></details>`;
       const ce = ens.cut_edges.quantiles, cs = ens.county_splits;
+      const lt = ens.log_spanning_trees && ens.log_spanning_trees.quantiles;
       const shape = placed.map(p => `<li><span class="ens-key" style="background:${MARK[p.role]}"></span><b>${esc(p.name)}</b>: ` +
         `${fmt(p.st.cut)} cut edges, ${cutBand(ce, p.st.cut)}` +
+        (lt ? `; spanning-tree score ${fmt(p.st.trees())}, ${treeBand(lt, p.st.trees())}` : '') +
         (cs ? `; ${p.st.splits} counties split, ${splitsPhrase(cs.histogram, p.st.splits)}` : '') + '.</li>').join('');
       const pass = index && index[ctx.abbr] && index[ctx.abbr][v.id];
       const warn = pass && pass.passed === false
@@ -291,7 +375,10 @@
         `</div>` +
         (placed.length ? `<p class="ens-cap" style="margin-top:12px">Compactness and counties</p>` +
           `<p class="ens-note" style="margin-top:0">Neutral plans, median (5–95%): ${fmt(ce[2])} (${fmt(ce[0])}–${fmt(ce[4])}) cut edges` +
-          (cs ? `, ${cs.quantiles[2]} (${cs.quantiles[0]}–${cs.quantiles[4]}) counties split` : '') + `. Fewer cut edges = more compact.</p>` +
+          (lt ? `, spanning-tree score ${fmt(lt[2])} (${fmt(lt[0])}–${fmt(lt[4])})` : '') +
+          (cs ? `, ${cs.quantiles[2]} (${cs.quantiles[0]}–${cs.quantiles[4]}) counties split` : '') +
+          `. Fewer cut edges = more compact.` +
+          (lt ? ` The spanning-tree score is the log of the number of ways to connect each district’s block groups with a tree, summed over districts: compact districts have far more, so higher = more compact.` : '') + `</p>` +
           `<ul class="ens-lines">${shape}</ul>` : '') +
         (missing.length ? `<p class="ens-note">${missing.map(esc).join(' ')}</p>` : '') +
         (ctx.swing ? `<p class="ens-note">The baseline uses actual votes; the swing slider is not applied here.</p>` : '') +
@@ -372,5 +459,6 @@
     if (el) new MutationObserver(schedule).observe(el, { childList: true });
   }
   if (isFair) onceFairLines();
+  window.__RD_ENSEMBLE = { logTrees };  // for checking against redistricting_addons.ensemble.log_spanning_trees
   schedule();
 })();

@@ -70,6 +70,9 @@ def main(argv=None) -> int:
     ap.add_argument("--max-share-diff", type=float, default=0.01)
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--skip-existing", action="store_true", help="keep existing results that already pass")
+    ap.add_argument("--from-index", action="store_true",
+                    help="re-run each state at the move count and seed that passed before (same chains, same numbers; "
+                         "use after adding a statistic)")
     a = ap.parse_args(argv)
 
     states = [s.upper() for s in (a.states or all_states())]
@@ -88,7 +91,11 @@ def main(argv=None) -> int:
                                                                                   "seats_tv": tv, "share_diff": sh}
                     print(f"{st} {v}: kept existing (TV {tv}, share diff {sh})")
                     continue
-            todo.append((st, v, a.steps or default_steps(seats[st]), 0))
+            prev = index.get(st, {}).get(v, {}) if a.from_index else {}
+            if prev.get("passed") and prev.get("moves_per_chain") and prev.get("attempt"):
+                todo.append((st, v, prev["moves_per_chain"], prev["attempt"] - 1))
+            else:
+                todo.append((st, v, a.steps or default_steps(seats[st]), 0))
 
     t0 = time.perf_counter()
     with ProcessPoolExecutor(max_workers=a.workers) as ex:

@@ -33,8 +33,10 @@ from pathlib import Path
 import numpy as np
 from scipy import sparse
 from scipy.sparse.csgraph import breadth_first_order, connected_components, minimum_spanning_tree
+from scipy.sparse.linalg import splu
 
-__all__ = ["Graph", "load_state", "grid_graph", "recom_chain", "tree_seed", "plan_stats", "summarize", "main"]
+__all__ = ["Graph", "load_state", "grid_graph", "recom_chain", "tree_seed", "plan_stats", "log_spanning_trees",
+           "summarize", "main"]
 
 ROOT = Path(__file__).resolve().parents[1]
 QUANTILES = (5, 25, 50, 75, 95)
@@ -234,13 +236,56 @@ def tree_seed(graph: Graph, k: int, tol: float = 0.01, seed: int = 0, tries: int
 
 # --------------------------------------------------------------------------- statistics
 
-def plan_stats(graph: Graph, labels, k: int) -> dict:
+def log_spanning_trees(graph: Graph, labels, k: int) -> float:
+    """Sum over districts of the natural log of each district's number of spanning trees.
+
+    Kirchhoff's matrix-tree theorem: the count is the determinant of the district's graph Laplacian with one row
+    and column removed. Compact districts have far more spanning trees than stringy ones (Procaccia &
+    Tucker-Foltz 2021), and ReCom samples plans roughly in proportion to this product, so higher = more compact.
+    """
+    labels = np.asarray(labels, np.int64)
+    e0, e1 = graph.edges[:, 0], graph.edges[:, 1]
+    inner = labels[e0] == labels[e1]
+    order = np.argsort(labels, kind="stable")
+    bounds = np.searchsorted(labels[order], np.arange(k + 1))
+    eorder = np.argsort(labels[e0[inner]], kind="stable")
+    ie0, ie1 = e0[inner][eorder], e1[inner][eorder]
+    ebounds = np.searchsorted(labels[ie0], np.arange(k + 1))
+    local = np.empty(graph.n, np.int64)
+    total = 0.0
+    for d in range(k):
+        nodes = order[bounds[d]:bounds[d + 1]]
+        n = nodes.size
+        if n <= 1:
+            continue
+        local[nodes] = np.arange(n)
+        u, v = local[ie0[ebounds[d]:ebounds[d + 1]]], local[ie1[ebounds[d]:ebounds[d + 1]]]
+        deg = np.bincount(u, minlength=n) + np.bincount(v, minlength=n)
+        rows = np.r_[u, v, np.arange(n)]
+        cols = np.r_[v, u, np.arange(n)]
+        vals = np.r_[-np.ones(u.size), -np.ones(v.size), deg.astype(float)]
+        lap = sparse.csc_matrix((vals, (rows, cols)), shape=(n, n))
+        ncomp, comp = connected_components(lap, directed=False)
+        # a district in several pieces has no spanning tree: count trees piece by piece (a spanning forest)
+        for c in range(ncomp):
+            idx = np.flatnonzero(comp == c)
+            if idx.size <= 1:
+                continue
+            sub = lap[idx][:, idx][1:, 1:]
+            lu = splu(sparse.csc_matrix(sub))
+            total += float(np.sum(np.log(np.abs(lu.U.diagonal()))))  # splu's L has a unit diagonal
+    return total
+
+
+def plan_stats(graph: Graph, labels, k: int, trees: bool = False) -> dict:
     """Neutral and partisan statistics of one plan (two-party shares; Democratic seats = districts with D > R)."""
     labels = np.asarray(labels, np.int64)
     e0, e1 = graph.edges[:, 0], graph.edges[:, 1]
     pops = np.bincount(labels, weights=graph.pop, minlength=k)
     out = {"cut_edges": int(np.sum(labels[e0] != labels[e1])),
            "max_dev_pct": float(100 * np.max(np.abs(pops / (graph.pop.sum() / k) - 1)))}
+    if trees:
+        out["log_spanning_trees"] = log_spanning_trees(graph, labels, k)
     if graph.county is not None:
         live = graph.pop > 0
         pairs = np.unique(graph.county[live] * k + labels[live])
@@ -279,6 +324,9 @@ def summarize(graph: Graph, samples: list[list[dict]], k: int) -> dict:
            "cut_edges": {"quantiles": _q([s["cut_edges"] for s in flat]),
                          "mean": round(float(np.mean([s["cut_edges"] for s in flat])), 1)},
            "max_dev_pct": {"quantiles": _q([s["max_dev_pct"] for s in flat])}}
+    if "log_spanning_trees" in flat[0]:
+        v = [s["log_spanning_trees"] for s in flat]
+        out["log_spanning_trees"] = {"quantiles": _q(v), "mean": round(float(np.mean(v)), 2)}
     if "county_splits" in flat[0]:
         out["county_splits"] = {"histogram": _hist([s["county_splits"] for s in flat]),
                                 "quantiles": _q([s["county_splits"] for s in flat])}
@@ -308,9 +356,14 @@ def summarize(graph: Graph, samples: list[list[dict]], k: int) -> dict:
 
 def reference(graph: Graph, labels, k: int, flat: list[dict]) -> dict:
     """Where an existing plan sits in the ensemble: its statistics and the share of sampled plans at or below it."""
-    s = plan_stats(graph, labels, k)
+    trees = "log_spanning_trees" in flat[0]
+    s = plan_stats(graph, labels, k, trees)
     out = {"cut_edges": s["cut_edges"], "cut_edges_pct_at_or_below": _pct_at_or_below([f["cut_edges"] for f in flat], s["cut_edges"]),
            "max_dev_pct": round(s["max_dev_pct"], 3)}
+    if trees:
+        out["log_spanning_trees"] = round(s["log_spanning_trees"], 2)
+        out["log_spanning_trees_pct_at_or_below"] = _pct_at_or_below([f["log_spanning_trees"] for f in flat],
+                                                                      s["log_spanning_trees"])
     if "county_splits" in s:
         out["county_splits"] = s["county_splits"]
         out["county_splits_pct_at_or_below"] = _pct_at_or_below([f["county_splits"] for f in flat], s["county_splits"])
@@ -336,7 +389,7 @@ def single_district(graph: Graph) -> dict:
 
 
 def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, county_weight: float, seed: int,
-        chains: int = 2, log=print) -> dict:
+        chains: int = 2, log=print, trees: bool = True) -> dict:
     if k == 1:
         return single_district(graph)
     starts = []
@@ -351,7 +404,7 @@ def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, cou
         kept = []
         for i, labels in enumerate(recom_chain(graph, start, k, burn + steps, tol, county_weight, seed + 1000 * (c + 1)), 1):
             if i > burn and (i - burn) % every == 0:
-                kept.append(plan_stats(graph, labels, k))
+                kept.append(plan_stats(graph, labels, k, trees))
             if log and i % 5000 == 0:
                 log(f"  chain {c + 1}: {i}/{burn + steps} moves, {time.perf_counter() - t1:.0f}s")
         samples.append(kept)
@@ -368,7 +421,7 @@ def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, cou
                      "(Clelland et al. 2021, arXiv:2011.06049)" if county_weight != 1 else ""),
         "graph": "the site's block-group graph (edges and bridges in site/data/<ST>.json); cut edges are counted on it",
         "params": {"moves_per_chain": steps, "burn_in": burn, "keep_every": every, "pop_tolerance": tol,
-                   "county_weight": county_weight, "chains": chains},
+                   "county_weight": county_weight, "chains": chains, "spanning_trees": trees},
         "chains": chain_meta,
         "seconds": round(time.perf_counter() - t0, 1),
         "quantiles": list(QUANTILES),
@@ -390,6 +443,7 @@ def main(argv=None) -> int:
     ap.add_argument("--county-weight", type=float, default=1.0, help="1 = plain ReCom; e.g. 20 keeps counties whole more")
     ap.add_argument("--chains", type=int, default=2)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--no-trees", action="store_true", help="skip the spanning-tree compactness measure (faster)")
     a = ap.parse_args(argv)
     st = a.state.upper()
     data = Path(a.data) if a.data else ROOT / "site" / "data" / f"{st}.json"
@@ -398,7 +452,7 @@ def main(argv=None) -> int:
     if not g.is_connected():
         raise SystemExit(f"{data}: graph is not connected")
     print(f"{st}: {g.n} units, {len(g.edges)} edges, {g.k} districts")
-    res = run(g, g.k, a.steps, a.burn, a.every, a.tol, a.county_weight, a.seed, a.chains)
+    res = run(g, g.k, a.steps, a.burn, a.every, a.tol, a.county_weight, a.seed, a.chains, trees=not a.no_trees)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, separators=(",", ":")), encoding="utf-8")
     print(f"wrote {out} ({out.stat().st_size / 1024:.1f} kB, {res['samples']} plans, {res.get('seconds', 0)}s)")
