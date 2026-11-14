@@ -17,6 +17,8 @@
   const VARIANTS = [
     { id: 'county20', file: '.county20', name: 'Counties kept whole', note: 'county-internal links weighted 20×, so samples split about as few counties as human-drawn maps' },
     { id: 'plain', file: '', name: 'Plain ReCom', note: 'no county preference' },
+    // added: ZIP-code areas (ZCTAs) kept whole instead of counties; site neighbour graph only
+    { id: 'zip20', file: '.zip20', name: 'ZIP areas kept whole', note: 'links inside one ZIP-code area weighted 20×, so samples keep neighbourhoods together rather than counties (site neighbours only)' },
   ];
   let variant = 'county20';
   try { const v = localStorage.getItem('ens-variant'); if (VARIANTS.some(x => x.id === v)) variant = v; } catch (e) { /* storage blocked */ }

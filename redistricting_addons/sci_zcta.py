@@ -270,7 +270,8 @@ def _weights(sm):
 
 
 def optimise(args):
-    st, bursts, burst, seed = args
+    st, bursts, burst, seed = args[:4]
+    compact = args[4] if len(args) > 4 else True  # added option: False = no shape limit
     from .sci import ties_kept
     try:
         import ctypes
@@ -284,14 +285,14 @@ def optimise(args):
     W = _weights(sm)
     zl = sm["local"]
     ens = json.loads((ENS / f"{st}.county20.json").read_text(encoding="utf-8"))
-    cap = ens["cut_edges"]["quantiles"][2]
+    cap = ens["cut_edges"]["quantiles"][2] if compact else None
     e = g.edges
 
     def cut(lab):
         return int(np.count_nonzero(lab[e[:, 0]] != lab[e[:, 1]]))
 
     def score(lab):
-        return -1.0 if cut(lab) > cap else ties_kept({"adjusted": W["adjusted"]}, zl, g.pop, lab, g.k)["adjusted"]
+        return -1.0 if cap is not None and cut(lab) > cap else ties_kept({"adjusted": W["adjusted"]}, zl, g.pop, lab, g.k)["adjusted"]
 
     best = g.plans["solver"].copy()
     best_s = start = score(best)
@@ -317,19 +318,19 @@ def optimise(args):
         t = sum(h.values())
         place[el] = {"seats_d": n_, "neutral_fewer": round(sum(v for k_, v in h.items() if k_ < n_) / t, 4),
                      "neutral_more": round(sum(v for k_, v in h.items() if k_ > n_) / t, 4)}
-    out = {"v": 1, "abbr": st, "objective": "zcta ties kept (distance-adjusted), compact", "labels": best.tolist(),
+    out = {"v": 1, "abbr": st, "objective": "zcta ties kept (distance-adjusted)" + (", compact" if compact else ", no shape limit"), "labels": best.tolist(),
            "ties_kept_zcta": {k_: round(v, 3) for k_, v in tk.items()}, "reference_ties_kept_zcta": ref,
            "cut_edges": cut(best), "cut_cap": cap, "seats": place,
            "params": {"bursts": bursts, "burst": burst, "seed": seed, "tol": 0.01},
            "start_score": round(start, 3), "seconds": round(time.perf_counter() - t0, 1)}
     DIST.mkdir(parents=True, exist_ok=True)
-    (DIST / f"{st}.zcta.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    (DIST / f"{st}.zcta{'' if compact else '.free'}.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     return st, out
 
 
 def report():
     res = {}
-    for p in sorted(DIST.glob("*.zcta.json")):
+    for p in sorted(DIST.glob("[A-Z][A-Z].zcta.json")):
         r = json.loads(p.read_text(encoding="utf-8"))
         res[r["abbr"]] = r
     if not res:
@@ -386,19 +387,83 @@ def main(argv=None) -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--skip-districts", action="store_true")
+    ap.add_argument("--free", action="store_true", help="no shape limit (writes <ST>.zcta.free.json)")
+    ap.add_argument("--skip-read", action="store_true", help="reuse site/data/sci/zcta and the cached per-state matrices")
     a = ap.parse_args(argv)
-    pairs(a.workers)
-    site_files(a.states)
+    if not a.skip_read:
+        pairs(a.workers)
+        site_files(a.states)
     if not a.skip_districts:
         sts = a.states or sorted(p.stem for p in (ROOT / "site" / "data").glob("[A-Z][A-Z].json") if p.stem.isupper())
         with Pool(a.workers) as pool:
-            for st, r in pool.imap_unordered(optimise, [(st, a.bursts, a.burst, a.seed) for st in sts]):
+            for st, r in pool.imap_unordered(optimise, [(st, a.bursts, a.burst, a.seed, not a.free) for st in sts]):
                 if r:
                     print(f"  {st}: ties {r['ties_kept_zcta']['adjusted']:.2f}% (start {r['start_score']:.2f}), "
                           f"2020 D {r['seats']['pres2020']['seats_d']}, {r['seconds']}s")
-        report()
+        if not a.free:
+            report()
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# ---------------------------------------------------------------------------------------------- ZIP remake report
+
+def zip_report():
+    """docs/ZIP_MAPS.md: the earlier maps remade with ZIP-code areas in place of counties (added 2026-11-14)."""
+    def med(d, el):
+        h = {int(k_): v for k_, v in d["elections"][el]["seats_d_histogram"].items()}
+        ks = sorted(h)
+        c = np.cumsum([h[k_] for k_ in ks]) / sum(h.values())
+        return ks[int(np.searchsorted(c, 0.5))]
+    rows = []
+    for p in sorted(ENS.glob("[A-Z][A-Z].zip20.json")):
+        z = json.loads(p.read_text(encoding="utf-8"))
+        st = z["abbr"]
+        if z.get("districts", 1) < 2:
+            continue
+        c = json.loads((ENS / f"{st}.county20.json").read_text(encoding="utf-8"))
+        free_p, comp_p = DIST / f"{st}.zcta.free.json", DIST / f"{st}.zcta.json"
+        fr = json.loads(free_p.read_text(encoding="utf-8")) if free_p.exists() else None
+        cp = json.loads(comp_p.read_text(encoding="utf-8")) if comp_p.exists() else None
+        off = c["reference"].get("official", {}).get("pres2020", {}).get("seats_d")
+        rows.append({"st": st, "k": z["districts"], "off": off, "c": med(c, "pres2020"), "z": med(z, "pres2020"),
+                     "cs_c": c["county_splits"]["quantiles"][2], "cs_z": z["county_splits"]["quantiles"][2],
+                     "zs_z": z["zip_splits"]["quantiles"][2],
+                     "comp": cp["seats"]["pres2020"]["seats_d"] if cp else None,
+                     "free": fr["seats"]["pres2020"]["seats_d"] if fr else None})
+    idx = json.loads((ENS / "index.json").read_text(encoding="utf-8"))
+    bad = [r["st"] for r in rows if idx.get(r["st"], {}).get("zip20", {}).get("passed") is False]
+    tot = lambda key: sum(r[key] for r in rows if r[key] is not None)
+    diff = [r["st"] for r in rows if r["c"] != r["z"]]
+    lines = ["# The maps remade with ZIP-code areas", "", "## In short (for people)", "",
+             "Every earlier district map that used counties now has a ZIP-code version: neutral maps that keep ZIP-code "
+             "areas whole instead of counties (10,000+ per state, two agreeing chains), and social-ties maps built "
+             "from friendships between ZIP-code areas, with and without a shape limit. The 50-state maps stay at county "
+             "level (a ZIP-to-ZIP table for the whole country would have about a billion pairs, and states are large "
+             "enough that county ties describe them).", "",
+             f"- Keeping ZIP areas whole instead of counties barely moves the neutral result: {tot('z')} Democratic seats "
+             f"(2020 votes, {len(rows)} states, sum of medians) against {tot('c')}. The median differs by one seat in "
+             f"{len(diff)} states ({', '.join(diff)}).",
+             "- It does change the maps: they split far more counties (they no longer try to keep them) and few ZIP areas.",
+             f"- Social-ties maps by ZIP: {tot('comp')} Democratic seats compact, {tot('free')} with no shape limit; "
+             f"official maps {tot('off')}.",
+             *([f"- Not passing the two-chain agreement check: {', '.join(bad)} (marked in the index)."] if bad else []),
+             "- Pictures: `docs/samples/<ST>.techniques.zip.png` for GA, OH, FL, MI, AZ, IL, NC, PA, TX and WI.", "",
+             "| State | Seats | Official | Neutral, counties whole | Neutral, ZIP areas whole | Social ties by ZIP, compact | No shape limit | County splits (county / ZIP neutral) | ZIP splits (ZIP neutral) |",
+             "| --- | --: | --: | --: | --: | --: | --: | --- | --: |"]
+    for r in rows:
+        lines.append(f"| {r['st']} | {r['k']} | {r['off']} | {r['c']} | {r['z']} | {r['comp']} | {r['free']} | "
+                     f"{r['cs_c']:.0f} / {r['cs_z']:.0f} | {r['zs_z']:.0f} |")
+    lines += ["", "Democratic seats with 2020 votes; neutral columns are medians; splits are medians.", "", "---", "",
+              "## For AI agents (detailed)", "",
+              "- Neutral: `python -m redistricting_addons.batch --variants zip20` -> `site/data/ensembles/<ST>.zip20.json` "
+              "(ReCom with edges inside one ZCTA weighted 20, `Graph.zcta`; plans also record `zip_splits`). Same moves, "
+              "burn-in, thinning and two-chain check as the county version; the panel offers it as \"ZIP areas kept whole\" "
+              "(site neighbour graph only).",
+              "- Social ties by ZIP: `python -m redistricting_addons.sci_zcta` (compact, `<ST>.zcta.json`) and "
+              "`--skip-read --free` (no shape limit, `<ST>.zcta.free.json`).",
+              "- Pictures: `python -m redistricting_addons.samples --states --fifty \"\" --techniques-zip GA OH ...`.", ""]
+    (ROOT / "docs" / "ZIP_MAPS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

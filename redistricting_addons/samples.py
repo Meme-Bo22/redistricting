@@ -134,7 +134,18 @@ TECHNIQUES = [
 ]
 
 
-def techniques(st: str, steps: int = 3000) -> Path:
+# added: the same six ways with ZIP-code areas in place of counties (redistricting_addons.sci_zcta)
+TECHNIQUES_ZIP = [
+    ("Official map (in use)", "official"),
+    ("Fair Lines solver (the toys' own)", "solver"),
+    ("Neutral ReCom, plain", "recom1"),
+    ("Neutral ReCom, ZIP areas kept whole", "zip20"),
+    ("Social ties by ZIP, no shape limit", "sci.zcta.free"),
+    ("Social ties by ZIP, compact", "sci.zcta"),
+]
+
+
+def techniques(st: str, steps: int = 3000, which=None, out_suffix: str = "") -> Path:
     """Added option: one state drawn six ways (``TECHNIQUES``), districts filled by 2020 Democratic share, written
     to ``docs/samples/<ST>.techniques.png``. ReCom maps are the plan after ``steps`` accepted moves from the solver
     plan (seed 1, 1% tolerance), county weight 1 (plain) or 20; social-ties maps are the ``sci_districts`` files."""
@@ -143,11 +154,19 @@ def techniques(st: str, steps: int = 3000) -> Path:
     k = int(d["seats"])
     g = load_state(ROOT / "site" / "data" / f"{st}.json", sci=False)
     plans = []
-    for name, key in TECHNIQUES:
+    for name, key in (which or TECHNIQUES):
         if key == "official":
             lab = np.asarray(d["current"])
         elif key == "solver":
             lab = np.asarray(d["plan"])
+        elif key == "zip20":  # added: ReCom keeping ZIP areas whole
+            z = json.loads((ROOT / "site" / "data" / "sci" / "zcta" / f"{st}.json").read_text(encoding="utf-8"))
+            gz = load_state(ROOT / "site" / "data" / f"{st}.json", sci=False)
+            gz.zcta = np.asarray(z["bg_zcta"], np.int64)
+            lab = None
+            for lab in recom_chain(gz, gz.plans["solver"], k, steps, 0.01, 20.0, seed=1):
+                pass
+            lab = lab.copy()
         elif key.startswith("recom"):
             lab = None
             for lab in recom_chain(g, g.plans["solver"], k, steps, 0.01, float(key[5:]), seed=1):
@@ -179,11 +198,11 @@ def techniques(st: str, steps: int = 3000) -> Path:
         ax.set_title(f"{name}\nDemocratic seats of {k}: {s16} (2016), {s20} (2020), {s24} (2024)", fontsize=11)
     for ax in axes[len(plans):]:
         ax.axis("off")
-    fig.suptitle(f"{d['name']}: one state, six ways to draw it (districts coloured by 2020 vote)",
+    fig.suptitle(f"{d['name']}: one state, six ways to draw it{' (ZIP-code versions)' if out_suffix else ''} (districts coloured by 2020 vote)",
                  fontsize=14, x=.01, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     OUT.mkdir(parents=True, exist_ok=True)
-    out = OUT / f"{st}.techniques.png"
+    out = OUT / f"{st}.techniques{out_suffix}.png"
     fig.savefig(out, dpi=110, facecolor="white")
     plt.close(fig)
     return out
@@ -270,6 +289,8 @@ def main(argv=None) -> int:
     ap.add_argument("--fifty", default="free.compact", help="sci_states variant for the 50-state picture ('' to skip)")
     ap.add_argument("--techniques", nargs="*", default=[],
                     help="also docs/samples/<ST>.techniques.png: each state drawn six ways")
+    ap.add_argument("--techniques-zip", nargs="*", default=[],
+                    help="also docs/samples/<ST>.techniques.zip.png: six ways with ZIP areas instead of counties")
     ap.add_argument("--grown", action="store_true", help="also docs/samples/states_grown.png (needs sci_grow output)")
     a = ap.parse_args(argv)
     for st in a.states:
@@ -278,6 +299,8 @@ def main(argv=None) -> int:
         print("wrote", states(a.fifty))
     for st in a.techniques:
         print("wrote", techniques(st))
+    for st in a.techniques_zip:  # added: ZIP-code versions
+        print("wrote", techniques(st, which=TECHNIQUES_ZIP, out_suffix=".zip"))
     if a.grown:  # added option: today's states beside the sci_grow versions
         print("wrote", states(others=[("Grown from today's capitals by friendships (today's populations)", "grown"),
                                       ("Grown, then made friendship-compact", "grown.strong"),

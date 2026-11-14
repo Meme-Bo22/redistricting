@@ -2,9 +2,9 @@
 
 ## In short (for people)
 
-16 pictures that show what this fork adds to the redistricting toys: how official congressional maps compare with 10,000 maps drawn without party data, single states drawn six different ways, and the country redrawn as 50 states by who is friends with whom (Meta's Social Connectedness Index). Votes are block-group estimates; official maps are approximated by block-group centres; neutral maps allow a 1% population difference.
+18 pictures that show what this fork adds to the redistricting toys: how official congressional maps compare with 10,000 maps drawn without party data, single states drawn six different ways, and the country redrawn as 50 states by who is friends with whom (Meta's Social Connectedness Index). Votes are block-group estimates; official maps are approximated by block-group centres; neutral maps allow a 1% population difference.
 
-More detail: [neutral baselines and true borders](GRAPH_SENSITIVITY.md), [districts drawn by social ties](SCI_DISTRICTS.md), [50 SCI states](SCI_STATES.md), [stronger compactness and capital-grown states](SCI_GROW.md), [the plan and status](PLAN.md), and the add-on modules in [redistricting_addons/README.md](../redistricting_addons/README.md).
+More detail: [neutral baselines and true borders](GRAPH_SENSITIVITY.md), [districts drawn by social ties](SCI_DISTRICTS.md), [50 SCI states](SCI_STATES.md), [stronger compactness and capital-grown states](SCI_GROW.md), [the maps remade with ZIP-code areas](ZIP_MAPS.md), [ZIP-level social ties](SCI_ZCTA.md), [the plan and status](PLAN.md), and the add-on modules in [redistricting_addons/README.md](../redistricting_addons/README.md).
 
 ### 1. Pennsylvania's official map sits at the Democratic edge
 
@@ -101,6 +101,18 @@ More detail: [neutral baselines and true borders](GRAPH_SENSITIVITY.md), [distri
 *Side by side.* Coloured by 2020 vote. Smoothing the grown states brings the border to 40,200 km (today 38,600) at almost the same cohesion. Equal-population states with border measured in kilometres need 20% less border than the earlier compact map at the same cohesion; 24, 23 and 29 states vote Democratic against 25 today.
 
 ![Today's states, grown states and strongly compact states](samples/states_grown.png)
+
+### 17. North Carolina with ZIP-code areas instead of counties
+
+*ZIP-code versions.* The same six ways, with neutral maps that keep ZIP-code areas whole and social-ties maps built from friendships between ZIP areas. With 2020 votes: official 3 of 14 Democratic seats; the pictured neutral map keeping ZIP areas whole 7 (median of all such maps: 6); social ties by ZIP 6 (compact) and 5 (no shape limit). Across 44 states, keeping ZIP areas whole instead of counties moves the neutral total by one seat (229 against 230); see [ZIP_MAPS.md](ZIP_MAPS.md).
+
+![North Carolina with ZIP-code areas](samples/NC.techniques.zip.png)
+
+### 18. Texas with ZIP-code areas instead of counties
+
+*ZIP-code versions.* Same layout for Texas (38 seats). With 2020 votes: official 14 Democratic seats; neutral maps keeping ZIP areas whole, median 19; social ties by ZIP 21 (compact) and 19 (no shape limit). Pictures for GA, OH, FL, MI, AZ, IL, PA and WI are in `docs/samples/<ST>.techniques.zip.png`.
+
+![Texas with ZIP-code areas](samples/TX.techniques.zip.png)
 
 ---
 

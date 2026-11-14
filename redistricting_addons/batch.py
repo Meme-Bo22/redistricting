@@ -22,7 +22,9 @@ OUT = ROOT / "site" / "data" / "ensembles"
 VARIANTS = {"plain": (1.0, ""), "county20": (20.0, ".county20")}
 # opt-in variants on the Census shared-border graph (redistricting_addons.graphs); not in the default run
 GRAPH_VARIANTS = {"plain-census": (1.0, ".census"), "county20-census": (20.0, ".county20.census")}
-ALL_VARIANTS = {**VARIANTS, **GRAPH_VARIANTS}
+# opt-in: ZIP-code areas kept whole (redistricting_addons.sci_zcta must have written site/data/sci/zcta/<ST>.json)
+ZIP_VARIANTS = {"zip20": (20.0, ".zip20")}
+ALL_VARIANTS = {**VARIANTS, **GRAPH_VARIANTS, **ZIP_VARIANTS}
 
 
 def all_states():
@@ -52,7 +54,13 @@ def job(st, variant, steps, burn, every, tol, seed):
     g = load_state(ROOT / "site" / "data" / f"{st}.json", graph="census" if variant in GRAPH_VARIANTS else "site")
     if not g.is_connected():
         raise RuntimeError(f"{st}: graph is not connected")
+    if variant in ZIP_VARIANTS:  # added: weight edges inside one ZIP area, count ZIP splits
+        z = json.loads((ROOT / "site" / "data" / "sci" / "zcta" / f"{st}.json").read_text(encoding="utf-8"))
+        g.zcta = __import__("numpy").asarray(z["bg_zcta"], dtype="int64")
     res = run(g, g.k, steps, burn, every, tol, ALL_VARIANTS[variant][0], seed, chains=2, log=None)
+    if variant in ZIP_VARIANTS:
+        res["method"] = res["method"].replace("county-internal", "ZIP-area-internal (ZCTA)")
+        res["weight_by"] = "zcta"
     p = out_path(st, variant)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(res, separators=(",", ":")), encoding="utf-8")

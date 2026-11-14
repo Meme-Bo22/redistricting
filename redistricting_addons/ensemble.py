@@ -58,6 +58,10 @@ class Graph:
     graph: str = "site"  # "site" (the toys' Delaunay graph) or "census" (shared borders, redistricting_addons.graphs)
     water_links: bool = True
     sci: dict | None = None  # "raw"/"adjusted" -> (C, C) friendship weights (redistricting_addons.sci), or None
+    # added option: ZIP-code area (ZCTA) index per unit (redistricting_addons.sci_zcta). When set, ReCom's
+    # county_weight applies to edges inside one ZIP area instead of one county ("ZIP areas kept whole"), and
+    # plan statistics also count ZIP-area splits. None (the default) changes nothing.
+    zcta: np.ndarray | None = None
 
     @property
     def n(self) -> int:
@@ -198,10 +202,11 @@ def _region(graph, mask):
 
 
 def _wmax(graph, em, county_weight):
-    if county_weight == 1 or graph.county is None:
+    grp = graph.zcta if getattr(graph, "zcta", None) is not None else graph.county  # ZIP areas when set (added)
+    if county_weight == 1 or grp is None:
         return np.ones(int(em.sum()))
     e = graph.edges[em]
-    return np.where(graph.county[e[:, 0]] == graph.county[e[:, 1]], float(county_weight), 1.0)
+    return np.where(grp[e[:, 0]] == grp[e[:, 1]], float(county_weight), 1.0)
 
 
 def recom_chain(graph: Graph, start, k: int, steps: int, tol: float = 0.01, county_weight: float = 1.0,
@@ -336,6 +341,9 @@ def plan_stats(graph: Graph, labels, k: int, trees: bool = False) -> dict:
         live = graph.pop > 0
         pairs = np.unique(graph.county[live] * k + labels[live])
         out["county_splits"] = int(np.sum(np.bincount(pairs // k) > 1))
+    if getattr(graph, "zcta", None) is not None:  # added: ZIP areas split between districts
+        zp = np.unique(np.asarray(graph.zcta, np.int64) * k + labels)
+        out["zip_splits"] = int(np.sum(np.bincount(zp // k) > 1))
     for name, el in graph.elections.items():
         d = np.bincount(labels, weights=el["d"], minlength=k)
         r = np.bincount(labels, weights=el["r"], minlength=k)
@@ -380,6 +388,9 @@ def summarize(graph: Graph, samples: list[list[dict]], k: int) -> dict:
     if "county_splits" in flat[0]:
         out["county_splits"] = {"histogram": _hist([s["county_splits"] for s in flat]),
                                 "quantiles": _q([s["county_splits"] for s in flat])}
+    if "zip_splits" in flat[0]:
+        out["zip_splits"] = {"histogram": _hist([s["zip_splits"] for s in flat]),
+                             "quantiles": _q([s["zip_splits"] for s in flat])}
     out["elections"] = {}
     for name, el in graph.elections.items():
         shares = np.array([s[name]["sorted_d_share"] for s in flat])
@@ -421,6 +432,9 @@ def reference(graph: Graph, labels, k: int, flat: list[dict]) -> dict:
     if "county_splits" in s:
         out["county_splits"] = s["county_splits"]
         out["county_splits_pct_at_or_below"] = _pct_at_or_below([f["county_splits"] for f in flat], s["county_splits"])
+    if "zip_splits" in s and "zip_splits" in flat[0]:
+        out["zip_splits"] = s["zip_splits"]
+        out["zip_splits_pct_at_or_below"] = _pct_at_or_below([f["zip_splits"] for f in flat], s["zip_splits"])
     for name in graph.elections:
         seats = s[name]["seats_d"]
         out[name] = {"seats_d": seats,

@@ -31,6 +31,14 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "AK.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "AL": {
@@ -63,6 +71,14 @@
    "passed": true,
    "seats_tv": 0.0108,
    "share_diff": 0.0029,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "AL.zip20.json",
+   "passed": true,
+   "seats_tv": 0.007,
+   "share_diff": 0.0016,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -99,6 +115,14 @@
    "share_diff": 0.0013,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "AR.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0062,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "AZ": {
@@ -131,6 +155,14 @@
    "passed": true,
    "seats_tv": 0.0122,
    "share_diff": 0.0036,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "AZ.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0246,
+   "share_diff": 0.0017,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -167,6 +199,14 @@
    "share_diff": 0.0028,
    "moves_per_chain": 156000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "CA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0549,
+   "share_diff": 0.0023,
+   "moves_per_chain": 312000,
+   "attempt": 2
   }
  },
  "CO": {
@@ -199,6 +239,14 @@
    "passed": true,
    "seats_tv": 0.0298,
    "share_diff": 0.0019,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "CO.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0302,
+   "share_diff": 0.0026,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -235,6 +283,14 @@
    "share_diff": 0.003,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "CT.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0134,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "DE": {
@@ -264,6 +320,14 @@
   },
   "county20-census": {
    "file": "DE.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "DE.zip20.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -303,6 +367,14 @@
    "share_diff": 0.0033,
    "moves_per_chain": 84000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "FL.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0821,
+   "share_diff": 0.0044,
+   "moves_per_chain": 168000,
+   "attempt": 2
   }
  },
  "GA": {
@@ -335,6 +407,14 @@
    "passed": true,
    "seats_tv": 0.0566,
    "share_diff": 0.0066,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "GA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.068,
+   "share_diff": 0.0052,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -371,6 +451,14 @@
    "share_diff": 0.0001,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "HI.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "IA": {
@@ -403,6 +491,14 @@
    "passed": true,
    "seats_tv": 0.0232,
    "share_diff": 0.0012,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "IA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.012,
+   "share_diff": 0.0005,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -439,6 +535,14 @@
    "share_diff": 0.003,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "ID.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "IL": {
@@ -471,6 +575,14 @@
    "passed": true,
    "seats_tv": 0.0518,
    "share_diff": 0.0056,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "IL.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0731,
+   "share_diff": 0.0073,
    "moves_per_chain": 51000,
    "attempt": 1
   }
@@ -507,6 +619,14 @@
    "share_diff": 0.0028,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "IN.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0362,
+   "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "KS": {
@@ -539,6 +659,14 @@
    "passed": true,
    "seats_tv": 0.0086,
    "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "KS.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0038,
+   "share_diff": 0.0007,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -575,6 +703,14 @@
    "share_diff": 0.0023,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "KY.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0144,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "LA": {
@@ -607,6 +743,14 @@
    "passed": true,
    "seats_tv": 0.027,
    "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "LA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0138,
+   "share_diff": 0.0013,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -643,6 +787,14 @@
    "share_diff": 0.0051,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "MA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0006,
+   "share_diff": 0.0032,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MD": {
@@ -677,6 +829,14 @@
    "share_diff": 0.0071,
    "moves_per_chain": 100000,
    "attempt": 2
+  },
+  "zip20": {
+   "file": "MD.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0366,
+   "share_diff": 0.0034,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "ME": {
@@ -709,6 +869,14 @@
    "passed": true,
    "seats_tv": 0.0024,
    "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "ME.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0044,
+   "share_diff": 0.0001,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -745,6 +913,14 @@
    "share_diff": 0.0019,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "MI.zip20.json",
+   "passed": true,
+   "seats_tv": 0.028,
+   "share_diff": 0.0055,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MN": {
@@ -777,6 +953,14 @@
    "passed": true,
    "seats_tv": 0.0282,
    "share_diff": 0.0029,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "MN.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0338,
+   "share_diff": 0.0055,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -813,6 +997,14 @@
    "share_diff": 0.0025,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "MO.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0224,
+   "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MS": {
@@ -845,6 +1037,14 @@
    "passed": true,
    "seats_tv": 0.011,
    "share_diff": 0.0011,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "MS.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0122,
+   "share_diff": 0.001,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -881,6 +1081,14 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "MT.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0003,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NC": {
@@ -915,6 +1123,14 @@
    "share_diff": 0.0023,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "NC.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0612,
+   "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "ND": {
@@ -944,6 +1160,14 @@
   },
   "county20-census": {
    "file": "ND.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "ND.zip20.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -983,6 +1207,14 @@
    "share_diff": 0.0007,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "NE.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0108,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NH": {
@@ -1015,6 +1247,14 @@
    "passed": true,
    "seats_tv": 0.006,
    "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "NH.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0144,
+   "share_diff": 0.0002,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1051,6 +1291,14 @@
    "share_diff": 0.0041,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "NJ.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0806,
+   "share_diff": 0.0058,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NM": {
@@ -1083,6 +1331,14 @@
    "passed": true,
    "seats_tv": 0.0054,
    "share_diff": 0.0013,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "NM.zip20.json",
+   "passed": true,
+   "seats_tv": 0.005,
+   "share_diff": 0.0009,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1119,6 +1375,14 @@
    "share_diff": 0.0005,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "NV.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0118,
+   "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NY": {
@@ -1151,6 +1415,14 @@
    "passed": true,
    "seats_tv": 0.0432,
    "share_diff": 0.0031,
+   "moves_per_chain": 78000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "NY.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0524,
+   "share_diff": 0.0024,
    "moves_per_chain": 78000,
    "attempt": 1
   }
@@ -1187,6 +1459,14 @@
    "share_diff": 0.0028,
    "moves_per_chain": 100000,
    "attempt": 2
+  },
+  "zip20": {
+   "file": "OH.zip20.json",
+   "passed": true,
+   "seats_tv": 0.032,
+   "share_diff": 0.0069,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "OK": {
@@ -1218,6 +1498,14 @@
    "file": "OK.census.json",
    "passed": true,
    "seats_tv": 0.0066,
+   "share_diff": 0.0012,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "OK.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0024,
    "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
@@ -1255,6 +1543,14 @@
    "share_diff": 0.0035,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "OR.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0112,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "PA": {
@@ -1289,6 +1585,14 @@
    "share_diff": 0.0058,
    "moves_per_chain": 51000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "PA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0349,
+   "share_diff": 0.0024,
+   "moves_per_chain": 102000,
+   "attempt": 2
   }
  },
  "RI": {
@@ -1321,6 +1625,14 @@
    "passed": true,
    "seats_tv": 0.0042,
    "share_diff": 0.0015,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "RI.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0016,
+   "share_diff": 0.0009,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1357,6 +1669,14 @@
    "share_diff": 0.0024,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "SC.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0248,
+   "share_diff": 0.0011,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "SD": {
@@ -1386,6 +1706,14 @@
   },
   "county20-census": {
    "file": "SD.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "SD.zip20.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -1425,6 +1753,14 @@
    "share_diff": 0.0023,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "TN.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0144,
+   "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "TX": {
@@ -1457,6 +1793,14 @@
    "passed": true,
    "seats_tv": 0.0397,
    "share_diff": 0.003,
+   "moves_per_chain": 114000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "TX.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0544,
+   "share_diff": 0.0093,
    "moves_per_chain": 114000,
    "attempt": 1
   }
@@ -1493,6 +1837,14 @@
    "share_diff": 0.0022,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "UT.zip20.json",
+   "passed": true,
+   "seats_tv": 0.005,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "VA": {
@@ -1527,6 +1879,14 @@
    "share_diff": 0.0034,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "VA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0228,
+   "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "VT": {
@@ -1556,6 +1916,14 @@
   },
   "county20-census": {
    "file": "VT.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "VT.zip20.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -1595,6 +1963,14 @@
    "share_diff": 0.0041,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "WA.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0332,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "WI": {
@@ -1627,6 +2003,14 @@
    "passed": true,
    "seats_tv": 0.0144,
    "share_diff": 0.0015,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "WI.zip20.json",
+   "passed": true,
+   "seats_tv": 0.032,
+   "share_diff": 0.0021,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1663,6 +2047,14 @@
    "share_diff": 0.0001,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "zip20": {
+   "file": "WV.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "WY": {
@@ -1692,6 +2084,14 @@
   },
   "county20-census": {
    "file": "WY.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "zip20": {
+   "file": "WY.zip20.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
