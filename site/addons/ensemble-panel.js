@@ -20,6 +20,15 @@
   ];
   let variant = 'county20';
   try { const v = localStorage.getItem('ens-variant'); if (VARIANTS.some(x => x.id === v)) variant = v; } catch (e) { /* storage blocked */ }
+  // which units count as neighbours: the site's own graph (default) or shared borders from the Census boundary
+  // file (data/graphs/<ST>.json, redistricting_addons.graphs); ensembles <ST>[.county20].census.json
+  const GRAPHS = [
+    { id: 'site', file: '', name: 'Site neighbours', note: 'the toys’ own neighbour graph (a triangulation of block-group centres)' },
+    { id: 'census', file: '.census', name: 'Census borders', note: 'neighbours = block groups sharing a border on land (Census 2020 boundary file); islands joined by recorded water links' },
+  ];
+  let graphSel = 'site';
+  try { const g = localStorage.getItem('ens-graph'); if (GRAPHS.some(x => x.id === g)) graphSel = g; } catch (e) { /* storage blocked */ }
+  const censusEdges = {};  // abbr -> Int32Array of i, j pairs (shared borders + water links)
 
   /* ---------- page adapters ---------- */
   const isDraw = !!document.getElementById('dlist'), isFair = !!document.getElementById('ladder');
@@ -75,6 +84,7 @@
   }
   const edgeCache = new WeakMap();
   function edgesOf(data) {
+    if (graphSel === 'census' && censusEdges[data.abbr]) return censusEdges[data.abbr];
     let e = edgeCache.get(data);
     if (e) return e;
     const seen = new Set(), out = [];
@@ -87,9 +97,11 @@
      redistricting_addons.ensemble.log_spanning_trees. Each district (or each piece of a district in pieces) is
      ordered by reverse Cuthill-McKee and its reduced Laplacian factored by envelope Cholesky:
      log det = 2 * sum(log L_ii). Higher = more compact. Cached per plan. */
-  const nbrCache = new WeakMap();
+  const nbrCache = new WeakMap();  // data -> { site: {start, adj}, census: {start, adj} }
   function neighbours(data) {
-    let A = nbrCache.get(data);
+    const slot = nbrCache.get(data) || {};
+    nbrCache.set(data, slot);
+    let A = slot[graphSel];
     if (A) return A;
     const e = edgesOf(data), deg = new Int32Array(data.n);
     for (let i = 0; i < e.length; i++) deg[e[i]]++;
@@ -97,11 +109,11 @@
     for (let i = 0; i < data.n; i++) start[i + 1] = start[i] + deg[i];
     const fill = start.slice(0, data.n), adj = new Int32Array(e.length);
     for (let i = 0; i < e.length; i += 2) { adj[fill[e[i]]++] = e[i + 1]; adj[fill[e[i + 1]]++] = e[i]; }
-    A = { start, adj }; nbrCache.set(data, A);
+    A = { start, adj }; slot[graphSel] = A;
     return A;
   }
   const treeCache = new Map();
-  function planKey(labels) { let h = 2166136261 >>> 0; for (let i = 0; i < labels.length; i++) h = Math.imul(h ^ (labels[i] + 1), 16777619) >>> 0; return labels.length + ':' + h; }
+  function planKey(labels) { let h = 2166136261 >>> 0; for (let i = 0; i < labels.length; i++) h = Math.imul(h ^ (labels[i] + 1), 16777619) >>> 0; return graphSel + ':' + labels.length + ':' + h; }
   function logTrees(data, labels) {
     const key = planKey(labels);
     if (treeCache.has(key)) return treeCache.get(key);
@@ -294,16 +306,21 @@
     const ctx = ADAPTER.context();
     if (!ctx) { root.hidden = true; return; }
     root.hidden = false;
-    const v = VARIANTS.find(x => x.id === variant);
-    const [ens, index] = await Promise.all([load(`ensembles/${ctx.abbr}${v.file}.json`), load('ensembles/index.json')]);
+    const v = VARIANTS.find(x => x.id === variant), gr = GRAPHS.find(x => x.id === graphSel);
+    const [ens, index, graph] = await Promise.all([load(`ensembles/${ctx.abbr}${v.file}${gr.file}.json`), load('ensembles/index.json'),
+      gr.id === 'census' ? load(`graphs/${ctx.abbr}.json`) : Promise.resolve(null)]);
     if (my !== token) return;
-    render(ctx, ens, index, v);
+    if (gr.id === 'census' && graph && !censusEdges[ctx.abbr]) censusEdges[ctx.abbr] = Int32Array.from([...graph.edges, ...graph.water_links]);
+    if (gr.id === 'census' && !graph) { render(ctx, null, index, v, gr); return; }
+    render(ctx, ens, index, v, gr);
   }
 
-  function head(v) {
+  function head(v, gr) {
     return `<div class="ens-head"><${isDraw ? 'h2' : 'h3'}>Neutral baseline</${isDraw ? 'h2' : 'h3'}>` +
       `<span class="ens-chips" role="group" aria-label="Baseline variant">${VARIANTS.map(x =>
-        `<button data-ens-v="${x.id}" aria-pressed="${x.id === v.id}" title="${esc(x.note)}">${esc(x.name)}</button>`).join('')}</span></div>`;
+        `<button data-ens-v="${x.id}" aria-pressed="${x.id === v.id}" title="${esc(x.note)}">${esc(x.name)}</button>`).join('')}</span>` +
+      `<span class="ens-chips" role="group" aria-label="Neighbour graph">${GRAPHS.map(x =>
+        `<button data-ens-g="${x.id}" aria-pressed="${x.id === gr.id}" title="${esc(x.note)}">${esc(x.name)}</button>`).join('')}</span></div>`;
   }
   function wire() {
     root.querySelectorAll('[data-ens-v]').forEach(b => b.onclick = () => {
@@ -311,10 +328,16 @@
       try { localStorage.setItem('ens-variant', variant); } catch (e) { /* storage blocked */ }
       update();
     });
+    root.querySelectorAll('[data-ens-g]').forEach(b => b.onclick = () => {
+      graphSel = b.dataset.ensG;
+      try { localStorage.setItem('ens-graph', graphSel); } catch (e) { /* storage blocked */ }
+      update();
+    });
   }
 
-  function render(ctx, ens, index, v) {
-    let html = head(v);
+  function render(ctx, ens, index, v, gr) {
+    gr = gr || GRAPHS[0];
+    let html = head(v, gr);
     if (!ens) {
       html += `<p class="ens-note">No neutral baseline for ${esc(ctx.abbr)} yet.</p>`;
     } else if (ens.districts === 1) {
@@ -361,7 +384,7 @@
         `${fmt(p.st.cut)} cut edges, ${cutBand(ce, p.st.cut)}` +
         (lt ? `; spanning-tree score ${fmt(p.st.trees())}, ${treeBand(lt, p.st.trees())}` : '') +
         (cs ? `; ${p.st.splits} counties split, ${splitsPhrase(cs.histogram, p.st.splits)}` : '') + '.</li>').join('');
-      const pass = index && index[ctx.abbr] && index[ctx.abbr][v.id];
+      const pass = index && index[ctx.abbr] && index[ctx.abbr][v.id + (gr.id === 'census' ? '-census' : '')];
       const warn = pass && pass.passed === false
         ? `<p class="ens-note ens-warn">The two sampling runs for this state did not agree closely (seat histograms ${Math.round(100 * pass.seats_tv)}% apart), so treat this baseline as rough.</p>` : '';
       html += `<p class="ens-note" style="margin-top:2px">Where the maps sit among ${fmt(total)} neutral plans: contiguous, within 1% of equal population, drawn without party data. ${esc(E.label)} votes, two-party.</p>` +
@@ -383,7 +406,7 @@
         (missing.length ? `<p class="ens-note">${missing.map(esc).join(' ')}</p>` : '') +
         (ctx.swing ? `<p class="ens-note">The baseline uses actual votes; the swing slider is not applied here.</p>` : '') +
         warn +
-        `<details style="margin-top:6px"><summary>About this baseline</summary><p class="ens-note">${esc(ens.method)}. ${esc(v.note)}. ` +
+        `<details style="margin-top:6px"><summary>About this baseline</summary><p class="ens-note">${esc(ens.method)}. ${esc(v.note)}. Neighbours: ${esc(gr.note)}. ` +
         `Two chains from different starting maps, ${fmt(ens.params.moves_per_chain)} moves each, every ${ens.params.keep_every}th plan kept. ` +
         `Cut edges = neighbouring block-group pairs split by a district line (on this site's block-group graph); fewer means more compact. ` +
         `A neutral process does not promise proportional seats: where voters live decides that.</p></details>`;

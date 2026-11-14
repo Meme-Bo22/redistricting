@@ -15,6 +15,22 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "AK.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "AK.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "AL": {
@@ -31,6 +47,22 @@
    "passed": true,
    "seats_tv": 0.0042,
    "share_diff": 0.0037,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "AL.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.011,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "AL.census.json",
+   "passed": true,
+   "seats_tv": 0.0108,
+   "share_diff": 0.0029,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -51,6 +83,22 @@
    "share_diff": 0.0018,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "AR.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.004,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "AR.census.json",
+   "passed": true,
+   "seats_tv": 0.0024,
+   "share_diff": 0.0013,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "AZ": {
@@ -67,6 +115,22 @@
    "passed": true,
    "seats_tv": 0.028,
    "share_diff": 0.0033,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "AZ.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.02,
+   "share_diff": 0.0029,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "AZ.census.json",
+   "passed": true,
+   "seats_tv": 0.0122,
+   "share_diff": 0.0036,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -87,6 +151,22 @@
    "share_diff": 0.0035,
    "moves_per_chain": 156000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "CA.county20.census.json",
+   "passed": false,
+   "seats_tv": 0.1104,
+   "share_diff": 0.0392,
+   "moves_per_chain": 312000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "CA.census.json",
+   "passed": true,
+   "seats_tv": 0.0557,
+   "share_diff": 0.0028,
+   "moves_per_chain": 156000,
+   "attempt": 1
   }
  },
  "CO": {
@@ -103,6 +183,22 @@
    "passed": true,
    "seats_tv": 0.0334,
    "share_diff": 0.0022,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "CO.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.044,
+   "share_diff": 0.0045,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "CO.census.json",
+   "passed": true,
+   "seats_tv": 0.0298,
+   "share_diff": 0.0019,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -123,6 +219,22 @@
    "share_diff": 0.0026,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "CT.census.json",
+   "passed": true,
+   "seats_tv": 0.0116,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "CT.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.004,
+   "share_diff": 0.003,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "DE": {
@@ -136,6 +248,22 @@
   },
   "county20": {
    "file": "DE.county20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "DE.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "DE.county20.census.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -159,6 +287,22 @@
    "share_diff": 0.0026,
    "moves_per_chain": 84000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "FL.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0851,
+   "share_diff": 0.0063,
+   "moves_per_chain": 84000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "FL.census.json",
+   "passed": true,
+   "seats_tv": 0.071,
+   "share_diff": 0.0033,
+   "moves_per_chain": 84000,
+   "attempt": 1
   }
  },
  "GA": {
@@ -175,6 +319,22 @@
    "passed": true,
    "seats_tv": 0.0578,
    "share_diff": 0.0052,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "GA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0277,
+   "share_diff": 0.0065,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "plain-census": {
+   "file": "GA.census.json",
+   "passed": true,
+   "seats_tv": 0.0566,
+   "share_diff": 0.0066,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -195,6 +355,22 @@
    "share_diff": 0.0002,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "HI.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "HI.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "IA": {
@@ -211,6 +387,22 @@
    "passed": true,
    "seats_tv": 0.025,
    "share_diff": 0.0015,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "IA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0124,
+   "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "IA.census.json",
+   "passed": true,
+   "seats_tv": 0.0232,
+   "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -231,6 +423,22 @@
    "share_diff": 0.0005,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "ID.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "ID.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.003,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "IL": {
@@ -249,6 +457,22 @@
    "share_diff": 0.0046,
    "moves_per_chain": 102000,
    "attempt": 2
+  },
+  "county20-census": {
+   "file": "IL.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0444,
+   "share_diff": 0.0044,
+   "moves_per_chain": 204000,
+   "attempt": 3
+  },
+  "plain-census": {
+   "file": "IL.census.json",
+   "passed": true,
+   "seats_tv": 0.0518,
+   "share_diff": 0.0056,
+   "moves_per_chain": 51000,
+   "attempt": 1
   }
  },
  "IN": {
@@ -265,6 +489,22 @@
    "passed": true,
    "seats_tv": 0.0194,
    "share_diff": 0.0045,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "IN.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.012,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "IN.census.json",
+   "passed": true,
+   "seats_tv": 0.0412,
+   "share_diff": 0.0028,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -285,6 +525,22 @@
    "share_diff": 0.0011,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "KS.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0096,
+   "share_diff": 0.0015,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "KS.census.json",
+   "passed": true,
+   "seats_tv": 0.0086,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "KY": {
@@ -301,6 +557,22 @@
    "passed": true,
    "seats_tv": 0.01,
    "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "KY.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0012,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "KY.census.json",
+   "passed": true,
+   "seats_tv": 0.0096,
+   "share_diff": 0.0023,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -321,6 +593,22 @@
    "share_diff": 0.0015,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "LA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0116,
+   "share_diff": 0.0024,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "LA.census.json",
+   "passed": true,
+   "seats_tv": 0.027,
+   "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MA": {
@@ -337,6 +625,22 @@
    "passed": true,
    "seats_tv": 0.0002,
    "share_diff": 0.0012,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "MA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.002,
+   "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "MA.census.json",
+   "passed": true,
+   "seats_tv": 0.0004,
+   "share_diff": 0.0051,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -357,6 +661,22 @@
    "share_diff": 0.0081,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "MD.census.json",
+   "passed": true,
+   "seats_tv": 0.0368,
+   "share_diff": 0.0036,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "MD.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0526,
+   "share_diff": 0.0071,
+   "moves_per_chain": 100000,
+   "attempt": 2
   }
  },
  "ME": {
@@ -372,6 +692,22 @@
    "file": "ME.json",
    "passed": true,
    "seats_tv": 0.012,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "ME.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.002,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "ME.census.json",
+   "passed": true,
+   "seats_tv": 0.0024,
    "share_diff": 0.0002,
    "moves_per_chain": 50000,
    "attempt": 1
@@ -393,6 +729,22 @@
    "share_diff": 0.0068,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "MI.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0608,
+   "share_diff": 0.0037,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "MI.census.json",
+   "passed": true,
+   "seats_tv": 0.0394,
+   "share_diff": 0.0019,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MN": {
@@ -409,6 +761,22 @@
    "passed": true,
    "seats_tv": 0.018,
    "share_diff": 0.0045,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "MN.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0416,
+   "share_diff": 0.0034,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "MN.census.json",
+   "passed": true,
+   "seats_tv": 0.0282,
+   "share_diff": 0.0029,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -429,6 +797,22 @@
    "share_diff": 0.0055,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "MO.census.json",
+   "passed": true,
+   "seats_tv": 0.029,
+   "share_diff": 0.0039,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "MO.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0208,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MS": {
@@ -445,6 +829,22 @@
    "passed": true,
    "seats_tv": 0.0112,
    "share_diff": 0.0019,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "MS.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0138,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "MS.census.json",
+   "passed": true,
+   "seats_tv": 0.011,
+   "share_diff": 0.0011,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -465,6 +865,22 @@
    "share_diff": 0.0004,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "MT.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0003,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "MT.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NC": {
@@ -483,6 +899,22 @@
    "share_diff": 0.0053,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "NC.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0546,
+   "share_diff": 0.008,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "NC.census.json",
+   "passed": true,
+   "seats_tv": 0.0334,
+   "share_diff": 0.0023,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "ND": {
@@ -496,6 +928,22 @@
   },
   "county20": {
    "file": "ND.county20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "ND.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "ND.county20.census.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -519,6 +967,22 @@
    "share_diff": 0.0004,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "NE.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0066,
+   "share_diff": 0.0003,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "NE.census.json",
+   "passed": true,
+   "seats_tv": 0.0038,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NH": {
@@ -534,6 +998,22 @@
    "file": "NH.county20.json",
    "passed": true,
    "seats_tv": 0.0028,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "NH.census.json",
+   "passed": true,
+   "seats_tv": 0.0042,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "NH.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.006,
    "share_diff": 0.0001,
    "moves_per_chain": 50000,
    "attempt": 1
@@ -555,6 +1035,22 @@
    "share_diff": 0.0055,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "NJ.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0558,
+   "share_diff": 0.0078,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "NJ.census.json",
+   "passed": true,
+   "seats_tv": 0.0716,
+   "share_diff": 0.0041,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NM": {
@@ -571,6 +1067,22 @@
    "passed": true,
    "seats_tv": 0.0124,
    "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "NM.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0064,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "NM.census.json",
+   "passed": true,
+   "seats_tv": 0.0054,
+   "share_diff": 0.0013,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -591,6 +1103,22 @@
    "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "NV.census.json",
+   "passed": true,
+   "seats_tv": 0.008,
+   "share_diff": 0.0006,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "NV.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0094,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NY": {
@@ -607,6 +1135,22 @@
    "passed": true,
    "seats_tv": 0.0327,
    "share_diff": 0.0043,
+   "moves_per_chain": 78000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "NY.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0592,
+   "share_diff": 0.0031,
+   "moves_per_chain": 78000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "NY.census.json",
+   "passed": true,
+   "seats_tv": 0.0432,
+   "share_diff": 0.0031,
    "moves_per_chain": 78000,
    "attempt": 1
   }
@@ -627,6 +1171,22 @@
    "share_diff": 0.0071,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "OH.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0378,
+   "share_diff": 0.0073,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "OH.census.json",
+   "passed": true,
+   "seats_tv": 0.0251,
+   "share_diff": 0.0028,
+   "moves_per_chain": 100000,
+   "attempt": 2
   }
  },
  "OK": {
@@ -643,6 +1203,22 @@
    "passed": true,
    "seats_tv": 0.0086,
    "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "OK.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.007,
+   "share_diff": 0.0022,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "OK.census.json",
+   "passed": true,
+   "seats_tv": 0.0066,
+   "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -663,6 +1239,22 @@
    "share_diff": 0.0019,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "OR.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0166,
+   "share_diff": 0.0021,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "OR.census.json",
+   "passed": true,
+   "seats_tv": 0.0336,
+   "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "PA": {
@@ -679,6 +1271,22 @@
    "passed": true,
    "seats_tv": 0.0808,
    "share_diff": 0.0068,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "PA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0376,
+   "share_diff": 0.0051,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "PA.census.json",
+   "passed": true,
+   "seats_tv": 0.0261,
+   "share_diff": 0.0058,
    "moves_per_chain": 51000,
    "attempt": 1
   }
@@ -699,6 +1307,22 @@
    "share_diff": 0.0008,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "RI.census.json",
+   "passed": true,
+   "seats_tv": 0.0004,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "RI.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0042,
+   "share_diff": 0.0015,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "SC": {
@@ -717,6 +1341,22 @@
    "share_diff": 0.0036,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "SC.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0628,
+   "share_diff": 0.0061,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "SC.census.json",
+   "passed": true,
+   "seats_tv": 0.027,
+   "share_diff": 0.0024,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "SD": {
@@ -730,6 +1370,22 @@
   },
   "county20": {
    "file": "SD.county20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "SD.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "SD.county20.census.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -753,6 +1409,22 @@
    "share_diff": 0.0029,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "TN.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0222,
+   "share_diff": 0.0023,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "TN.census.json",
+   "passed": true,
+   "seats_tv": 0.0124,
+   "share_diff": 0.0023,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "TX": {
@@ -769,6 +1441,22 @@
    "passed": true,
    "seats_tv": 0.0424,
    "share_diff": 0.0035,
+   "moves_per_chain": 114000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "TX.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0354,
+   "share_diff": 0.0048,
+   "moves_per_chain": 114000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "TX.census.json",
+   "passed": true,
+   "seats_tv": 0.0397,
+   "share_diff": 0.003,
    "moves_per_chain": 114000,
    "attempt": 1
   }
@@ -789,6 +1477,22 @@
    "share_diff": 0.0039,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "UT.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0038,
+   "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "UT.census.json",
+   "passed": true,
+   "seats_tv": 0.0124,
+   "share_diff": 0.0022,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "VA": {
@@ -807,6 +1511,22 @@
    "share_diff": 0.0026,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "VA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0844,
+   "share_diff": 0.005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "VA.census.json",
+   "passed": true,
+   "seats_tv": 0.0472,
+   "share_diff": 0.0034,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "VT": {
@@ -820,6 +1540,22 @@
   },
   "county20": {
    "file": "VT.county20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "VT.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "VT.county20.census.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,
@@ -843,6 +1579,22 @@
    "share_diff": 0.0041,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "plain-census": {
+   "file": "WA.census.json",
+   "passed": true,
+   "seats_tv": 0.016,
+   "share_diff": 0.0019,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "WA.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0338,
+   "share_diff": 0.0041,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "WI": {
@@ -859,6 +1611,22 @@
    "passed": true,
    "seats_tv": 0.016,
    "share_diff": 0.0014,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "WI.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0626,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "WI.census.json",
+   "passed": true,
+   "seats_tv": 0.0144,
+   "share_diff": 0.0015,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -879,6 +1647,22 @@
    "share_diff": 0.0001,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "county20-census": {
+   "file": "WV.county20.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "WV.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "WY": {
@@ -892,6 +1676,22 @@
   },
   "county20": {
    "file": "WY.county20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "plain-census": {
+   "file": "WY.census.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "county20-census": {
+   "file": "WY.county20.census.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0,

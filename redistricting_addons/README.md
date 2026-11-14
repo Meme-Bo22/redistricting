@@ -4,11 +4,13 @@
 
 These tools build a **neutral baseline** for every state: 10,000 district maps drawn by computer with no party data, following the method of Moon Duchin and Daryl DeFord's group (ReCom). The toys then show where any map (yours, the solver's, the official one) falls among them, for seats, compactness and county splits. Run `python -m redistricting_addons.batch` to rebuild everything; the results are already in `site/data/ensembles/`. See `docs/PLAN.md` for the bigger picture.
 
+They also add: **true neighbours** (block groups that share a border, from Census boundary files, instead of the site's triangulation) with a report on how much that changes results; a **block-level refinement** that makes districts equal to within one person; and a way to **run the original solver in this fork** without the author's private data folder.
+
 ## For AI agents (detailed)
 
-Add-on tools for the redistricting toys. They are additive: they read the same data as the site and change nothing in `redistricting/`, `site/` pages or existing data. They live outside `redistricting/` because `scripts/sync_from_research.py` mirrors that folder from SegmentAnyMesh and deletes files it does not know. `site/data/ensembles/` and `tests/test_ensemble.py` are also outside the sync's reach.
+Add-on tools for the redistricting toys. They are additive: they read the same data as the site and change nothing in `redistricting/`, `site/` pages or existing data. They live outside `redistricting/` because `scripts/sync_from_research.py` mirrors that folder from SegmentAnyMesh and deletes files it does not know. `site/data/ensembles/`, `site/data/graphs/`, `site/data/blocks/` and the new files in `tests/` are also outside the sync's reach.
 
-Needs numpy and scipy only.
+Needs numpy and scipy only (`generate.py` runs the original solver, which also needs shapely). Downloads (Census population file, boundary files, block shapes) are cached in `$REDISTRICTING_CACHE` or `~/.cache/redistricting` and checked against pinned sha256 hashes where noted.
 
 ### ensemble.py: a neutral baseline (ReCom)
 
@@ -51,4 +53,20 @@ Tests: `python tests/test_ensemble.py` (or `pytest tests/test_ensemble.py`).
 
 ### Pages
 
-`site/addons/ensemble-panel.js` (Draw, Fair Lines) and `site/addons/regions-sampler.js` (Re-draw the states) read these files. Each page loads its add-on with one `<script>` line; Fair Lines also publishes its state with one line (`window.__RD_PAGE`). The panel computes the spanning-tree score for the maps on the page in the browser (reverse Cuthill-McKee order and envelope Cholesky, about 50-90 ms a map); it matches the Python values to 0.01.
+`site/addons/ensemble-panel.js` (Draw, Fair Lines) and `site/addons/regions-sampler.js` (Re-draw the states) read these files. Each page loads its add-on with one `<script>` line; Fair Lines also publishes its state with one line (`window.__RD_PAGE`). The panel computes the spanning-tree score for the maps on the page in the browser (reverse Cuthill-McKee order and envelope Cholesky, about 50-90 ms a map); it matches the Python values to 0.01. A second switch picks the neighbour graph ("Site neighbours" or "Census borders"); with Census borders the panel loads `<ST>[.county20].census.json` and `data/graphs/<ST>.json` and computes cut edges and the spanning-tree score of the page's maps on that graph (checked: Pennsylvania's official plan, 1,467 cut edges, score 14,086, as in Python).
+
+### cenpop.py and generate.py: run the original solver here
+
+`redistricting.data` reads `research/redistricting_2020/CenPop2020_Mean_BG.txt` (only in the private SegmentAnyMesh repo) and pins its hash. `cenpop.py` downloads the official census.gov file (same 242,335 rows and populations, different bytes; sha256 `e4a7ebbf…`) and `cenpop.geoids(fips)` gives each site unit's GEOID (the site lists units in this file's order; checked by population and position). `python -m redistricting_addons.generate <solver options>` runs `redistricting.cli.main` with `--cenpop <official file>` added only when the private copy is missing and `--pop-year` is 2020. `tests/conftest.py` does the same for the original tests. `pyproject.toml` makes `pip install -e ".[districts]"` / `".[test]"` work.
+
+### graphs.py: true neighbours from Census borders
+
+`python -m redistricting_addons.graphs` writes `site/data/graphs/<ST>.json` from `cb_2020_us_bg_500k` (Census cartographic boundary file, shoreline-clipped, sha256 pinned): rook adjacency by exact matching of shared boundary segments, `border_km` per edge, and `water_links` joining land components (islands, peninsulas across water) to their nearest unit, recorded separately. Units without a polygon have zero population. Use with `ensemble.py --graph census` (add `--no-water-links` to leave the links out; states with islands then cannot be sampled) or `batch.py --variants plain-census county20-census` (files `<ST>.census.json`, `<ST>.county20.census.json`). When the solver's plan is not contiguous on the chosen graph, chain 1 starts from a random spanning-tree plan instead (recorded in `chains`). Census-graph ensembles: 99 of 100 pass the two-chain check; California county-weighted (`CA.county20.census.json`) does not (seat TV 0.110, median share diff 0.039 after 312,000 moves per chain) and is kept, marked `passed: false` in `index.json`, so the panel warns on it. Its chains agree on median seats (44/45/40), so the sensitivity row is indicative; a longer run or more chains would settle it.
+
+### graph_report.py: does the neighbour graph change the results?
+
+`python -m redistricting_addons.graph_report` compares the site-graph and Census-graph ensembles per state: seat-histogram total variation per election, median seats, the official plan's place on each graph, median county splits, contiguity of the solver's and official plans on each graph, and graph facts. Writes `docs/GRAPH_SENSITIVITY.md` and `site/data/ensembles/graph_sensitivity.json`.
+
+### blocks.py: within one person, at census-block level
+
+`python -m redistricting_addons.blocks --state PA [--plan solver|official]` downloads TIGER/Line `tl_2020_<FIPS>_tabblock20` (block shapes with `POP20`), builds rook block adjacency (hashed segment keys; water blocks are ordinary nodes; islands joined by recorded water links), gives each block its block group's district, repairs districts that are in pieces (smaller pieces join the neighbour sharing most edges), then balances: one hop at a time from the largest surplus toward the nearest deficit, moving border blocks largest first without overshooting and never disconnecting a district, with a final step that swaps one border block each way for an exact net amount. Stops when the largest and smallest districts differ by at most one person. Writes `site/data/blocks/<ST>.<plan>.json` (report) and `<ST>.<plan>.bef.csv.gz` (block GEOID, district 1..k). Pilots committed: PA (336,985 blocks; from 1,265 people apart and 24 pieces to 1 person apart and 17 pieces; 530 blocks / 20,618 people changed; about 50 s), RI and NH (2 blocks each).

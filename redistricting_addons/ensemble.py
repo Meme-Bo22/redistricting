@@ -55,6 +55,8 @@ class Graph:
     plans: dict = field(default_factory=dict)  # name -> (n,) int labels, e.g. "solver", "official"
     k: int = 0
     abbr: str = ""
+    graph: str = "site"  # "site" (the toys' Delaunay graph) or "census" (shared borders, redistricting_addons.graphs)
+    water_links: bool = True
 
     @property
     def n(self) -> int:
@@ -72,10 +74,40 @@ def _unique_edges(e) -> np.ndarray:
     return np.unique(e, axis=0)
 
 
-def load_state(path: str | Path) -> Graph:
-    """Load ``site/data/<ST>.json`` (the toys' data format) as a Graph."""
-    d = json.loads(Path(path).read_text(encoding="utf-8"))
-    edges = _unique_edges(np.r_[np.asarray(d["edges"], np.int64), np.asarray(d.get("bridges", []), np.int64)])
+GRAPHS = {
+    "site": "the site's block-group graph (Delaunay triangulation of centre points clipped to the state, "
+            "edges and bridges in site/data/<ST>.json)",
+    "census": "Census shared-border graph (site/data/graphs/<ST>.json: rook adjacency from the 2020 boundary file, "
+              "shoreline-clipped)",
+}
+
+
+def load_state(path: str | Path, graph: str = "site", water_links: bool = True) -> Graph:
+    """Load ``site/data/<ST>.json`` (the toys' data format) as a Graph.
+
+    ``graph="site"`` (default) uses the page's own edges plus its water ``bridges``; ``graph="census"`` uses
+    the shared-border graph built by ``redistricting_addons.graphs`` plus its ``water_links``. With
+    ``water_links=False`` the water bridges / links are left out (pieces cut off by water then stay separate,
+    and ReCom needs a connected graph, so states with islands cannot be sampled that way).
+    """
+    path = Path(path)
+    d = json.loads(path.read_text(encoding="utf-8"))
+    if graph == "site":
+        base = _unique_edges(d["edges"])
+        bridges = _unique_edges(d.get("bridges", []))
+        if water_links:
+            edges = _unique_edges(np.r_[base, bridges])
+        else:
+            drop = {tuple(b) for b in bridges.tolist()}
+            edges = np.array([e for e in base.tolist() if tuple(e) not in drop], np.int64).reshape(-1, 2)
+    elif graph == "census":
+        g = json.loads((path.parent / "graphs" / f"{d['abbr']}.json").read_text(encoding="utf-8"))
+        if g["n"] != d["n"]:
+            raise ValueError(f"{d['abbr']}: census graph has {g['n']} units, site data {d['n']}")
+        edges = _unique_edges(np.r_[np.asarray(g["edges"], np.int64),
+                                    np.asarray(g["water_links"] if water_links else [], np.int64)])
+    else:
+        raise ValueError(f"unknown graph {graph!r} (use 'site' or 'census')")
     elections = {name: {"label": e.get("label", name), "d": np.asarray(e["d"], float), "r": np.asarray(e["r"], float)}
                  for name, e in d.get("elections", {}).items()}
     plans = {}
@@ -84,7 +116,8 @@ def load_state(path: str | Path) -> Graph:
     if "current" in d:
         plans["official"] = np.asarray(d["current"], np.int64)
     return Graph(pop=np.asarray(d["pop"], float), edges=edges, county=np.asarray(d["cty"], np.int64),
-                 elections=elections, plans=plans, k=int(d["seats"]), abbr=d.get("abbr", ""))
+                 elections=elections, plans=plans, k=int(d["seats"]), abbr=d.get("abbr", ""),
+                 graph=graph, water_links=water_links)
 
 
 def grid_graph(nx: int, ny: int, pop=None) -> Graph:
@@ -377,6 +410,15 @@ def reference(graph: Graph, labels, k: int, flat: list[dict]) -> dict:
 
 # --------------------------------------------------------------------------- run
 
+def contiguous(graph: Graph, labels, k: int) -> bool:
+    """True when every district of ``labels`` is one connected piece of ``graph``."""
+    labels = np.asarray(labels, np.int64)
+    e = graph.edges[labels[graph.edges[:, 0]] == labels[graph.edges[:, 1]]]
+    a = sparse.coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(graph.n, graph.n))
+    ncomp, _ = connected_components(a, directed=False)
+    return ncomp == len(np.unique(labels))
+
+
 def single_district(graph: Graph) -> dict:
     """Summary for an at-large state (one district): there is only one possible plan, so nothing is sampled."""
     labels = np.zeros(graph.n, np.int64)
@@ -393,7 +435,9 @@ def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, cou
     if k == 1:
         return single_district(graph)
     starts = []
-    if "solver" in graph.plans:
+    default_graph = graph.graph == "site" and graph.water_links
+    if "solver" in graph.plans and (default_graph or contiguous(graph, graph.plans["solver"], k)):
+        # (on another graph the solver's plan can be in pieces, and ReCom must start from connected districts)
         starts.append(("solver plan", graph.plans["solver"]))
     while len(starts) < chains:
         starts.append((f"random spanning-tree plan (seed {seed + len(starts)})", tree_seed(graph, k, tol, seed + len(starts))))
@@ -419,9 +463,13 @@ def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, cou
                   "(DeFord, Duchin & Solomon 2019, arXiv:1911.05725)"
                   + (f"; county-internal edge weights drawn from [0, {county_weight}] "
                      "(Clelland et al. 2021, arXiv:2011.06049)" if county_weight != 1 else ""),
-        "graph": "the site's block-group graph (edges and bridges in site/data/<ST>.json); cut edges are counted on it",
+        "graph": ("the site's block-group graph (edges and bridges in site/data/<ST>.json); cut edges are counted on it"
+                  if default_graph else GRAPHS[graph.graph] + ("; water links included" if graph.water_links
+                                                               else "; water links left out")
+                  + "; cut edges are counted on it"),
         "params": {"moves_per_chain": steps, "burn_in": burn, "keep_every": every, "pop_tolerance": tol,
-                   "county_weight": county_weight, "chains": chains, "spanning_trees": trees},
+                   "county_weight": county_weight, "chains": chains, "spanning_trees": trees,
+                   **({} if default_graph else {"graph": graph.graph, "water_links": graph.water_links})},
         "chains": chain_meta,
         "seconds": round(time.perf_counter() - t0, 1),
         "quantiles": list(QUANTILES),
@@ -444,11 +492,16 @@ def main(argv=None) -> int:
     ap.add_argument("--chains", type=int, default=2)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no-trees", action="store_true", help="skip the spanning-tree compactness measure (faster)")
+    ap.add_argument("--graph", choices=list(GRAPHS), default="site",
+                    help="site = the toys' Delaunay graph (default); census = shared borders from the Census "
+                         "boundary file (build with python -m redistricting_addons.graphs)")
+    ap.add_argument("--no-water-links", action="store_true",
+                    help="leave out water bridges (site) or water links (census); states with islands then fail")
     a = ap.parse_args(argv)
     st = a.state.upper()
     data = Path(a.data) if a.data else ROOT / "site" / "data" / f"{st}.json"
     out = Path(a.out) if a.out else ROOT / "site" / "data" / "ensembles" / f"{st}.json"
-    g = load_state(data)
+    g = load_state(data, graph=a.graph, water_links=not a.no_water_links)
     if not g.is_connected():
         raise SystemExit(f"{data}: graph is not connected")
     print(f"{st}: {g.n} units, {len(g.edges)} edges, {g.k} districts")

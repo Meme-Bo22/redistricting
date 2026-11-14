@@ -20,6 +20,9 @@ from .ensemble import ROOT, load_state, run
 
 OUT = ROOT / "site" / "data" / "ensembles"
 VARIANTS = {"plain": (1.0, ""), "county20": (20.0, ".county20")}
+# opt-in variants on the Census shared-border graph (redistricting_addons.graphs); not in the default run
+GRAPH_VARIANTS = {"plain-census": (1.0, ".census"), "county20-census": (20.0, ".county20.census")}
+ALL_VARIANTS = {**VARIANTS, **GRAPH_VARIANTS}
 
 
 def all_states():
@@ -28,7 +31,7 @@ def all_states():
 
 
 def out_path(st, variant):
-    return OUT / f"{st}{VARIANTS[variant][1]}.json"
+    return OUT / f"{st}{ALL_VARIANTS[variant][1]}.json"
 
 
 def default_steps(k):
@@ -46,10 +49,10 @@ def check(res, max_tv, max_share):
 
 
 def job(st, variant, steps, burn, every, tol, seed):
-    g = load_state(ROOT / "site" / "data" / f"{st}.json")
+    g = load_state(ROOT / "site" / "data" / f"{st}.json", graph="census" if variant in GRAPH_VARIANTS else "site")
     if not g.is_connected():
         raise RuntimeError(f"{st}: graph is not connected")
-    res = run(g, g.k, steps, burn, every, tol, VARIANTS[variant][0], seed, chains=2, log=None)
+    res = run(g, g.k, steps, burn, every, tol, ALL_VARIANTS[variant][0], seed, chains=2, log=None)
     p = out_path(st, variant)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(res, separators=(",", ":")), encoding="utf-8")
@@ -59,7 +62,8 @@ def job(st, variant, steps, burn, every, tol, seed):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="python -m redistricting_addons.batch", description=__doc__.split("\n\n")[0])
     ap.add_argument("--states", nargs="*", help="two-letter codes (default: every state in site/data)")
-    ap.add_argument("--variants", nargs="*", default=list(VARIANTS), choices=list(VARIANTS))
+    ap.add_argument("--variants", nargs="*", default=list(VARIANTS), choices=list(ALL_VARIANTS),
+                    help="default: plain county20; add plain-census county20-census for the Census border graph")
     ap.add_argument("--workers", type=int, default=12)
     ap.add_argument("--steps", type=int, help="moves per chain (default: max(50000, 3000 x districts))")
     ap.add_argument("--burn", type=int, default=2000)
