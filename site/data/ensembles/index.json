@@ -41,24 +41,36 @@
    "attempt": 1
   },
   "nature20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "AK.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "huc20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "AK.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "town20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "AK.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "school20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "AK.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "AL": {
@@ -547,24 +559,36 @@
    "attempt": 1
   },
   "nature20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "DE.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "huc20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "DE.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "town20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "DE.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "school20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "DE.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "FL": {
@@ -2015,24 +2039,36 @@
    "attempt": 1
   },
   "nature20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "ND.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "huc20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "ND.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "town20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "ND.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "school20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "ND.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NE": {
@@ -2965,24 +3001,36 @@
    "attempt": 1
   },
   "nature20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "SD.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "huc20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "SD.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "town20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "SD.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "school20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "SD.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "TN": {
@@ -3323,24 +3371,36 @@
    "attempt": 1
   },
   "nature20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "VT.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "huc20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "VT.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "town20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "VT.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "school20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "VT.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "WA": {
@@ -3607,24 +3667,36 @@
    "attempt": 1
   },
   "nature20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "WY.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "huc20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "WY.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "town20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "WY.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   },
   "school20": {
-   "file": null,
-   "passed": false,
-   "error": "FileNotFoundError(2, 'No such file or directory')"
+   "file": "WY.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  }
 }

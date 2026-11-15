@@ -62,8 +62,8 @@ def job(st, variant, steps, burn, every, tol, seed):
     if variant in ZIP_VARIANTS:  # added: weight edges inside one ZIP area, count ZIP splits
         z = json.loads((ROOT / "site" / "data" / "sci" / "zcta" / f"{st}.json").read_text(encoding="utf-8"))
         g.zcta = __import__("numpy").asarray(z["bg_zcta"], dtype="int64")
-    if variant in GEO_VARIANTS:  # added: geography / community keep rules, plus their split statistics
-        from .geo_layers import attach
+    if variant in GEO_VARIANTS and g.k > 1:  # added: geography / community keep rules, plus their split statistics
+        from .geo_layers import attach  # (at-large states have no layer files and nothing to sample)
         attach(g, st, GEO_VARIANTS[variant][2])
     res = run(g, g.k, steps, burn, every, tol, ALL_VARIANTS[variant][0], seed, chains=2, log=None)
     if variant in GEO_VARIANTS:
