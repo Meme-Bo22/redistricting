@@ -25,6 +25,11 @@ GRAPH_VARIANTS = {"plain-census": (1.0, ".census"), "county20-census": (20.0, ".
 # opt-in: ZIP-code areas kept whole (redistricting_addons.sci_zcta must have written site/data/sci/zcta/<ST>.json)
 ZIP_VARIANTS = {"zip20": (20.0, ".zip20")}
 ALL_VARIANTS = {**VARIANTS, **GRAPH_VARIANTS, **ZIP_VARIANTS}
+# opt-in: geography and communities (redistricting_addons.geo_layers must have written site/data/layers/geo/<ST>.json):
+# links crossing no river, lake, ridge or watershed line weighted 20; watersheds, towns or school districts kept whole
+GEO_VARIANTS = {"nature20": (20.0, ".nature20", "nature"), "huc20": (20.0, ".huc20", "huc8"),
+                "town20": (20.0, ".town20", "town"), "school20": (20.0, ".school20", "school")}
+ALL_VARIANTS.update({k: v[:2] for k, v in GEO_VARIANTS.items()})
 
 
 def all_states():
@@ -57,7 +62,14 @@ def job(st, variant, steps, burn, every, tol, seed):
     if variant in ZIP_VARIANTS:  # added: weight edges inside one ZIP area, count ZIP splits
         z = json.loads((ROOT / "site" / "data" / "sci" / "zcta" / f"{st}.json").read_text(encoding="utf-8"))
         g.zcta = __import__("numpy").asarray(z["bg_zcta"], dtype="int64")
+    if variant in GEO_VARIANTS:  # added: geography / community keep rules, plus their split statistics
+        from .geo_layers import attach
+        attach(g, st, GEO_VARIANTS[variant][2])
     res = run(g, g.k, steps, burn, every, tol, ALL_VARIANTS[variant][0], seed, chains=2, log=None)
+    if variant in GEO_VARIANTS:
+        from .geo_layers import KEEP
+        res["method"] = res["method"].replace("county-internal", f"{KEEP[GEO_VARIANTS[variant][2]]}: internal")
+        res["weight_by"] = GEO_VARIANTS[variant][2]
     if variant in ZIP_VARIANTS:
         res["method"] = res["method"].replace("county-internal", "ZIP-area-internal (ZCTA)")
         res["weight_by"] = "zcta"

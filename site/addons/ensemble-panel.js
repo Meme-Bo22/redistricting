@@ -19,6 +19,11 @@
     { id: 'plain', file: '', name: 'Plain ReCom', note: 'no county preference' },
     // added: ZIP-code areas (ZCTAs) kept whole instead of counties; site neighbour graph only
     { id: 'zip20', file: '.zip20', name: 'ZIP areas kept whole', note: 'links inside one ZIP-code area weighted 20×, so samples keep neighbourhoods together rather than counties (site neighbours only)' },
+    // added: geography and communities (redistricting_addons/geo_layers.py); site neighbour graph only
+    { id: 'nature20', file: '.nature20', name: 'Rivers & ridges followed', note: 'links that cross no USGS river (Strahler order 4+), lake, ridge (≥ 150 m climb) or river-basin line weighted 20×, so district lines tend to run along natural lines (site neighbours only)' },
+    { id: 'huc20', file: '.huc20', name: 'River basins kept whole', note: 'links inside one 8-digit USGS watershed weighted 20× (site neighbours only)' },
+    { id: 'town20', file: '.town20', name: 'Towns kept whole', note: 'links inside one town (incorporated place, else county subdivision with a government) weighted 20× (site neighbours only)' },
+    { id: 'school20', file: '.school20', name: 'School districts kept whole', note: 'links inside one school district weighted 20× (site neighbours only)' },
   ];
   let variant = 'county20';
   try { const v = localStorage.getItem('ens-variant'); if (VARIANTS.some(x => x.id === v)) variant = v; } catch (e) { /* storage blocked */ }
@@ -551,6 +556,13 @@
     const s = document.createElement('script');
     s.src = (me && me.src ? me.src.replace(/ensemble-panel\.js.*$/, '') : '../addons/') + 'sci-slider.js';
     s.dataset.rdSci = '1';
+    document.body.appendChild(s);
+  }
+  if (isDraw && !document.querySelector('script[data-rd-geo]')) {  // added: geography and community sliders (geo-sliders.js)
+    const me = document.currentScript || [...document.scripts].find(s => /ensemble-panel\.js/.test(s.src));
+    const s = document.createElement('script');
+    s.src = (me && me.src ? me.src.replace(/ensemble-panel\.js.*$/, '') : '../addons/') + 'geo-sliders.js';
+    s.dataset.rdGeo = '1';
     document.body.appendChild(s);
   }
   window.__RD_ENSEMBLE = { logTrees, sciKept: (data, labels, k) => sciFiles[data.abbr] && sciKept(data, sciFiles[data.abbr], labels, k) };  // for checking against redistricting_addons.ensemble.log_spanning_trees

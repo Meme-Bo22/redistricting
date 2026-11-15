@@ -145,6 +145,64 @@ TECHNIQUES_ZIP = [
 ]
 
 
+# added: geography and communities (redistricting_addons.geo_layers): two background maps, then seven plans
+TECHNIQUES_GEO = [
+    ("The land: relief, USGS rivers, river basins", "map:land"),
+    ("Communities: towns (purple), school districts (orange)", "map:communities"),
+    ("Official map (in use)", "official"),
+    ("Neutral ReCom, plain", "recom1"),
+    ("Neutral ReCom, counties kept whole", "recom20"),
+    ("Neutral ReCom, rivers & ridges followed", "geo:nature"),
+    ("Neutral ReCom, river basins kept whole", "geo:huc8"),
+    ("Neutral ReCom, towns kept whole", "geo:town"),
+    ("Neutral ReCom, school districts kept whole", "geo:school"),
+]
+
+
+def _geo_panel(ax, st, d, kind):
+    """Added: a background map in the site's x, y frame (geo_layers outputs)."""
+    from .geo_layers import OUT as GEO
+    L = json.loads((GEO / f"{st}.json").read_text(encoding="utf-8"))
+    sh = json.loads((GEO / f"{st}.shapes.json").read_text(encoding="utf-8"))
+    for poly in d["outline"]:
+        for ring in poly:
+            r = np.asarray(ring)
+            ax.fill(r[:, 0], r[:, 1], color="#f3efe6", zorder=0)
+            ax.plot(r[:, 0], r[:, 1], color="#555", lw=0.8, zorder=5)
+    xy = lambda f: (np.asarray(f[0::2]), np.asarray(f[1::2]))
+    if kind == "land":
+        import matplotlib.image as mpimg
+        R = L["relief"]
+        ax.imshow(mpimg.imread(GEO / R["file"]), extent=(R["x0"], R["x1"], R["y_bottom"], R["y1"]), zorder=1)
+        for f in sh["huc8"]:
+            ax.plot(*xy(f), color="#2a9d8f", lw=0.6, zorder=2)
+        for f in sh["lakes"]:
+            ax.fill(*xy(f), color="#3b82c4", alpha=0.6, lw=0, zorder=3)
+        for f in sh["rivers"]:
+            ax.plot(*xy(f["p"]), color="#3b82c4", lw={4: 0.6, 5: 1.0, 6: 1.5}.get(f["o"], 2.0), zorder=3)
+    else:
+        for f in sh["school"]:
+            ax.plot(*xy(f), color="#e09f3e", lw=0.7, zorder=2)
+        for f in sh["town"]:
+            ax.plot(*xy(f), color="#7b5ea7", lw=0.5, zorder=3)
+    from matplotlib.patches import PathPatch
+    from matplotlib.path import Path as MPath
+    verts, codes = [], []
+    for poly in d["outline"]:
+        for ring in poly:
+            r = np.asarray(ring, float)
+            verts += r.tolist() + [r[0].tolist()]
+            codes += [MPath.MOVETO] + [MPath.LINETO] * (len(r) - 1) + [MPath.CLOSEPOLY]
+    clip = PathPatch(MPath(verts, codes), transform=ax.transData, facecolor="none", edgecolor="none")
+    ax.add_patch(clip)
+    for art in ax.lines + ax.images + ax.patches + ax.collections:
+        if art is not clip and art.get_zorder() in (1, 2, 3):
+            art.set_clip_path(clip)
+    x0, y0 = np.min([np.min(np.asarray(r)[:, 0]) for p in d["outline"] for r in p]), np.min([np.min(np.asarray(r)[:, 1]) for p in d["outline"] for r in p])
+    x1, y1 = np.max([np.max(np.asarray(r)[:, 0]) for p in d["outline"] for r in p]), np.max([np.max(np.asarray(r)[:, 1]) for p in d["outline"] for r in p])
+    ax.set_xlim(x0, x1); ax.set_ylim(y0, y1)
+
+
 def techniques(st: str, steps: int = 3000, which=None, out_suffix: str = "") -> Path:
     """Added option: one state drawn six ways (``TECHNIQUES``), districts filled by 2020 Democratic share, written
     to ``docs/samples/<ST>.techniques.png``. ReCom maps are the plan after ``steps`` accepted moves from the solver
@@ -167,6 +225,15 @@ def techniques(st: str, steps: int = 3000, which=None, out_suffix: str = "") -> 
             for lab in recom_chain(gz, gz.plans["solver"], k, steps, 0.01, 20.0, seed=1):
                 pass
             lab = lab.copy()
+        elif key.startswith("map:"):  # added: background map panel (drawn below)
+            lab = key
+        elif key.startswith("geo:"):  # added: ReCom with a geo_layers keep rule, weight 20
+            from .geo_layers import attach
+            gg = attach(load_state(ROOT / "site" / "data" / f"{st}.json", sci=False), st, key[4:])
+            lab = None
+            for lab in recom_chain(gg, gg.plans["solver"], k, steps, 0.01, 20.0, seed=1):
+                pass
+            lab = lab.copy()
         elif key.startswith("recom"):
             lab = None
             for lab in recom_chain(g, g.plans["solver"], k, steps, 0.01, float(key[5:]), seed=1):
@@ -183,9 +250,18 @@ def techniques(st: str, steps: int = 3000, which=None, out_suffix: str = "") -> 
     c0 = np.cos(np.radians(lat0))
     cols = 3
     rows = (len(plans) + cols - 1) // cols
-    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5.4 * rows))
+    if out_suffix == ".geo":  # added: rows sized to the state's shape (wide states left too much white)
+        o = np.vstack([np.asarray(r)[:, :2] for p in d["outline"] for r in p])
+        asp = float(np.clip(np.ptp(o[:, 1]) / max(np.ptp(o[:, 0]), 1e-6), 0.35, 1.4))
+        fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, (6 * asp + 0.9) * rows))
+    else:
+        fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5.4 * rows))
     axes = np.atleast_1d(axes).ravel()
     for ax, (name, lab) in zip(axes, plans):
+        if isinstance(lab, str):  # added: geo_layers background map
+            _geo_panel(ax, st, d, lab[4:])
+            ax.set_aspect("equal"); ax.axis("off"); ax.set_title(name, fontsize=11)
+            continue
         sh = _shares(d, lab, k)
         verts, fc = [], []
         for i, rings in enumerate(polys):
@@ -198,8 +274,9 @@ def techniques(st: str, steps: int = 3000, which=None, out_suffix: str = "") -> 
         ax.set_title(f"{name}\nDemocratic seats of {k}: {s16} (2016), {s20} (2020), {s24} (2024)", fontsize=11)
     for ax in axes[len(plans):]:
         ax.axis("off")
-    fig.suptitle(f"{d['name']}: one state, six ways to draw it{' (ZIP-code versions)' if out_suffix else ''} (districts coloured by 2020 vote)",
-                 fontsize=14, x=.01, ha="left")
+    title = (f"{d['name']}: following the land and its communities (districts coloured by 2020 vote)" if out_suffix == ".geo"
+             else f"{d['name']}: one state, six ways to draw it{' (ZIP-code versions)' if out_suffix else ''} (districts coloured by 2020 vote)")
+    fig.suptitle(title, fontsize=14, x=.01, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{st}.techniques{out_suffix}.png"
@@ -291,6 +368,8 @@ def main(argv=None) -> int:
                     help="also docs/samples/<ST>.techniques.png: each state drawn six ways")
     ap.add_argument("--techniques-zip", nargs="*", default=[],
                     help="also docs/samples/<ST>.techniques.zip.png: six ways with ZIP areas instead of counties")
+    ap.add_argument("--techniques-geo", nargs="*", default=[],
+                    help="also docs/samples/<ST>.techniques.geo.png: the land, communities and seven plans (geo_layers)")
     ap.add_argument("--grown", action="store_true", help="also docs/samples/states_grown.png (needs sci_grow output)")
     a = ap.parse_args(argv)
     for st in a.states:
@@ -301,6 +380,8 @@ def main(argv=None) -> int:
         print("wrote", techniques(st))
     for st in a.techniques_zip:  # added: ZIP-code versions
         print("wrote", techniques(st, which=TECHNIQUES_ZIP, out_suffix=".zip"))
+    for st in a.techniques_geo:  # added: geography and communities
+        print("wrote", techniques(st, which=TECHNIQUES_GEO, out_suffix=".geo"))
     if a.grown:  # added option: today's states beside the sci_grow versions
         print("wrote", states(others=[("Grown from today's capitals by friendships (today's populations)", "grown"),
                                       ("Grown, then made friendship-compact", "grown.strong"),

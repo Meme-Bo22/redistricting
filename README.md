@@ -85,3 +85,5 @@ For agents: `redistricting_addons/sci.py` (data, score), `sci_districts.py` (opt
 **Interactive:** `site/sci-states/` shows the 50-state maps (pick a version, click a state); the Draw toy has a friendship-ties slider (ZIP-code social connectedness, `docs/SCI_ZCTA.md`).
 
 **ZIP-code versions:** every county-based district map also has a ZIP-code version (neutral maps keeping ZIP areas whole, social ties by ZIP); see `docs/ZIP_MAPS.md`.
+
+**Land and communities:** the Draw toy has sliders for mountains and ridges, river basins, USGS rivers and lakes, drive time, towns and school districts, and there are neutral maps that follow rivers and ridges or keep river basins, towns or school districts whole; see `docs/GEO_LAYERS.md`.

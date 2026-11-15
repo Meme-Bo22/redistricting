@@ -39,6 +39,26 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "huc20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "town20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "school20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
   }
  },
  "AL": {
@@ -79,6 +99,38 @@
    "passed": true,
    "seats_tv": 0.007,
    "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "AL.town20.json",
+   "passed": true,
+   "seats_tv": 0.0144,
+   "share_diff": 0.0024,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "AL.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0186,
+   "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "AL.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0208,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "AL.school20.json",
+   "passed": true,
+   "seats_tv": 0.0146,
+   "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -123,6 +175,38 @@
    "share_diff": 0.0009,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "town20": {
+   "file": "AR.town20.json",
+   "passed": true,
+   "seats_tv": 0.0032,
+   "share_diff": 0.0006,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "AR.huc20.json",
+   "passed": true,
+   "seats_tv": 0.007,
+   "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "AR.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0004,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "AR.school20.json",
+   "passed": true,
+   "seats_tv": 0.0026,
+   "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "AZ": {
@@ -163,6 +247,38 @@
    "passed": true,
    "seats_tv": 0.0246,
    "share_diff": 0.0017,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "AZ.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0462,
+   "share_diff": 0.0039,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "AZ.nature20.json",
+   "passed": true,
+   "seats_tv": 0.008,
+   "share_diff": 0.0009,
+   "moves_per_chain": 200000,
+   "attempt": 3
+  },
+  "town20": {
+   "file": "AZ.town20.json",
+   "passed": true,
+   "seats_tv": 0.0114,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "AZ.school20.json",
+   "passed": true,
+   "seats_tv": 0.0264,
+   "share_diff": 0.0062,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -207,6 +323,38 @@
    "share_diff": 0.0023,
    "moves_per_chain": 312000,
    "attempt": 2
+  },
+  "huc20": {
+   "file": "CA.huc20.json",
+   "passed": false,
+   "seats_tv": 0.1814,
+   "share_diff": 0.0075,
+   "moves_per_chain": 624000,
+   "attempt": 3
+  },
+  "nature20": {
+   "file": "CA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.035,
+   "share_diff": 0.0068,
+   "moves_per_chain": 624000,
+   "attempt": 3
+  },
+  "school20": {
+   "file": "CA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0651,
+   "share_diff": 0.0029,
+   "moves_per_chain": 156000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "CA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0826,
+   "share_diff": 0.0029,
+   "moves_per_chain": 312000,
+   "attempt": 2
   }
  },
  "CO": {
@@ -247,6 +395,38 @@
    "passed": true,
    "seats_tv": 0.0302,
    "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "CO.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0272,
+   "share_diff": 0.0076,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "CO.huc20.json",
+   "passed": true,
+   "seats_tv": 0.048,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "CO.school20.json",
+   "passed": true,
+   "seats_tv": 0.0138,
+   "share_diff": 0.0014,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "CO.town20.json",
+   "passed": true,
+   "seats_tv": 0.0196,
+   "share_diff": 0.0031,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -291,6 +471,38 @@
    "share_diff": 0.002,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "town20": {
+   "file": "CT.town20.json",
+   "passed": true,
+   "seats_tv": 0.016,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "CT.school20.json",
+   "passed": true,
+   "seats_tv": 0.0034,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "CT.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0088,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "CT.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0076,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "DE": {
@@ -333,6 +545,26 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "huc20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "town20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "school20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
   }
  },
  "FL": {
@@ -375,6 +607,38 @@
    "share_diff": 0.0044,
    "moves_per_chain": 168000,
    "attempt": 2
+  },
+  "nature20": {
+   "file": "FL.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0928,
+   "share_diff": 0.0058,
+   "moves_per_chain": 168000,
+   "attempt": 2
+  },
+  "huc20": {
+   "file": "FL.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0986,
+   "share_diff": 0.0081,
+   "moves_per_chain": 168000,
+   "attempt": 2
+  },
+  "school20": {
+   "file": "FL.school20.json",
+   "passed": true,
+   "seats_tv": 0.0403,
+   "share_diff": 0.0028,
+   "moves_per_chain": 336000,
+   "attempt": 3
+  },
+  "town20": {
+   "file": "FL.town20.json",
+   "passed": true,
+   "seats_tv": 0.0704,
+   "share_diff": 0.0031,
+   "moves_per_chain": 84000,
+   "attempt": 1
   }
  },
  "GA": {
@@ -415,6 +679,38 @@
    "passed": true,
    "seats_tv": 0.068,
    "share_diff": 0.0052,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "GA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0844,
+   "share_diff": 0.0098,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "huc20": {
+   "file": "GA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0804,
+   "share_diff": 0.0096,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "GA.school20.json",
+   "passed": true,
+   "seats_tv": 0.043,
+   "share_diff": 0.0052,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "GA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0268,
+   "share_diff": 0.0041,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -459,6 +755,38 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "town20": {
+   "file": "HI.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "HI.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "HI.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "HI.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "IA": {
@@ -499,6 +827,38 @@
    "passed": true,
    "seats_tv": 0.012,
    "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "IA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0228,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "IA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0186,
+   "share_diff": 0.003,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "IA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0198,
+   "share_diff": 0.0019,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "IA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0152,
+   "share_diff": 0.0016,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -543,6 +903,38 @@
    "share_diff": 0.0004,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "school20": {
+   "file": "ID.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "ID.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "ID.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "ID.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "IL": {
@@ -583,6 +975,38 @@
    "passed": true,
    "seats_tv": 0.0731,
    "share_diff": 0.0073,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "IL.nature20.json",
+   "passed": true,
+   "seats_tv": 0.06,
+   "share_diff": 0.0062,
+   "moves_per_chain": 102000,
+   "attempt": 2
+  },
+  "huc20": {
+   "file": "IL.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0639,
+   "share_diff": 0.0073,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "IL.town20.json",
+   "passed": true,
+   "seats_tv": 0.0533,
+   "share_diff": 0.0092,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "IL.school20.json",
+   "passed": true,
+   "seats_tv": 0.072,
+   "share_diff": 0.0097,
    "moves_per_chain": 51000,
    "attempt": 1
   }
@@ -627,6 +1051,38 @@
    "share_diff": 0.0026,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "IN.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0214,
+   "share_diff": 0.0019,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "IN.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0146,
+   "share_diff": 0.0021,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "IN.school20.json",
+   "passed": true,
+   "seats_tv": 0.0188,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "IN.town20.json",
+   "passed": true,
+   "seats_tv": 0.0268,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "KS": {
@@ -667,6 +1123,38 @@
    "passed": true,
    "seats_tv": 0.0038,
    "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "KS.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0216,
+   "share_diff": 0.0013,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "KS.town20.json",
+   "passed": true,
+   "seats_tv": 0.0062,
+   "share_diff": 0.0011,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "KS.nature20.json",
+   "passed": true,
+   "seats_tv": 0.027,
+   "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "KS.school20.json",
+   "passed": true,
+   "seats_tv": 0.0058,
+   "share_diff": 0.001,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -711,6 +1199,38 @@
    "share_diff": 0.0028,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "huc20": {
+   "file": "KY.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0076,
+   "share_diff": 0.0042,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "KY.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0254,
+   "share_diff": 0.0023,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "KY.school20.json",
+   "passed": true,
+   "seats_tv": 0.0024,
+   "share_diff": 0.0031,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "KY.town20.json",
+   "passed": true,
+   "seats_tv": 0.0074,
+   "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "LA": {
@@ -751,6 +1271,38 @@
    "passed": true,
    "seats_tv": 0.0138,
    "share_diff": 0.0013,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "LA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0102,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "LA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0296,
+   "share_diff": 0.0085,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "LA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0074,
+   "share_diff": 0.0048,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "LA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0082,
+   "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -795,6 +1347,38 @@
    "share_diff": 0.0032,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "huc20": {
+   "file": "MA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0032,
+   "share_diff": 0.0024,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "MA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0022,
+   "share_diff": 0.0046,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "MA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0002,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0006,
+   "share_diff": 0.0043,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MD": {
@@ -837,6 +1421,38 @@
    "share_diff": 0.0034,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "MD.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0302,
+   "share_diff": 0.0075,
+   "moves_per_chain": 200000,
+   "attempt": 3
+  },
+  "huc20": {
+   "file": "MD.huc20.json",
+   "passed": true,
+   "seats_tv": 0.043,
+   "share_diff": 0.0065,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MD.town20.json",
+   "passed": true,
+   "seats_tv": 0.0236,
+   "share_diff": 0.0031,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "MD.school20.json",
+   "passed": true,
+   "seats_tv": 0.0544,
+   "share_diff": 0.0042,
+   "moves_per_chain": 200000,
+   "attempt": 3
   }
  },
  "ME": {
@@ -877,6 +1493,38 @@
    "passed": true,
    "seats_tv": 0.0044,
    "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "ME.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0008,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "ME.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0024,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "ME.town20.json",
+   "passed": true,
+   "seats_tv": 0.0266,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "ME.school20.json",
+   "passed": true,
+   "seats_tv": 0.0102,
+   "share_diff": 0.0005,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -921,6 +1569,38 @@
    "share_diff": 0.0055,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "MI.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0207,
+   "share_diff": 0.0031,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "huc20": {
+   "file": "MI.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0498,
+   "share_diff": 0.0066,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MI.town20.json",
+   "passed": true,
+   "seats_tv": 0.0404,
+   "share_diff": 0.0041,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "MI.school20.json",
+   "passed": true,
+   "seats_tv": 0.0226,
+   "share_diff": 0.0084,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MN": {
@@ -961,6 +1641,38 @@
    "passed": true,
    "seats_tv": 0.0338,
    "share_diff": 0.0055,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "MN.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0562,
+   "share_diff": 0.0058,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "MN.huc20.json",
+   "passed": true,
+   "seats_tv": 0.012,
+   "share_diff": 0.0043,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "school20": {
+   "file": "MN.school20.json",
+   "passed": true,
+   "seats_tv": 0.0264,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MN.town20.json",
+   "passed": true,
+   "seats_tv": 0.0208,
+   "share_diff": 0.002,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1005,6 +1717,38 @@
    "share_diff": 0.0026,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "MO.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0104,
+   "share_diff": 0.0041,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MO.town20.json",
+   "passed": true,
+   "seats_tv": 0.0138,
+   "share_diff": 0.0033,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "MO.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0916,
+   "share_diff": 0.0098,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "MO.school20.json",
+   "passed": true,
+   "seats_tv": 0.029,
+   "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "MS": {
@@ -1045,6 +1789,38 @@
    "passed": true,
    "seats_tv": 0.0122,
    "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "MS.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0124,
+   "share_diff": 0.0006,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MS.town20.json",
+   "passed": true,
+   "seats_tv": 0.0122,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "MS.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0216,
+   "share_diff": 0.0012,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "MS.school20.json",
+   "passed": true,
+   "seats_tv": 0.0124,
+   "share_diff": 0.0006,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1089,6 +1865,38 @@
    "share_diff": 0.0003,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "huc20": {
+   "file": "MT.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "MT.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "MT.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "MT.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NC": {
@@ -1129,6 +1937,38 @@
    "passed": true,
    "seats_tv": 0.0612,
    "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "NC.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0622,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "NC.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0506,
+   "share_diff": 0.0099,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "NC.town20.json",
+   "passed": true,
+   "seats_tv": 0.0492,
+   "share_diff": 0.0066,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NC.school20.json",
+   "passed": true,
+   "seats_tv": 0.0318,
+   "share_diff": 0.0025,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1173,6 +2013,26 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "huc20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "town20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "school20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
   }
  },
  "NE": {
@@ -1213,6 +2073,38 @@
    "passed": true,
    "seats_tv": 0.0108,
    "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "NE.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0068,
+   "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NE.school20.json",
+   "passed": true,
+   "seats_tv": 0.0058,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "NE.town20.json",
+   "passed": true,
+   "seats_tv": 0.004,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "NE.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0088,
+   "share_diff": 0.0003,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1257,6 +2149,38 @@
    "share_diff": 0.0002,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "NH.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0026,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "NH.town20.json",
+   "passed": true,
+   "seats_tv": 0.0058,
+   "share_diff": 0.0003,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "NH.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0104,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NH.school20.json",
+   "passed": true,
+   "seats_tv": 0.0048,
+   "share_diff": 0.0003,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NJ": {
@@ -1297,6 +2221,38 @@
    "passed": true,
    "seats_tv": 0.0806,
    "share_diff": 0.0058,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "NJ.nature20.json",
+   "passed": true,
+   "seats_tv": 0.036,
+   "share_diff": 0.0028,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "huc20": {
+   "file": "NJ.huc20.json",
+   "passed": true,
+   "seats_tv": 0.088,
+   "share_diff": 0.0048,
+   "moves_per_chain": 200000,
+   "attempt": 3
+  },
+  "town20": {
+   "file": "NJ.town20.json",
+   "passed": true,
+   "seats_tv": 0.0664,
+   "share_diff": 0.0054,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NJ.school20.json",
+   "passed": true,
+   "seats_tv": 0.0278,
+   "share_diff": 0.0043,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1341,6 +2297,38 @@
    "share_diff": 0.0009,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "NM.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0098,
+   "share_diff": 0.0015,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "NM.huc20.json",
+   "passed": true,
+   "seats_tv": 0.004,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "NM.town20.json",
+   "passed": true,
+   "seats_tv": 0.0064,
+   "share_diff": 0.0004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NM.school20.json",
+   "passed": true,
+   "seats_tv": 0.002,
+   "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "NV": {
@@ -1381,6 +2369,38 @@
    "passed": true,
    "seats_tv": 0.0118,
    "share_diff": 0.0016,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "NV.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0044,
+   "share_diff": 0.0034,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "NV.town20.json",
+   "passed": true,
+   "seats_tv": 0.0016,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NV.school20.json",
+   "passed": true,
+   "seats_tv": 0.0042,
+   "share_diff": 0.0012,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "NV.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0062,
+   "share_diff": 0.001,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1425,6 +2445,38 @@
    "share_diff": 0.0024,
    "moves_per_chain": 78000,
    "attempt": 1
+  },
+  "huc20": {
+   "file": "NY.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0455,
+   "share_diff": 0.0051,
+   "moves_per_chain": 78000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "NY.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0585,
+   "share_diff": 0.0085,
+   "moves_per_chain": 78000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "NY.town20.json",
+   "passed": true,
+   "seats_tv": 0.0206,
+   "share_diff": 0.0024,
+   "moves_per_chain": 78000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "NY.school20.json",
+   "passed": true,
+   "seats_tv": 0.0536,
+   "share_diff": 0.0054,
+   "moves_per_chain": 78000,
+   "attempt": 1
   }
  },
  "OH": {
@@ -1465,6 +2517,38 @@
    "passed": true,
    "seats_tv": 0.032,
    "share_diff": 0.0069,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "OH.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0604,
+   "share_diff": 0.0095,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "huc20": {
+   "file": "OH.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0892,
+   "share_diff": 0.0053,
+   "moves_per_chain": 100000,
+   "attempt": 2
+  },
+  "town20": {
+   "file": "OH.town20.json",
+   "passed": true,
+   "seats_tv": 0.0518,
+   "share_diff": 0.0052,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "OH.school20.json",
+   "passed": true,
+   "seats_tv": 0.0272,
+   "share_diff": 0.0053,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1509,6 +2593,38 @@
    "share_diff": 0.0012,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "OK.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0011,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "OK.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0002,
+   "share_diff": 0.0009,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "OK.town20.json",
+   "passed": true,
+   "seats_tv": 0.001,
+   "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "OK.school20.json",
+   "passed": true,
+   "seats_tv": 0.004,
+   "share_diff": 0.001,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "OR": {
@@ -1549,6 +2665,38 @@
    "passed": true,
    "seats_tv": 0.0112,
    "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "OR.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0462,
+   "share_diff": 0.004,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "OR.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0124,
+   "share_diff": 0.0035,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "OR.town20.json",
+   "passed": true,
+   "seats_tv": 0.0094,
+   "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "OR.school20.json",
+   "passed": true,
+   "seats_tv": 0.0392,
+   "share_diff": 0.0019,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1593,6 +2741,38 @@
    "share_diff": 0.0024,
    "moves_per_chain": 102000,
    "attempt": 2
+  },
+  "nature20": {
+   "file": "PA.nature20.json",
+   "passed": false,
+   "seats_tv": 0.0423,
+   "share_diff": 0.0204,
+   "moves_per_chain": 204000,
+   "attempt": 3
+  },
+  "huc20": {
+   "file": "PA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0226,
+   "share_diff": 0.0035,
+   "moves_per_chain": 204000,
+   "attempt": 3
+  },
+  "town20": {
+   "file": "PA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0741,
+   "share_diff": 0.0098,
+   "moves_per_chain": 51000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "PA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0322,
+   "share_diff": 0.0037,
+   "moves_per_chain": 102000,
+   "attempt": 2
   }
  },
  "RI": {
@@ -1635,6 +2815,38 @@
    "share_diff": 0.0009,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "huc20": {
+   "file": "RI.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0002,
+   "share_diff": 0.0005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "RI.nature20.json",
+   "passed": true,
+   "seats_tv": 0.001,
+   "share_diff": 0.0003,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "RI.town20.json",
+   "passed": true,
+   "seats_tv": 0.0008,
+   "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "RI.school20.json",
+   "passed": true,
+   "seats_tv": 0.001,
+   "share_diff": 0.0007,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "SC": {
@@ -1674,6 +2886,38 @@
    "file": "SC.zip20.json",
    "passed": true,
    "seats_tv": 0.0248,
+   "share_diff": 0.0011,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "SC.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0546,
+   "share_diff": 0.0088,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "SC.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0082,
+   "share_diff": 0.0031,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "SC.town20.json",
+   "passed": true,
+   "seats_tv": 0.0496,
+   "share_diff": 0.0042,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "SC.school20.json",
+   "passed": true,
+   "seats_tv": 0.0186,
    "share_diff": 0.0011,
    "moves_per_chain": 50000,
    "attempt": 1
@@ -1719,6 +2963,26 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "huc20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "town20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "school20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
   }
  },
  "TN": {
@@ -1759,6 +3023,38 @@
    "passed": true,
    "seats_tv": 0.0144,
    "share_diff": 0.0026,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "TN.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0168,
+   "share_diff": 0.0047,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "TN.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0164,
+   "share_diff": 0.0027,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "TN.school20.json",
+   "passed": true,
+   "seats_tv": 0.0192,
+   "share_diff": 0.0034,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "TN.town20.json",
+   "passed": true,
+   "seats_tv": 0.0202,
+   "share_diff": 0.0054,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1803,6 +3099,38 @@
    "share_diff": 0.0093,
    "moves_per_chain": 114000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "TX.nature20.json",
+   "passed": true,
+   "seats_tv": 0.031,
+   "share_diff": 0.0063,
+   "moves_per_chain": 228000,
+   "attempt": 2
+  },
+  "school20": {
+   "file": "TX.school20.json",
+   "passed": true,
+   "seats_tv": 0.0785,
+   "share_diff": 0.0046,
+   "moves_per_chain": 114000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "TX.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0717,
+   "share_diff": 0.0064,
+   "moves_per_chain": 228000,
+   "attempt": 2
+  },
+  "town20": {
+   "file": "TX.town20.json",
+   "passed": true,
+   "seats_tv": 0.0624,
+   "share_diff": 0.0039,
+   "moves_per_chain": 114000,
+   "attempt": 1
   }
  },
  "UT": {
@@ -1843,6 +3171,38 @@
    "passed": true,
    "seats_tv": 0.005,
    "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "UT.town20.json",
+   "passed": true,
+   "seats_tv": 0.0026,
+   "share_diff": 0.0012,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "UT.school20.json",
+   "passed": true,
+   "seats_tv": 0.0032,
+   "share_diff": 0.0014,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "UT.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0086,
+   "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "UT.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0122,
+   "share_diff": 0.0024,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -1887,6 +3247,38 @@
    "share_diff": 0.0035,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "VA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0604,
+   "share_diff": 0.0037,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "VA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0326,
+   "share_diff": 0.0028,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "VA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0714,
+   "share_diff": 0.0036,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "VA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0712,
+   "share_diff": 0.0068,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "VT": {
@@ -1929,6 +3321,26 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "huc20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "town20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "school20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
   }
  },
  "WA": {
@@ -1969,6 +3381,38 @@
    "passed": true,
    "seats_tv": 0.0332,
    "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "WA.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0374,
+   "share_diff": 0.002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "WA.huc20.json",
+   "passed": true,
+   "seats_tv": 0.021,
+   "share_diff": 0.0034,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "WA.school20.json",
+   "passed": true,
+   "seats_tv": 0.0136,
+   "share_diff": 0.0018,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "WA.town20.json",
+   "passed": true,
+   "seats_tv": 0.0108,
+   "share_diff": 0.0023,
    "moves_per_chain": 50000,
    "attempt": 1
   }
@@ -2013,6 +3457,38 @@
    "share_diff": 0.0021,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": "WI.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0442,
+   "share_diff": 0.005,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "WI.huc20.json",
+   "passed": true,
+   "seats_tv": 0.0308,
+   "share_diff": 0.0025,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "WI.town20.json",
+   "passed": true,
+   "seats_tv": 0.0224,
+   "share_diff": 0.0041,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "WI.school20.json",
+   "passed": true,
+   "seats_tv": 0.0328,
+   "share_diff": 0.0021,
+   "moves_per_chain": 50000,
+   "attempt": 1
   }
  },
  "WV": {
@@ -2050,6 +3526,38 @@
   },
   "zip20": {
    "file": "WV.zip20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0001,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "school20": {
+   "file": "WV.school20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "nature20": {
+   "file": "WV.nature20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "town20": {
+   "file": "WV.town20.json",
+   "passed": true,
+   "seats_tv": 0.0,
+   "share_diff": 0.0002,
+   "moves_per_chain": 50000,
+   "attempt": 1
+  },
+  "huc20": {
+   "file": "WV.huc20.json",
    "passed": true,
    "seats_tv": 0.0,
    "share_diff": 0.0001,
@@ -2097,6 +3605,26 @@
    "share_diff": 0.0,
    "moves_per_chain": 50000,
    "attempt": 1
+  },
+  "nature20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "huc20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "town20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "school20": {
+   "file": null,
+   "passed": false,
+   "error": "FileNotFoundError(2, 'No such file or directory')"
   }
  }
 }

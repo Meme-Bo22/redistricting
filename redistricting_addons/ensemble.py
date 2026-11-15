@@ -62,6 +62,16 @@ class Graph:
     # county_weight applies to edges inside one ZIP area instead of one county ("ZIP areas kept whole"), and
     # plan statistics also count ZIP-area splits. None (the default) changes nothing.
     zcta: np.ndarray | None = None
+    # added options (redistricting_addons.geo_layers), all None by default (nothing changes):
+    # keep_groups = a group per unit (watershed, town, school district; -1 = none): county_weight then applies to
+    # edges inside one group instead of one county. keep_edges = a bool per row of ``edges``: county_weight then
+    # applies to those edges (e.g. links that cross no river, lake, ridge or watershed line). split_groups =
+    # name -> group per unit: plan statistics also count "<name>_splits". edge_flags = name -> bool per row of
+    # ``edges``: plan statistics also count "<name>_cut_edges" (district lines along those links).
+    keep_groups: np.ndarray | None = None
+    keep_edges: np.ndarray | None = None
+    split_groups: dict | None = None
+    edge_flags: dict | None = None
 
     @property
     def n(self) -> int:
@@ -202,6 +212,11 @@ def _region(graph, mask):
 
 
 def _wmax(graph, em, county_weight):
+    if county_weight != 1 and getattr(graph, "keep_edges", None) is not None:  # added: geography-kept links
+        return np.where(np.asarray(graph.keep_edges)[em], float(county_weight), 1.0)
+    if county_weight != 1 and getattr(graph, "keep_groups", None) is not None:  # added: towns, watersheds ...
+        g, e = np.asarray(graph.keep_groups), graph.edges[em]
+        return np.where((g[e[:, 0]] == g[e[:, 1]]) & (g[e[:, 0]] >= 0), float(county_weight), 1.0)
     grp = graph.zcta if getattr(graph, "zcta", None) is not None else graph.county  # ZIP areas when set (added)
     if county_weight == 1 or grp is None:
         return np.ones(int(em.sum()))
@@ -344,6 +359,13 @@ def plan_stats(graph: Graph, labels, k: int, trees: bool = False) -> dict:
     if getattr(graph, "zcta", None) is not None:  # added: ZIP areas split between districts
         zp = np.unique(np.asarray(graph.zcta, np.int64) * k + labels)
         out["zip_splits"] = int(np.sum(np.bincount(zp // k) > 1))
+    for name, grp in (getattr(graph, "split_groups", None) or {}).items():  # added: towns, watersheds ... split
+        gi = np.asarray(grp, np.int64)
+        ok = gi >= 0
+        gp = np.unique(gi[ok] * k + labels[ok])
+        out[f"{name}_splits"] = int(np.sum(np.bincount(gp // k) > 1))
+    for name, flag in (getattr(graph, "edge_flags", None) or {}).items():  # added: district lines along flagged links
+        out[f"{name}_cut_edges"] = int(np.sum((labels[e0] != labels[e1]) & np.asarray(flag)))
     for name, el in graph.elections.items():
         d = np.bincount(labels, weights=el["d"], minlength=k)
         r = np.bincount(labels, weights=el["r"], minlength=k)
@@ -391,6 +413,10 @@ def summarize(graph: Graph, samples: list[list[dict]], k: int) -> dict:
     if "zip_splits" in flat[0]:
         out["zip_splits"] = {"histogram": _hist([s["zip_splits"] for s in flat]),
                              "quantiles": _q([s["zip_splits"] for s in flat])}
+    for key in [x for x in flat[0] if x.endswith(("_splits", "_cut_edges"))
+                and x not in ("county_splits", "zip_splits")]:  # added: geo_layers statistics
+        out[key] = {"histogram": _hist([s[key] for s in flat]), "quantiles": _q([s[key] for s in flat]),
+                    "mean": round(float(np.mean([s[key] for s in flat])), 2)}
     out["elections"] = {}
     for name, el in graph.elections.items():
         shares = np.array([s[name]["sorted_d_share"] for s in flat])
@@ -435,6 +461,10 @@ def reference(graph: Graph, labels, k: int, flat: list[dict]) -> dict:
     if "zip_splits" in s and "zip_splits" in flat[0]:
         out["zip_splits"] = s["zip_splits"]
         out["zip_splits_pct_at_or_below"] = _pct_at_or_below([f["zip_splits"] for f in flat], s["zip_splits"])
+    for key in [x for x in s if x.endswith(("_splits", "_cut_edges")) and x not in ("county_splits", "zip_splits")
+                and x in flat[0]]:  # added: geo_layers statistics
+        out[key] = s[key]
+        out[f"{key}_pct_at_or_below"] = _pct_at_or_below([f[key] for f in flat], s[key])
     for name in graph.elections:
         seats = s[name]["seats_d"]
         out[name] = {"seats_d": seats,
