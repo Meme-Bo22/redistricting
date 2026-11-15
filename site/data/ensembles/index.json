@@ -314,11 +314,11 @@
   },
   "county20-census": {
    "file": "CA.county20.census.json",
-   "passed": false,
-   "seats_tv": 0.1104,
-   "share_diff": 0.0392,
-   "moves_per_chain": 312000,
-   "attempt": 1
+   "passed": true,
+   "seats_tv": 0.031,
+   "share_diff": 0.0039,
+   "moves_per_chain": 1248000,
+   "attempt": 3
   },
   "plain-census": {
    "file": "CA.census.json",
@@ -339,10 +339,10 @@
   "huc20": {
    "file": "CA.huc20.json",
    "passed": false,
-   "seats_tv": 0.1814,
-   "share_diff": 0.0075,
-   "moves_per_chain": 624000,
-   "attempt": 3
+   "seats_tv": 0.0879,
+   "share_diff": 0.0106,
+   "moves_per_chain": 1248000,
+   "attempt": 4
   },
   "nature20": {
    "file": "CA.nature20.json",
@@ -2781,10 +2781,10 @@
   "nature20": {
    "file": "PA.nature20.json",
    "passed": false,
-   "seats_tv": 0.0423,
-   "share_diff": 0.0204,
-   "moves_per_chain": 204000,
-   "attempt": 3
+   "seats_tv": 0.0068,
+   "share_diff": 0.0216,
+   "moves_per_chain": 1248000,
+   "attempt": 6
   },
   "huc20": {
    "file": "PA.huc20.json",
