@@ -36,14 +36,22 @@ OUT = ROOT / "site" / "data" / "sci" / "districts"
 ENS = ROOT / "site" / "data" / "ensembles"
 
 
-def optimise(st: str, objective: str, bursts: int, burst: int, seed: int, tol: float = 0.01, compact: bool = False) -> dict:
-    g = load_state(ROOT / "site" / "data" / f"{st}.json")
+def optimise(st: str, objective: str, bursts: int, burst: int, seed: int, tol: float = 0.01, compact: bool = False,
+             graph: str = "site") -> dict:
+    # added option graph="census": the Census shared-border graph (redistricting_addons.graphs), so every district is
+    # contiguous on real borders; it starts from ensemble.tree_seed (the solver's plan is not contiguous there) and
+    # compares with the Census-graph ensembles (<ST>.county20.census.json, <ST>.census.json)
+    g = load_state(ROOT / "site" / "data" / f"{st}.json", graph=graph)
     if g.k < 2 or g.sci is None or "solver" not in g.plans:
         return {}
+    gsuf = ".census" if graph == "census" else ""
+    if graph == "census":
+        from .ensemble import tree_seed
+        g.plans["solver"] = tree_seed(g, g.k, tol, seed=1)
     best = g.plans["solver"].copy()
     cap = None
     if compact:  # no less compact than the median county-weighted neutral plan (cut edges)
-        e = json.loads((ENS / f"{st}.county20.json").read_text(encoding="utf-8"))
+        e = json.loads((ENS / f"{st}.county20{gsuf}.json").read_text(encoding="utf-8"))
         cap = e["cut_edges"]["quantiles"][2]
 
     def score(lab):
@@ -63,7 +71,7 @@ def optimise(st: str, objective: str, bursts: int, burst: int, seed: int, tol: f
     out = {"v": 1, "abbr": st, "districts": g.k, "objective": objective,
            "method": "short bursts of ReCom (Cannon et al. 2023) maximising cross-county friendship weight kept "
                      f"inside districts ({objective} SCI), from the solver's plan, {int(tol * 100)}% population tolerance",
-           "params": {"bursts": bursts, "burst": burst, "seed": seed, "tol": tol, "compact": compact,
+           "params": {"bursts": bursts, "burst": burst, "seed": seed, "tol": tol, "compact": compact, "graph": graph,
                       **({"max_cut_edges": cap} if cap is not None else {})},
            "seconds": round(time.perf_counter() - t0, 1),
            "start_ties_kept": round(start_s, 3), "ties_kept": {k: round(v, 3) for k, v in stats["sci_ties_kept"].items()},
@@ -75,7 +83,7 @@ def optimise(st: str, objective: str, bursts: int, burst: int, seed: int, tol: f
            "labels": best.tolist()}
     out["vs_neutral"] = {}
     for variant, suffix in (("county20", ".county20"), ("plain", "")):
-        p = ENS / f"{st}{suffix}.json"
+        p = ENS / f"{st}{suffix}{gsuf}.json"
         if not p.exists():
             continue
         e = json.loads(p.read_text(encoding="utf-8"))

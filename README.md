@@ -87,3 +87,5 @@ For agents: `redistricting_addons/sci.py` (data, score), `sci_districts.py` (opt
 **ZIP-code versions:** every county-based district map also has a ZIP-code version (neutral maps keeping ZIP areas whole, social ties by ZIP); see `docs/ZIP_MAPS.md`.
 
 **Land and communities:** the Draw toy has sliders for mountains and ridges, river basins, USGS rivers and lakes, drive time, towns and school districts, and there are neutral maps that follow rivers and ridges or keep river basins, towns or school districts whole; see `docs/GEO_LAYERS.md`.
+
+**Social-ties maps on real borders:** the social-ties maps were grown on the toys' guessed neighbour links, and some of their districts fall into pieces on real Census borders. Both are redrawn on real borders (every district one piece, files ending `.census.json`; old files kept); see `docs/SCI_CENSUS.md`.

@@ -272,19 +272,24 @@ def _weights(sm):
 def optimise(args):
     st, bursts, burst, seed = args[:4]
     compact = args[4] if len(args) > 4 else True  # added option: False = no shape limit
+    graph = args[5] if len(args) > 5 else "site"  # added option: "census" = real shared borders (see sci_census)
+    gsuf = ".census" if graph == "census" else ""
     from .sci import ties_kept
     try:
         import ctypes
         ctypes.windll.kernel32.SetPriorityClass(ctypes.windll.kernel32.GetCurrentProcess(), 0x40)
     except Exception:
         pass
-    g = load_state(ROOT / "site" / "data" / f"{st}.json", sci=False)
+    g = load_state(ROOT / "site" / "data" / f"{st}.json", sci=False, graph=graph)
     if g.k < 2 or "solver" not in g.plans:
         return st, None
+    if graph == "census":  # the solver's plan is not contiguous on real borders: start from a balanced tree seed
+        from .ensemble import tree_seed
+        g.plans["solver"] = tree_seed(g, g.k, 0.01, seed=1)
     sm = dict(np.load(_cache() / "zcta_state" / f"{st}.npz"))
     W = _weights(sm)
     zl = sm["local"]
-    ens = json.loads((ENS / f"{st}.county20.json").read_text(encoding="utf-8"))
+    ens = json.loads((ENS / f"{st}.county20{gsuf}.json").read_text(encoding="utf-8"))
     cap = ens["cut_edges"]["quantiles"][2] if compact else None
     e = g.edges
 
@@ -321,10 +326,10 @@ def optimise(args):
     out = {"v": 1, "abbr": st, "objective": "zcta ties kept (distance-adjusted)" + (", compact" if compact else ", no shape limit"), "labels": best.tolist(),
            "ties_kept_zcta": {k_: round(v, 3) for k_, v in tk.items()}, "reference_ties_kept_zcta": ref,
            "cut_edges": cut(best), "cut_cap": cap, "seats": place,
-           "params": {"bursts": bursts, "burst": burst, "seed": seed, "tol": 0.01},
+           "params": {"bursts": bursts, "burst": burst, "seed": seed, "tol": 0.01, "graph": graph},
            "start_score": round(start, 3), "seconds": round(time.perf_counter() - t0, 1)}
     DIST.mkdir(parents=True, exist_ok=True)
-    (DIST / f"{st}.zcta{'' if compact else '.free'}.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    (DIST / f"{st}.zcta{'' if compact else '.free'}{gsuf}.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     return st, out
 
 
