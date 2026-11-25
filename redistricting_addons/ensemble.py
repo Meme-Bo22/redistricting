@@ -496,7 +496,7 @@ def single_district(graph: Graph) -> dict:
 
 
 def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, county_weight: float, seed: int,
-        chains: int = 2, log=print, trees: bool = True) -> dict:
+        chains: int = 2, log=print, trees: bool = True, keep_maps: bool = False) -> dict:
     if k == 1:
         return single_district(graph)
     starts = []
@@ -508,12 +508,19 @@ def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, cou
         starts.append((f"random spanning-tree plan (seed {seed + len(starts)})", tree_seed(graph, k, tol, seed + len(starts))))
     t0 = time.perf_counter()
     samples, chain_meta = [], []
+    finals, cands = [], []  # added (keep_maps): each chain's last map, and ~200 evenly spaced sampled maps per chain
+    cand_every = max(every, (steps // every // 200) * every)
     for c, (name, start) in enumerate(starts[:chains]):
         t1 = time.perf_counter()
         kept = []
+        labels = start
         for i, labels in enumerate(recom_chain(graph, start, k, burn + steps, tol, county_weight, seed + 1000 * (c + 1)), 1):
             if i > burn and (i - burn) % every == 0:
                 kept.append(plan_stats(graph, labels, k, trees))
+                if keep_maps and (i - burn) % cand_every == 0:
+                    cands.append((labels.astype(np.int16).copy(), kept[-1]))
+        if keep_maps:
+            finals.append(np.asarray(labels, np.int64).tolist())
             if log and i % 5000 == 0:
                 log(f"  chain {c + 1}: {i}/{burn + steps} moves, {time.perf_counter() - t1:.0f}s")
         samples.append(kept)
@@ -541,7 +548,30 @@ def run(graph: Graph, k: int, steps: int, burn: int, every: int, tol: float, cou
         **summarize(graph, samples, k),
         "reference": {name: reference(graph, labels, k, flat) for name, labels in graph.plans.items()},
     }
+    if keep_maps and cands:
+        out["maps"] = typical_and_final(graph, k, flat, cands, finals)
     return out
+
+
+def typical_and_final(graph: Graph, k: int, flat: list[dict], cands: list, finals: list) -> dict:
+    """Added: the stored maps of a run. ``typical`` = the sampled map closest to the ensemble's middle (2020 or the
+    first election: Democratic seats at the median, then cut edges nearest the median, then the median district
+    shares); ``final`` = the last map of each chain. Every map is a full labelling (one district per unit)."""
+    el = "pres2020" if "pres2020" in graph.elections else next(iter(graph.elections))
+    seats_med = float(np.median([s[el]["seats_d"] for s in flat]))
+    cut_med = float(np.median([s["cut_edges"] for s in flat]))
+    cut_sd = float(np.std([s["cut_edges"] for s in flat])) or 1.0
+    share_med = np.median(np.array([s[el]["sorted_d_share"] for s in flat]), axis=0)
+
+    def dist(st):
+        return (abs(st[el]["seats_d"] - seats_med), abs(st["cut_edges"] - cut_med) / cut_sd
+                + float(np.abs(np.asarray(st[el]["sorted_d_share"]) - share_med).mean()) * 20)
+    best = min(range(len(cands)), key=lambda i: dist(cands[i][1]))
+    lab, st = cands[best]
+    return {"typical": np.asarray(lab, np.int64).tolist(), "final": finals, "election": el,
+            "typical_stats": {"seats_d": st[el]["seats_d"], "cut_edges": st["cut_edges"],
+                              "max_dev_pct": round(float(st["max_dev_pct"]), 3)},
+            "candidates": len(cands)}
 
 
 def main(argv=None) -> int:

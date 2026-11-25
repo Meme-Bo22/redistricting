@@ -30,6 +30,10 @@ from .ensemble import ROOT, load_state
 DIST = ROOT / "site" / "data" / "sci" / "districts"
 ENS = ROOT / "site" / "data" / "ensembles"
 KINDS = (("adjusted.compact", "Social ties by county"), ("zcta", "Social ties by ZIP"))
+# added: the other versions too (no shape limit, raw friendship index, ZIP with no shape limit)
+MORE = (("adjusted", "Social ties by county, no shape limit"), ("raw.compact", "Social ties by county, raw index"),
+        ("raw", "Social ties by county, raw index, no shape limit"), ("zcta.free", "Social ties by ZIP, no shape limit"))
+ALL_KINDS = KINDS + MORE
 
 
 def pieces(graph, labels) -> int:
@@ -51,14 +55,14 @@ def _job(args):
     except Exception:
         pass
     from . import sci_districts, sci_zcta
-    if kind == "adjusted.compact":
-        res = sci_districts.optimise(st, "adjusted", bursts, burst, seed, compact=True, graph="census")
+    if kind.startswith("zcta"):
+        sci_zcta.optimise((st, bursts, burst, seed, kind == "zcta", "census"))
+    else:
+        obj, compact = kind.split(".")[0], kind.endswith(".compact")
+        res = sci_districts.optimise(st, obj, bursts, burst, seed, compact=compact, graph="census")
         if res:
             DIST.mkdir(parents=True, exist_ok=True)
-            (DIST / f"{st}.adjusted.compact.census.json").write_text(json.dumps(res, separators=(",", ":")),
-                                                                     encoding="utf-8")
-    else:
-        sci_zcta.optimise((st, bursts, burst, seed, True, "census"))
+            (DIST / f"{st}.{kind}.census.json").write_text(json.dumps(res, separators=(",", ":")), encoding="utf-8")
     return st, kind
 
 
@@ -141,11 +145,13 @@ def main(argv=None) -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--force", action="store_true", help="redo states whose .census.json files exist")
     ap.add_argument("--report-only", action="store_true")
+    ap.add_argument("--all", action="store_true", help="also the no-shape-limit, raw-index and ZIP no-limit versions")
     a = ap.parse_args(argv)
     if not a.report_only:
         sts = a.states or sorted(p.stem for p in (ROOT / "site" / "data").glob("[A-Z][A-Z].json") if p.stem.isupper())
         sts = [s for s in sts if json.loads((ROOT / "site" / "data" / f"{s}.json").read_text(encoding="utf-8"))["seats"] > 1]
-        jobs = [(st, k, a.bursts, a.burst, a.seed) for st in sts for k, _ in KINDS
+        kinds = ALL_KINDS if a.all else KINDS
+        jobs = [(st, k, a.bursts, a.burst, a.seed) for st in sts for k, _ in kinds
                 if a.force or not (DIST / f"{st}.{k}.census.json").exists()]
         with Pool(a.workers) as pool:
             for st, k in pool.imap_unordered(_job, jobs):

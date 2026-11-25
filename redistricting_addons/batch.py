@@ -30,6 +30,11 @@ ALL_VARIANTS = {**VARIANTS, **GRAPH_VARIANTS, **ZIP_VARIANTS}
 GEO_VARIANTS = {"nature20": (20.0, ".nature20", "nature"), "huc20": (20.0, ".huc20", "huc8"),
                 "town20": (20.0, ".town20", "town"), "school20": (20.0, ".school20", "school")}
 ALL_VARIANTS.update({k: v[:2] for k, v in GEO_VARIANTS.items()})
+# added (2026-11-15): every scheme on the Census shared-border graph too, so every sampled map is contiguous on real
+# borders (the site graph's guessed links let ReCom draw districts that are in pieces on real borders)
+CENSUS_OF = {f"{v}-census": v for v in ("zip20", *GEO_VARIANTS)}
+ALL_VARIANTS.update({cv: (ALL_VARIANTS[v][0], ALL_VARIANTS[v][1] + ".census") for cv, v in CENSUS_OF.items()})
+MAPS = OUT / "maps"  # added: stored maps of a run (--maps): typical + each chain's final map
 
 
 def all_states():
@@ -55,22 +60,29 @@ def check(res, max_tv, max_share):
     return tv <= max_tv and sh <= max_share, tv, sh
 
 
-def job(st, variant, steps, burn, every, tol, seed):
-    g = load_state(ROOT / "site" / "data" / f"{st}.json", graph="census" if variant in GRAPH_VARIANTS else "site")
+def job(st, variant, steps, burn, every, tol, seed, keep_maps=False):
+    base = CENSUS_OF.get(variant, variant)  # added: "<scheme>-census" = the same scheme on the Census graph
+    g = load_state(ROOT / "site" / "data" / f"{st}.json",
+                   graph="census" if variant in GRAPH_VARIANTS or variant in CENSUS_OF else "site")
     if not g.is_connected():
         raise RuntimeError(f"{st}: graph is not connected")
-    if variant in ZIP_VARIANTS:  # added: weight edges inside one ZIP area, count ZIP splits
+    if base in ZIP_VARIANTS:  # added: weight edges inside one ZIP area, count ZIP splits
         z = json.loads((ROOT / "site" / "data" / "sci" / "zcta" / f"{st}.json").read_text(encoding="utf-8"))
         g.zcta = __import__("numpy").asarray(z["bg_zcta"], dtype="int64")
-    if variant in GEO_VARIANTS and g.k > 1:  # added: geography / community keep rules, plus their split statistics
+    if base in GEO_VARIANTS and g.k > 1:  # added: geography / community keep rules, plus their split statistics
         from .geo_layers import attach  # (at-large states have no layer files and nothing to sample)
-        attach(g, st, GEO_VARIANTS[variant][2])
-    res = run(g, g.k, steps, burn, every, tol, ALL_VARIANTS[variant][0], seed, chains=2, log=None)
-    if variant in GEO_VARIANTS:
+        attach(g, st, GEO_VARIANTS[base][2])
+    res = run(g, g.k, steps, burn, every, tol, ALL_VARIANTS[variant][0], seed, chains=2, log=None, keep_maps=keep_maps)
+    maps = res.pop("maps", None)
+    if maps is not None:  # added: stored maps go to their own file
+        MAPS.mkdir(parents=True, exist_ok=True)
+        (MAPS / out_path(st, variant).name).write_text(json.dumps({"abbr": st, "variant": variant, **maps},
+                                                                  separators=(",", ":")), encoding="utf-8")
+    if base in GEO_VARIANTS:
         from .geo_layers import KEEP
-        res["method"] = res["method"].replace("county-internal", f"{KEEP[GEO_VARIANTS[variant][2]]}: internal")
-        res["weight_by"] = GEO_VARIANTS[variant][2]
-    if variant in ZIP_VARIANTS:
+        res["method"] = res["method"].replace("county-internal", f"{KEEP[GEO_VARIANTS[base][2]]}: internal")
+        res["weight_by"] = GEO_VARIANTS[base][2]
+    if base in ZIP_VARIANTS:
         res["method"] = res["method"].replace("county-internal", "ZIP-area-internal (ZCTA)")
         res["weight_by"] = "zcta"
     p = out_path(st, variant)
@@ -94,6 +106,8 @@ def main(argv=None) -> int:
     ap.add_argument("--max-share-diff", type=float, default=0.01)
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--skip-existing", action="store_true", help="keep existing results that already pass")
+    ap.add_argument("--maps", action="store_true",
+                    help="also store each run's typical map and each chain's final map in site/data/ensembles/maps/")
     ap.add_argument("--from-index", action="store_true",
                     help="re-run each state at the move count and seed that passed before (same chains, same numbers; "
                          "use after adding a statistic)")
@@ -123,7 +137,7 @@ def main(argv=None) -> int:
 
     t0 = time.perf_counter()
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
-        running = {ex.submit(job, st, v, steps, a.burn, a.every, a.tol, a.seed + 7 * tries): (st, v, steps, tries)
+        running = {ex.submit(job, st, v, steps, a.burn, a.every, a.tol, a.seed + 7 * tries, a.maps): (st, v, steps, tries)
                    for st, v, steps, tries in todo}
         while running:
             fut = next(as_completed(running))
@@ -141,7 +155,7 @@ def main(argv=None) -> int:
             index.setdefault(st, {})[v] = {"file": out_path(st, v).name, "passed": ok, "seats_tv": tv,
                                            "share_diff": sh, "moves_per_chain": steps, "attempt": tries + 1}
             if not ok and tries < a.retries:
-                running[ex.submit(job, st, v, steps * 2, a.burn, a.every, a.tol, a.seed + 7 * (tries + 1))] = \
+                running[ex.submit(job, st, v, steps * 2, a.burn, a.every, a.tol, a.seed + 7 * (tries + 1), a.maps)] = \
                     (st, v, steps * 2, tries + 1)
             index_path.write_text(json.dumps(dict(sorted(index.items())), indent=1), encoding="utf-8")
     failed = [(st, v) for st, vs in index.items() for v, r in vs.items() if not r.get("passed")]

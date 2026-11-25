@@ -89,3 +89,5 @@ For agents: `redistricting_addons/sci.py` (data, score), `sci_districts.py` (opt
 **Land and communities:** the Draw toy has sliders for mountains and ridges, river basins, USGS rivers and lakes, drive time, towns and school districts, and there are neutral maps that follow rivers and ridges or keep river basins, towns or school districts whole; see `docs/GEO_LAYERS.md`.
 
 **Social-ties maps on real borders:** the social-ties maps were grown on the toys' guessed neighbour links, and some of their districts fall into pieces on real Census borders. Both are redrawn on real borders (every district one piece, files ending `.census.json`; old files kept); see `docs/SCI_CENSUS.md`.
+
+**Every map usable:** every map the toys store or compare against (official, Fair Lines, all social-ties versions, and the typical and final maps kept from every neutral ensemble on real borders) has each district in one piece on real Census borders and within 1% of equal population; `docs/MAP_AUDIT.md` lists the check for all 1,272.
