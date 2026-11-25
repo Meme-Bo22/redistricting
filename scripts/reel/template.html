@@ -1,0 +1,198 @@
+<meta charset="utf-8">
+<title>Lines on the Land</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,700;62..125,800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a dark map-room wall; a sticky bar picks the map for every state at once, each plate can override it. One deliberate dark look. */
+:root {
+  color-scheme: dark;
+  --wall: #111316;
+  --panel: #1a1d22;
+  --raise: #23272e;
+  --ink: #eceae6;
+  --muted: #9b9fa6;
+  --rule: #2b3038;
+  --dem: #3b74f0;
+  --rep: #e04444;
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+html { background: var(--wall); }
+body {
+  background: var(--wall); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--wall); }
+.wrap { max-width: 1240px; margin: 0 auto; }
+.masthead { padding-block: 48px 22px; display: grid; gap: 16px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-stretch: 125%; font-weight: 800; font-size: clamp(40px, 8vw, 92px); line-height: .92; margin: 0; text-transform: uppercase; text-wrap: balance; }
+.lede { max-width: 64ch; margin: 0; font-size: 17px; }
+.key { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13px; color: var(--muted); margin: 0; padding: 0; list-style: none; }
+.key li { display: flex; align-items: center; gap: 8px; }
+.sw { width: 22px; height: 12px; border-radius: 2px; flex: none; }
+.sw.d { background: var(--dem); } .sw.r { background: var(--rep); } .sw.line { height: 0; border-top: 2px solid #fff; border-radius: 0; }
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--wall) 92%, transparent);
+  backdrop-filter: blur(6px); border-block: 1px solid var(--rule); padding-block: 10px; display: grid; gap: 6px;
+}
+.bar-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .chip {
+  font: 500 13px var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
+  padding: 5px 12px; cursor: pointer; display: inline-flex; gap: 8px; align-items: baseline;
+}
+.seg button[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--ink); color: var(--wall); border-color: var(--ink); }
+.seg button:focus-visible, .chip:focus-visible { outline: 2px solid var(--dem); outline-offset: 2px; }
+.group { padding-block: 36px 8px; display: grid; gap: 20px; }
+.group-head { display: grid; gap: 4px; }
+h2 { font-family: var(--display); font-stretch: 112%; font-weight: 700; font-size: clamp(24px, 3.6vw, 34px); margin: 0; text-transform: uppercase; letter-spacing: .02em; }
+.group-head p { margin: 0; color: var(--muted); max-width: 64ch; }
+.plates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 24px; }
+.plate { margin: 0; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.plate.wide { grid-column: 1 / -1; }
+.stack { position: relative; aspect-ratio: var(--ar); max-width: 100%; border-radius: 4px; overflow: hidden; background: var(--panel); cursor: zoom-in; }
+.stack img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.overlay { transition: opacity .25s ease; }
+.overlay.fading { opacity: 0; }
+.plan-tag { position: absolute; left: 10px; top: 10px; background: rgba(17, 19, 22, .8); color: var(--ink); font: 500 12px var(--mono); padding: 3px 8px; border-radius: 3px; }
+figcaption { display: grid; gap: 8px; }
+.cap-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.abbr { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+h3 { font-family: var(--display); font-weight: 700; font-size: 20px; margin: 0; }
+.facts { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { padding: 3px 10px; font-size: 12px; }
+.chip-seats { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--dem); font-weight: 500; }
+.chip[aria-pressed="true"] .chip-seats { color: #1d4fd0; }
+.notes { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 13px; display: grid; gap: 8px; max-width: 82ch; }
+.notes p { margin: 0; } .notes strong { color: var(--ink); font-weight: 500; }
+.lightbox { position: fixed; inset: 0; background: rgba(6, 7, 9, .95); z-index: 20; display: grid; place-items: center;
+  padding: calc(56px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(56px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.lightbox[hidden] { display: none; }
+.lb-stack { position: relative; max-width: 100%; max-height: 100%; }
+.lb-stack img { display: block; max-width: 100%; max-height: calc(100vh - 120px); }
+.lb-stack img + img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lb-close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); font: 500 13px var(--body); color: var(--ink); background: var(--raise); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.lb-name { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center; font-family: var(--display); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.hist { display: grid; gap: 4px; max-width: 640px; }
+.hist svg { width: 100%; height: auto; display: block; }
+.hist-cap { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hist-cap strong { color: var(--ink); font-weight: 500; }
+.unsettled { color: #e0b44a; }
+@media (max-width: 760px) { .plates { grid-template-columns: minmax(0, 1fr); } .masthead { padding-block: 28px 18px; } }
+@media (prefers-reduced-motion: reduce) { .overlay { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">Redistricting toys · one state, eleven ways to draw it</div>
+    <h1>Lines on the Land</h1>
+    <p class="lede">Every state with more than one district, over its own ground, in grey so the politics show. Switch every map at
+      once with the bar, or one state with its buttons. The number on each button is how many seats that map gives Democrats
+      with 2020 votes; the chart under each state shows how 10,000 or more neutral maps split those seats, and where the other maps land.</p>
+    <p class="lede"><strong>Every map here is usable</strong>: each district is one piece on real Census borders and within 1% of
+      equal population (all 1,272 stored maps checked).</p>
+    <ul class="key">
+      <li><span class="sw d"></span>District voted Democratic in 2020</li>
+      <li><span class="sw r"></span>Voted Republican (deeper = wider margin)</li>
+      <li><span class="sw line"></span>District border</li>
+      <li><span class="sw" style="background:#5b616b"></span>Neutral maps per seat count (white: the map shown)</li>
+    </ul>
+  </header>
+  <nav class="bar" aria-label="Map shown for every state">
+    <span class="bar-label">Show every state as</span>
+    <div class="seg" id="global"></div>
+  </nav>
+<!--PLATES-->
+  <footer class="notes">
+    <p><strong>Official</strong>: the map in use, as the toys approximate it from block-group centres. <strong>Fair Lines</strong>: the toys' own solver. Both were made usable on real borders: stray pieces join the neighbouring district they touch most, then block groups along district edges move one at a time, never splitting a district, until every district is within 1%.</p>
+    <p><strong>ReCom</strong>: neutral maps drawn by computer without party data (Moon Duchin's group's method: merge two districts, split them along a random tree, 50,000 times or more per chain, two chains, populations within 1%). The map shown is the <strong>typical</strong> one: among the maps sampled, the one nearest the middle seat count with the most ordinary shape.</p>
+    <p><strong>Counties, ZIP areas, Towns, Schools</strong>: the same ReCom, with links inside one county, ZIP-code area, town or school district made 20 times less likely to be cut, so those stay whole. <strong>Rivers &amp; ridges</strong>: links that cross a big river, a lake, a 150 m ridge or a river-basin line are the ones it prefers to cut.</p>
+    <p><strong>Ties (county) and Ties (ZIP)</strong>: districts grown from Meta's Social Connectedness Index, keeping places whose people are friends with each other together, with a compactness limit; redrawn on real borders.</p>
+    <p><strong>The chart</strong>: how many of the neutral maps (10,000 or more per state) give Democrats each number of seats, for the neutral set shown (counties whole when a non-neutral map is shown). Marks: O official, F Fair Lines, T social ties (county), Z social ties (ZIP). <span class="unsettled">Not settled</span> means that set's two chains disagreed on seat counts, so its chart is rougher than the others.</p>
+    <p><strong>Sources</strong>: USGS 3D Elevation Program (relief), USGS National Atlas 1:1,000,000 (rivers, lakes), Census 2020 block groups and shared borders, the redistricting toys' vote estimates.</p>
+  </footer>
+</div>
+
+<div class="lightbox" id="lb" hidden>
+  <button class="lb-close" type="button" id="lb-close">Close</button>
+  <div class="lb-stack"><img id="lb-t" alt=""><img id="lb-o" alt=""></div>
+  <div class="lb-name" id="lb-name"></div>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const SHORT = /*SHORT*/;
+const LONG = {"official":"Official map","solver":"Fair Lines solver","recom1":"ReCom, plain","recom20":"ReCom, counties whole","zip20":"ReCom, ZIP areas whole","sci.adjusted.compact":"Social ties (counties)","sci.zcta":"Social ties (ZIP)","geo:nature":"Rivers & ridges","geo:town":"Towns whole","geo:school":"School districts whole"};
+const NEUTRAL = ["recom1","recom20","zip20","geo:town","geo:school","geo:nature","geo:huc"];
+const MARKS = [["official","O"],["solver","F"],["sci.adjusted.compact","T"],["sci.zcta","Z"]];
+function hist(st, plan) {
+  const box = document.querySelector(`[data-hist="${st}"]`), D = DATA[st];
+  const key = NEUTRAL.includes(plan) && D.hist[plan] ? plan : (D.hist.recom20 ? "recom20" : Object.keys(D.hist)[0]);
+  if (!key) { box.innerHTML = ""; return; }
+  const H = D.hist[key], h = H.h, n = H.n;
+  const seats = [...Object.keys(h).map(Number), ...MARKS.map(([m]) => D.plans[m] && D.plans[m].d).filter(x => x != null), D.plans[plan] ? D.plans[plan].d : 0];
+  const lo = Math.min(...seats), hi = Math.max(...seats), cnt = hi - lo + 1;
+  const W = 600, BH = 70, top = 8, bw = W / cnt, max = Math.max(...Object.values(h));
+  const cur = D.plans[plan] ? D.plans[plan].d : null;
+  let svg = `<svg viewBox="0 0 ${W} ${top + BH + 34}" role="img" aria-label="Seat counts of ${n} neutral maps for ${D.name}">`;
+  for (let s = lo; s <= hi; s++) {
+    const v = h[s] || 0, bh = v ? Math.max(2, v / max * BH) : 0, x = (s - lo) * bw;
+    svg += `<rect x="${x + 2}" y="${top + BH - bh}" width="${bw - 4}" height="${bh}" rx="2" fill="${s === cur ? '#eceae6' : '#5b616b'}"><title>${s} D seats: ${v} of ${n} maps</title></rect>`;
+    if (cnt <= 30 || s % 2 === 0) svg += `<text x="${x + bw / 2}" y="${top + BH + 13}" fill="#9b9fa6" font-size="11" text-anchor="middle" font-family="IBM Plex Mono, monospace">${s}</text>`;
+  }
+  const at = {};
+  MARKS.forEach(([m, l]) => { const p = D.plans[m]; if (!p) return; (at[p.d] = at[p.d] || []).push(l); });
+  Object.entries(at).forEach(([s, ls]) => { const x = (s - lo) * bw + bw / 2;
+    svg += `<text x="${x}" y="${top + BH + 28}" fill="#eceae6" font-size="11" text-anchor="middle" font-family="IBM Plex Mono, monospace">▲${ls.join("")}</text>`; });
+  svg += `</svg>`;
+  let cap = `<strong>${n.toLocaleString()} neutral maps, ${LONG[key].replace("ReCom, ", "")}</strong> · seats for Democrats`;
+  if (!H.settled) cap += ` · <span class="unsettled">not settled</span>`;
+  if (cur != null) {
+    const below = Object.entries(h).reduce((a, [s, v]) => a + (+s < cur ? v : 0), 0), same = h[cur] || 0;
+    cap += ` · ${LONG[plan]}: ${cur} D; ${Math.round(below / n * 100)}% of neutral maps give fewer, ${Math.round(same / n * 100)}% the same`;
+  }
+  box.innerHTML = svg + `<div class="hist-cap">${cap}</div>`;
+}
+const current = {};
+function show(st, plan) {
+  const p = DATA[st].plans[plan]; if (!p) return;
+  current[st] = plan;
+  const img = document.querySelector(`.overlay[data-st="${st}"]`);
+  if (img.getAttribute('src') !== p.f) {
+    img.classList.add('fading');
+    const pre = new Image(); pre.onload = pre.onerror = () => { img.src = p.f; img.classList.remove('fading'); }; pre.src = p.f;
+  }
+  document.querySelector(`[data-tag="${st}"]`).textContent = `${LONG[plan]} · ${p.d} of ${DATA[st].k} D`;
+  hist(st, plan);
+  document.querySelectorAll(`.chip[data-st="${st}"]`).forEach(c => c.setAttribute('aria-pressed', String(c.dataset.plan === plan)));
+}
+const g = document.getElementById('global');
+Object.keys(LONG).forEach(k => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = SHORT[k]; b.dataset.plan = k;
+  b.setAttribute('aria-pressed', String(k === 'official'));
+  b.addEventListener('click', () => {
+    g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    Object.keys(DATA).forEach(st => show(st, k));
+  });
+  g.appendChild(b);
+});
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => show(c.dataset.st, c.dataset.plan)));
+Object.keys(DATA).forEach(st => show(st, DATA[st].plans.official ? 'official' : Object.keys(DATA[st].plans)[0]));
+const lb = document.getElementById('lb');
+document.querySelectorAll('.stack').forEach(s => s.addEventListener('click', () => {
+  const st = s.closest('.plate').id, p = DATA[st].plans[current[st]];
+  document.getElementById('lb-t').src = `m/${st}/terrain.jpg`; document.getElementById('lb-o').src = p.f;
+  document.getElementById('lb-o').alt = `${DATA[st].name}, ${LONG[current[st]]}`;
+  document.getElementById('lb-name').textContent = `${DATA[st].name} · ${LONG[current[st]]} · ${p.d} of ${DATA[st].k} D`;
+  lb.hidden = false; document.getElementById('lb-close').focus();
+}));
+const shut = () => { lb.hidden = true; };
+document.getElementById('lb-close').addEventListener('click', shut);
+lb.addEventListener('click', e => { if (e.target === lb) shut(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+</script>
